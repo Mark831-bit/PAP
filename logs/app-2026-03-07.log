@@ -1,0 +1,2 @@
+{"time":"2026-03-07 22:27:39","level":"INFO","ip":"10.147.215.253","uri":"\/PAP\/api\/push.php","msg":"push request","ctx":{"uid":"C329471C","device_id":"F0:F5:BD:52:3D:CC"}}
+{"time":"2026-03-07 22:27:39","level":"INFO","ip":"10.147.215.253","uri":"\/PAP\/api\/push.php","msg":"match aluno","ctx":{"id":1,"nome":"Marko Nikoalienko","uid":"C329471C"}}
