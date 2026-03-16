@@ -23,7 +23,7 @@
 
       <div class="topbar-center">
         <a href="http://localhost/PAP/project/public/">Principal</a>
-        <a href="http://localhost/PAP/project/public/schedule">Pagina pessoal</a>
+        <a href="http://localhost/PAP/api/profile.php">Pagina pessoal</a>
         <a href="http://localhost/PAP/project/public/dashboard">Horario</a>
       </div>
 
