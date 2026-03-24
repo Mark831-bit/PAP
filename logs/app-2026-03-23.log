@@ -1,0 +1,5 @@
+{"time":"2026-03-23 22:00:41","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-03-23 22:00:41","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}
+{"time":"2026-03-23 22:05:08","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-03-23 22:05:08","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}
+{"time":"2026-03-23 22:28:13","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"a12345"}}

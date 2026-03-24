@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__.'/../../config/session.php';
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -28,10 +33,35 @@
       </div>
 
       <div class="topbar-right">
-        <form class="login-mini" action="#" method="post">
-          <input type="text" name="login" placeholder="Login" autocomplete="username">
-          <input type="password" name="password" placeholder="Password" autocomplete="current-password">
-          <button type="submit">Seguinte</button>
+       <?php if (isset($_SESSION['user_id'])): ?>
+    <div id="loginStatus" style="color: green;">
+        Вы вошли как: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+    </div>
+
+    <div id="logoutBox" style="display: block;">
+        <a href="/PAP/api/profile.php">Página pessoal</a>
+        <a href="/PAP/api/logout.php">Logout</a>
+    </div>
+
+    <?php else: ?>
+        <div id="loginStatus" style="color: gray;">Вы не вошли в систему</div>
+
+          <form id="loginForm">
+              <input name="login" placeholder="Login" required>
+              <input type="password" name="password" placeholder="Password" required>
+              <button type="submit">Login</button>
+          </form>
+
+          <div id="logoutBox" style="display: none;">
+              <a href="/PAP/api/profile.php">Página pessoal</a>
+              <a href="/PAP/api/logout.php">Logout</a>
+          </div>
+          <?php endif; ?>
+
+        </div>
+
+       
+
         </form>
       </div>
 
@@ -101,3 +131,15 @@
   <script src="/PAP/project/assets/app.js?v=dev"></script>
 </body>
 </html>
+
+
+<!-- 
+
+<script>
+window.addEventListener("beforeunload", function () {
+    navigator.sendBeacon("/PAP/api/logout.php");
+});
+</script>
+
+ -->
+

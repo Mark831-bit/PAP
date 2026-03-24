@@ -1,0 +1,59 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+if ($_SESSION['role'] !== 'Aluno') {
+    header("Location: ../../api/profile.php");
+    exit;
+}
+
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/PAP/project/assets/style.css? dev=2">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+
+            <div class="topbar-left">
+                
+                <a href="http://localhost/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
+            </div>
+
+            <div class="topbar-center">
+                <a href="http://localhost/PAP/project/public/">Principal</a>
+                <a href="http://localhost/PAP/api/profile.php">Pagina pessoal</a>
+                <a href="http://localhost/PAP/project/public/dashboard">Horario</a>
+            </div>
+
+            <div class="topbar-right">
+                <form id="loginForm">
+
+                <input name="login" placeholder="Login">
+
+                <input type="password" name="password" placeholder="Password">
+
+                <button type="submit">Login</button>
+
+                </form>
+            </div>
+
+        </div>
+  </header>
+  <main>
+    
+  </main>
+</body>
+</html>
+

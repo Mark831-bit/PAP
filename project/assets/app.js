@@ -38,5 +38,38 @@ if (container) {
   });
 }
 
+
+
 // старт
 showSlide();
+
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch("/PAP/api/auth.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        const statusBox = document.getElementById("loginStatus");
+
+        if (data.ok) {
+            statusBox.textContent = "Вы вошли как: " + data.login + " (" + data.role + ")";
+            statusBox.style.color = "green";
+
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("logoutBox").style.display = "block";
+        } else {
+            statusBox.textContent = data.error || "Login failed";
+            statusBox.style.color = "red";
+        }
+    } catch (err) {
+        document.getElementById("loginStatus").textContent = "Ошибка запроса";
+        document.getElementById("loginStatus").style.color = "red";
+    }
+});
