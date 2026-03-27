@@ -20,6 +20,6 @@ if ($_SESSION['role'] !== 'Professor') {
     <title>Document</title>
 </head>
 <body>
-    
+    <h1>PROFESSORES</h1>
 </body>
 </html>

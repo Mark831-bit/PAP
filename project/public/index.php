@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__.'/../../config/session.php';
-session_start();
 ?>
 
 <!DOCTYPE html>
@@ -23,37 +22,36 @@ session_start();
 
       <div class="topbar-left">
         
-        <a href="http://localhost/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
+        <a href="/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
       </div>
 
       <div class="topbar-center">
-        <a href="http://localhost/PAP/project/public/">Principal</a>
-        <a href="http://localhost/PAP/api/profile.php">Pagina pessoal</a>
-        <a href="http://localhost/PAP/project/public/dashboard">Horario</a>
+        <a href="/PAP/project/public/">Principal</a>
+        <a href="/PAP/api/profile.php">Pagina pessoal</a>
+        <a href="/PAP/project/public/dashboard">Horario</a>
       </div>
 
       <div class="topbar-right">
        <?php if (isset($_SESSION['user_id'])): ?>
-    <div id="loginStatus" style="color: green;">
-        Вы вошли как: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
-    </div>
+        <div id="loginStatus" style="color: green;">
+            Вы вошли как: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+        </div>
 
     <div id="logoutBox" style="display: block;">
-        <a href="/PAP/api/profile.php">Página pessoal</a>
+        
         <a href="/PAP/api/logout.php">Logout</a>
     </div>
 
     <?php else: ?>
-        <div id="loginStatus" style="color: gray;">Вы не вошли в систему</div>
-
           <form id="loginForm">
               <input name="login" placeholder="Login" required>
               <input type="password" name="password" placeholder="Password" required>
               <button type="submit">Login</button>
+              <div id="loginStatus">Вы не вошли в систему</div>
           </form>
 
           <div id="logoutBox" style="display: none;">
-              <a href="/PAP/api/profile.php">Página pessoal</a>
+             
               <a href="/PAP/api/logout.php">Logout</a>
           </div>
           <?php endif; ?>
@@ -130,16 +128,46 @@ session_start();
 
   <script src="/PAP/project/assets/app.js?v=dev"></script>
 </body>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("loginForm");
+    if (!form) return;
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch("/PAP/api/auth.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            const statusBox = document.getElementById("loginStatus");
+
+            if (data.ok) {
+                statusBox.textContent = "Вы вошли как: " + data.login + " (" + data.role + ")";
+                statusBox.style.color = "green";
+
+                this.style.display = "none";
+                document.getElementById("logoutBox").style.display = "block";
+            } else {
+                statusBox.textContent = data.error || "Login failed";
+                statusBox.style.color = "red";
+            }
+        } catch (err) {
+            const statusBox = document.getElementById("loginStatus");
+            statusBox.textContent = "Ошибка запроса";
+            statusBox.style.color = "red";
+            console.error(err);
+        }
+    });
+});
+</script>
 </html>
 
 
-<!-- 
 
-<script>
-window.addEventListener("beforeunload", function () {
-    navigator.sendBeacon("/PAP/api/logout.php");
-});
-</script>
-
- -->
 

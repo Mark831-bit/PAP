@@ -52,7 +52,7 @@ if ($_SESSION['role'] !== 'Aluno') {
         </div>
   </header>
   <main>
-    
+    <h1>Aluno</h1>
   </main>
 </body>
 </html>
