@@ -22,7 +22,8 @@ if ($_SESSION['role'] !== 'Aluno') {
     <title>Document</title>
     <link rel="stylesheet" href="/PAP/project/assets/style.css? dev=2">
 </head>
-<body>
+
+<body class="page-aluno">
     <header class="topbar">
         <div class="topbar-inner">
 
@@ -38,15 +39,7 @@ if ($_SESSION['role'] !== 'Aluno') {
             </div>
 
             <div class="topbar-right">
-                <form id="loginForm">
-
-                <input name="login" placeholder="Login">
-
-                <input type="password" name="password" placeholder="Password">
-
-                <button type="submit">Login</button>
-
-                </form>
+                <h1>Aluno</h1>
             </div>
 
         </div>

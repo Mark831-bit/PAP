@@ -14,7 +14,7 @@ require_once __DIR__.'/../../config/session.php';
    <link rel="stylesheet" href="/PAP/project/assets/style.css? dev=2">
 </head>
 
-<body>
+<body class="page-index">
 
   <!-- HEADER -->
   <header class="topbar">
@@ -35,6 +35,7 @@ require_once __DIR__.'/../../config/session.php';
        <?php if (isset($_SESSION['user_id'])): ?>
         <div id="loginStatus" style="color: green;">
             Вы вошли как: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+            
         </div>
 
     <div id="logoutBox" style="display: block;">

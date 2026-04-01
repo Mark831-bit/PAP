@@ -24,7 +24,8 @@ if (!$user) {
     exit;
 }
 
-if ($user['Password'] !== $password) {
+// osnovnoye izmenenie
+if (!password_verify($password, $user['Password'])) {
     log_event("WARN", "wrong password", ["login" => $login]);
     echo json_encode([
         "ok" => false,

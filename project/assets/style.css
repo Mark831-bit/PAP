@@ -1,7 +1,7 @@
 /* ===== RESET / BASE ===== */
 * { box-sizing: border-box; }
 
-body {
+.page-index {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: #f3f3f3;
@@ -40,11 +40,20 @@ body {
   object-fit: contain;
 }
 
-.topbar-center {
+.page-index.topbar-center {
   display: flex;
   justify-content: center;
   gap: 120px;
   margin-left: 200px;
+}
+
+.page-aluno .topbar-center{
+  /*margin-right: 1000px;
+  gap: 1000px;*/
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  margin-right: 2000px;
 }
 
 .topbar-right {
@@ -213,3 +222,4 @@ body {
     min-width: 140px;
   }
 }
+

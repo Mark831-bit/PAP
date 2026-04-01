@@ -36,6 +36,8 @@ if (container) {
   container.addEventListener("mouseleave", () => {
     timer = setInterval(nextSlide, 4000);
   });
+
+ 
 }
 
 
