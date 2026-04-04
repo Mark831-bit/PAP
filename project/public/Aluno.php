@@ -20,7 +20,7 @@ if ($_SESSION['role'] !== 'Aluno') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css? dev=2">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=2">
 </head>
 
 <body class="page-aluno">
@@ -29,13 +29,13 @@ if ($_SESSION['role'] !== 'Aluno') {
 
             <div class="topbar-left">
                 
-                <a href="http://localhost/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
+                <a href="/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
             </div>
 
             <div class="topbar-center">
-                <a href="http://localhost/PAP/project/public/">Principal</a>
-                <a href="http://localhost/PAP/api/profile.php">Pagina pessoal</a>
-                <a href="http://localhost/PAP/project/public/dashboard">Horario</a>
+                <a href="/PAP/project/public/index.php">Principal</a>
+                <a href="/PAP/api/profile.php">Pagina pessoal</a>
+                <a href="/PAP/project/public/dashboard">Horario</a>
             </div>
 
             <div class="topbar-right">
@@ -45,7 +45,7 @@ if ($_SESSION['role'] !== 'Aluno') {
         </div>
   </header>
   <main>
-    <h1>Aluno</h1>
+    
   </main>
 </body>
 </html>

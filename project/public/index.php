@@ -11,7 +11,7 @@ require_once __DIR__.'/../../config/session.php';
 
   
   <!-- <link rel="stylesheet" href="/PAP/project/assets/style.css?v=dev"> -->
-   <link rel="stylesheet" href="/PAP/project/assets/style.css? dev=2">
+   <link rel="stylesheet" href="/PAP/project/assets/style.css?v=2">
 </head>
 
 <body class="page-index">

@@ -20,6 +20,27 @@ if ($_SESSION['role'] !== 'Admin') {
     <title>Admin</title>
 </head>
 <body>
+     <header class="topbar">
+        <div class="topbar-inner">
+
+            <div class="topbar-left">
+                
+                <a href="/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
+            </div>
+
+            <div class="topbar-center">
+                <a href="/PAP/project/public/index.php">Principal</a>
+                <a href="/PAP/api/profile.php">Pagina pessoal</a>
+                <a href="/PAP/project/public/dashboard">Horario</a>
+            </div>
+
+            <div class="topbar-right">
+                <h1>Aluno</h1>
+            </div>
+
+        </div>
+  </header>
+  <main>
     <h1>Admin blyat</h1>
     <form id="saveLoginForm">
         <input type="text" name="login" placeholder="Login" required>
@@ -35,7 +56,9 @@ if ($_SESSION['role'] !== 'Admin') {
 
         <button type="submit">Add / Update</button>
     </form>
+</main>
 </body>
+
 </html>
 
 
