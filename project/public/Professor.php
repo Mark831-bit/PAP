@@ -41,25 +41,61 @@ if (empty($professor['turma'])) {
 $turma = $professor['turma'];
 $professorNome = $professor['Nome'];
 
-/* 2. Получаем учеников этой turma */
-$stmtAlunos = $conn->prepare("
+/* 2. Получаем все уникальные turma из alunos */
+$turmas = [];
+
+$stmtTurmas = $conn->prepare("
+    SELECT DISTINCT Turma
+    FROM alunos
+    WHERE Turma IS NOT NULL AND Turma <> ''
+    ORDER BY Turma ASC
+");
+
+if ($stmtTurmas) {
+    $stmtTurmas->execute();
+    $resultTurmas = $stmtTurmas->get_result();
+
+    while ($row = $resultTurmas->fetch_assoc()) {
+        $turmas[] = $row['Turma'];
+    }
+}
+
+/* 3. Фильтры */
+$filtroTurma = $_GET['turma'] ?? $turma;
+$filtroPresenca = $_GET['presenca'] ?? '';
+
+/* 4. Получаем учеников по выбранной turma + presença */
+$sqlAlunos = "
     SELECT 
         ID,
         Nome AS nome,
         Idade AS idade,
         Turma AS turma,
         `Número em turma` AS numero_turma,
-        `Presença` AS presenca
+        `Presença` AS presenca,
+        login
     FROM alunos
     WHERE Turma = ?
-    ORDER BY `Número em turma` ASC, Nome ASC
-");
+";
+
+$params = [$filtroTurma];
+$types = "s";
+
+if ($filtroPresenca !== '' && ($filtroPresenca === '0' || $filtroPresenca === '1')) {
+    $sqlAlunos .= " AND `Presença` = ?";
+    $params[] = (int)$filtroPresenca;
+    $types .= "i";
+}
+
+$sqlAlunos .= " ORDER BY `Número em turma` ASC, Nome ASC";
+
+$stmtAlunos = $conn->prepare($sqlAlunos);
 
 if (!$stmtAlunos) {
     die("Erro na query dos alunos: " . $conn->error);
 }
 
-$stmtAlunos->bind_param("s", $turma);
+$stmtAlunos->bind_param($types, ...$params);
 $stmtAlunos->execute();
 $resultAlunos = $stmtAlunos->get_result();
 
@@ -74,7 +110,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professor - Os meus alunos</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=7">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=200">
 </head>
 <body class="page-professor">
 
@@ -105,10 +141,81 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <h2>Os meus alunos</h2>
                 <p>
                     Professor: <?= htmlspecialchars($professorNome) ?> |
-                    Turma: <?= htmlspecialchars($turma) ?>
+                    Turma: <?= htmlspecialchars($filtroTurma) ?>
                 </p>
             </div>
         </div>
+
+         <div class="test-box">
+            <h2>Назначить тест</h2>
+
+            <div class="form-row">
+                <label for="testTitle">Название</label>
+                <input
+                    type="text"
+                    id="testTitle"
+                    name="test_title"
+                    placeholder="Тест / контрольная работа"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="testDate">Дата</label>
+                <input
+                    type="date"
+                    id="testDate"
+                    name="test_date"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="testDescription">Описание</label>
+                <textarea
+                    id="testDescription"
+                    name="test_description"
+                    rows="4"
+                    placeholder="Опиши тему, материалы, инструкции..."
+                ></textarea>
+            </div>
+        </div>
+
+        <form class="students-filters" method="GET">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="turmaSelect">Turma</label>
+                    <select id="turmaSelect" name="turma" onchange="this.form.submit()">
+                        <?php foreach ($turmas as $turmaItem): ?>
+                            <option value="<?= htmlspecialchars($turmaItem) ?>"
+                                <?= ($turmaItem === $filtroTurma) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($turmaItem) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Presença</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="presenca" value="" <?= ($filtroPresenca === '') ? 'checked' : '' ?> onchange="this.form.submit()">
+                            <span>Todos</span>
+                        </label>
+
+                        <label class="radio-option">
+                            <input type="radio" name="presenca" value="1" <?= ($filtroPresenca === '1') ? 'checked' : '' ?> onchange="this.form.submit()">
+                            <span>Presente</span>
+                        </label>
+
+                        <label class="radio-option">
+                            <input type="radio" name="presenca" value="0" <?= ($filtroPresenca === '0') ? 'checked' : '' ?> onchange="this.form.submit()">
+                            <span>Falta</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+       
 
         <div class="students-list">
             <?php if (count($alunos) > 0): ?>
@@ -131,7 +238,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
                         </div>
 
                         <div class="student-right <?= ((int)$aluno['presenca'] === 1) ? 'present-text' : 'absent-text' ?>">
-                          <?= ((int)$aluno['presenca'] === 1) ? 'Presente' : 'Ausente' ?>
+                            <?= ((int)$aluno['presenca'] === 1) ? 'Presente' : 'Falta' ?>
                         </div>
                     </div>
                 <?php endforeach; ?>

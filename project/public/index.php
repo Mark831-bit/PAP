@@ -1,78 +1,92 @@
 <?php
-require_once __DIR__.'/../../config/session.php';
+require_once __DIR__ . '/../../config/session.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PAP - Main</title>
-
-  
-  <!-- <link rel="stylesheet" href="/PAP/project/assets/style.css?v=dev"> -->
-   <link rel="stylesheet" href="/PAP/project/assets/style.css?v=2">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=3">
 </head>
 
 <body class="page-index">
 
-  <!-- HEADER -->
   <header class="topbar">
     <div class="topbar-inner">
 
       <div class="topbar-left">
-        
-        <a href="/PAP/project/public/index"><img class="logo" src="../assets/aemtg.jpg" alt="Logo", ></a>
+        <a href="/PAP/project/public/index.php">
+          <img class="logo" src="../assets/aemtg.jpg" alt="Logo">
+        </a>
       </div>
 
       <div class="topbar-center">
-        <a href="/PAP/project/public/">Principal</a>
-        <a href="/PAP/api/profile.php">Pagina pessoal</a>
-        <a href="/PAP/project/public/dashboard">Horario</a>
+        <?php if (isset($_SESSION['user_id'])): ?>
+          <a href="/PAP/project/public/index.php">Principal</a>
+          <a href="/PAP/api/profile.php">Pagina pessoal</a>
+          <a href="/PAP/project/public/dashboard">Horario</a>
+        <?php endif; ?>
       </div>
 
       <div class="topbar-right">
-       <?php if (isset($_SESSION['user_id'])): ?>
-        <div id="loginStatus" style="color: green;">
+        <?php if (isset($_SESSION['user_id'])): ?>
+
+          <div class="user-status" style="color: green;">
             Вы вошли как: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
-            
-        </div>
-
-    <div id="logoutBox" style="display: block;">
-        
-        <a href="/PAP/api/logout.php">Logout</a>
-    </div>
-
-    <?php else: ?>
-          <form id="loginForm">
-              <input name="login" placeholder="Login" required>
-              <input type="password" name="password" placeholder="Password" required>
-              <button type="submit">Login</button>
-              <div id="loginStatus">Вы не вошли в систему</div>
-          </form>
-
-          <div id="logoutBox" style="display: none;">
-             
-              <a href="/PAP/api/logout.php">Logout</a>
           </div>
-          <?php endif; ?>
 
-        </div>
+          <div id="logoutBox">
+            <a href="/PAP/api/logout.php">Logout</a>
+          </div>
 
-       
+        <?php else: ?>
 
-        </form>
+          <div class="auth-buttons">
+            <button type="button" id="openLogin">Login</button>
+            <button type="button" id="openRegister">Register</button>
+          </div>
+
+        <?php endif; ?>
       </div>
 
     </div>
   </header>
 
-  <!-- MAIN -->
+  <?php if (!isset($_SESSION['user_id'])): ?>
+    <div id="loginModal" class="auth-modal hidden">
+      <div class="auth-box">
+        <button class="close-modal" type="button" data-close="loginModal">×</button>
+        <h2>Login</h2>
+
+        <form id="loginForm">
+          <input type="text" name="login" placeholder="Login" required>
+          <input type="password" name="password" placeholder="Password" required>
+          <button type="submit">Entrar</button>
+          <div id="loginFormStatus">Вы не вошли в систему</div>
+        </form>
+      </div>
+    </div>
+
+    <div id="registerModal" class="auth-modal hidden">
+      <div class="auth-box">
+        <button class="close-modal" type="button" data-close="registerModal">×</button>
+        <h2>Register</h2>
+
+        <form id="registerForm">
+          <input type="text" name="login" placeholder="New login" required>
+          <input type="password" name="password" placeholder="New password" required>
+          <button type="submit">Criar conta</button>
+          <div id="registerStatus"></div>
+        </form>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <main class="page-content">
     <h1 class="main_hello">Bom dia</h1>
     <p class="main_text">Texto muito importante</p>
 
-    <!-- CAROUSEL -->
     <section class="carousel-container" aria-label="News carousel">
       <div class="carousel" id="carousel">
 
@@ -117,58 +131,13 @@ require_once __DIR__.'/../../config/session.php';
           </div>
         </article>
 
-
       </div>
 
-      <!-- arrows -->
       <button class="nav-btn prev" type="button" aria-label="Previous slide">❮</button>
       <button class="nav-btn next" type="button" aria-label="Next slide">❯</button>
     </section>
-
   </main>
 
-  <script src="/PAP/project/assets/app.js?v=dev"></script>
+  <script src="/PAP/project/assets/app.js?v=3"></script>
 </body>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("loginForm");
-    if (!form) return;
-
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch("/PAP/api/auth.php", {
-                method: "POST",
-                body: formData
-            });
-
-            const data = await response.json();
-            const statusBox = document.getElementById("loginStatus");
-
-            if (data.ok) {
-                statusBox.textContent = "Вы вошли как: " + data.login + " (" + data.role + ")";
-                statusBox.style.color = "green";
-
-                this.style.display = "none";
-                document.getElementById("logoutBox").style.display = "block";
-            } else {
-                statusBox.textContent = data.error || "Login failed";
-                statusBox.style.color = "red";
-            }
-        } catch (err) {
-            const statusBox = document.getElementById("loginStatus");
-            statusBox.textContent = "Ошибка запроса";
-            statusBox.style.color = "red";
-            console.error(err);
-        }
-    });
-});
-</script>
 </html>
-
-
-
-

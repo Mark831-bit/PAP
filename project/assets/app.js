@@ -1,77 +1,100 @@
-let index = 0;
+document.addEventListener("DOMContentLoaded", function () {
+  const loginModal = document.getElementById("loginModal");
+  const registerModal = document.getElementById("registerModal");
 
-const carousel = document.getElementById("carousel");
-const slides = document.querySelectorAll(".slide");
-const totalSlides = slides.length;
+  const openLogin = document.getElementById("openLogin");
+  const openRegister = document.getElementById("openRegister");
 
-const btnPrev = document.querySelector(".nav-btn.prev");
-const btnNext = document.querySelector(".nav-btn.next");
-const container = document.querySelector(".carousel-container");
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
 
-function showSlide() {
-  if (!carousel) return;
-  carousel.style.transform = `translateX(-${index * 100}%)`;
-}
+  if (openLogin && loginModal) {
+    openLogin.addEventListener("click", () => {
+      loginModal.classList.remove("hidden");
+    });
+  }
 
-function nextSlide() {
-  if (totalSlides === 0) return;
-  index = (index + 1) % totalSlides;
-  showSlide();
-}
+  if (openRegister && registerModal) {
+    openRegister.addEventListener("click", () => {
+      registerModal.classList.remove("hidden");
+    });
+  }
 
-function prevSlide() {
-  if (totalSlides === 0) return;
-  index = (index - 1 + totalSlides) % totalSlides;
-  showSlide();
-}
-
-if (btnNext) btnNext.addEventListener("click", nextSlide);
-if (btnPrev) btnPrev.addEventListener("click", prevSlide);
-
-// авто-прокрутка + пауза при наведении
-let timer = setInterval(nextSlide, 4000);
-
-if (container) {
-  container.addEventListener("mouseenter", () => clearInterval(timer));
-  container.addEventListener("mouseleave", () => {
-    timer = setInterval(nextSlide, 4000);
+  document.querySelectorAll(".close-modal").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const modalId = this.dataset.close;
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.add("hidden");
+    });
   });
 
- 
-}
+  [loginModal, registerModal].forEach(modal => {
+    if (!modal) return;
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+      }
+    });
+  });
 
+  if (loginForm) {
+    loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
 
+      const formData = new FormData(this);
+      const statusBox = document.getElementById("loginStatus");
 
-// старт
-showSlide();
-
-document.getElementById("loginForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-
-    try {
+      try {
         const response = await fetch("/PAP/api/auth.php", {
-            method: "POST",
-            body: formData
+          method: "POST",
+          body: formData
         });
 
         const data = await response.json();
 
-        const statusBox = document.getElementById("loginStatus");
+        if (data.ok) {
+          if (loginModal) loginModal.classList.add("hidden");
+          location.reload();
+        } else {
+          statusBox.textContent = data.error || "Login failed";
+          statusBox.style.color = "red";
+        }
+      } catch (err) {
+        statusBox.textContent = "Ошибка запроса";
+        statusBox.style.color = "red";
+        console.error(err);
+      }
+    });
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const statusBox = document.getElementById("registerStatus");
+
+      try {
+        const response = await fetch("/PAP/api/register.php", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
 
         if (data.ok) {
-            statusBox.textContent = "Вы вошли как: " + data.login + " (" + data.role + ")";
-            statusBox.style.color = "green";
-
-            document.getElementById("loginForm").style.display = "none";
-            document.getElementById("logoutBox").style.display = "block";
+          statusBox.textContent = data.message || "Conta criada com sucesso";
+          statusBox.style.color = "green";
+          this.reset();
         } else {
-            statusBox.textContent = data.error || "Login failed";
-            statusBox.style.color = "red";
+          statusBox.textContent = data.error || "Erro no registo";
+          statusBox.style.color = "red";
         }
-    } catch (err) {
-        document.getElementById("loginStatus").textContent = "Ошибка запроса";
-        document.getElementById("loginStatus").style.color = "red";
-    }
+      } catch (err) {
+        statusBox.textContent = "Ошибка запроса";
+        statusBox.style.color = "red";
+        console.error(err);
+      }
+    });
+  }
 });

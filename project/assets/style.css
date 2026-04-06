@@ -1,9 +1,24 @@
-/* ===== RESET / BASE ===== */
+/* =========================================================
+   PAP - Main stylesheet
+   Organized and cleaned:
+   1. Base / Reset
+   2. Shared layout
+   3. Topbar / Navigation
+   4. Auth buttons + modals
+   5. Homepage / Carousel
+   6. Professor page
+   7. Responsive
+   ========================================================= */
+
+/* =========================================================
+   1. BASE / RESET
+   ========================================================= */
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
@@ -16,7 +31,22 @@ body.page-professor {
   color: #1f2937;
 }
 
-/* ===== TOPBAR ===== */
+/* Shared container for page content */
+.page-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 110px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+main {
+  padding-top: 110px;
+}
+
+/* =========================================================
+   2. TOPBAR / SHARED HEADER
+   ========================================================= */
 .topbar {
   position: fixed;
   top: 0;
@@ -40,7 +70,6 @@ body.page-professor {
   gap: 18px;
 }
 
-/* left */
 .topbar-left {
   display: flex;
   align-items: center;
@@ -55,7 +84,6 @@ body.page-professor {
   object-fit: contain;
 }
 
-/* center */
 .topbar-center {
   display: flex;
   align-items: center;
@@ -76,16 +104,14 @@ body.page-professor {
   text-decoration: underline;
 }
 
-/* right */
 .topbar-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
 }
 
-/* page-specific right side */
 .page-aluno .topbar-right h1,
 .page-professor .topbar-right h1 {
   margin: 0;
@@ -94,53 +120,10 @@ body.page-professor {
   color: #1f2937;
 }
 
-/* login form */
-.login-mini,
-#loginForm {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  
-}
-
-.login-mini input,
-#loginForm input {
-  height: 34px;
-  width: 140px;
-  padding: 0 10px;
-  border-radius: 10px;
-  border: 1px solid #d6d6d6;
-  outline: none;
-  background: #fff;
-}
-
-.login-mini input:focus,
-#loginForm input:focus {
-  box-shadow: 0 0 0 3px rgba(47, 111, 255, 0.20);
-  border-color: rgba(47, 111, 255, 0.45);
-}
-
-.login-mini button,
-#loginForm button {
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 0;
-  cursor: pointer;
-  font-weight: 600;
-  background: #0b1b3a;
-  color: #fff;
-}
-
-.login-mini button:hover,
-#loginForm button:hover {
-  filter: brightness(1.08);
-}
-
-/* login status */
-#loginStatus {
-  font-size: 13px;
-  color: #6b7280;
+.user-status {
+  font-size: 14px;
+  color: #15803d;
+  text-align: right;
 }
 
 #logoutBox a {
@@ -154,20 +137,159 @@ body.page-professor {
   text-decoration: underline;
 }
 
-/* ===== MAIN CONTENT ===== */
-.page-content,
-main {
-  padding-top: 110px;
+/* =========================================================
+   3. AUTH BUTTONS + AUTH MODALS
+   ========================================================= */
+
+/* Buttons in header before login */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
 }
 
-/* only for homepage main width */
-.page-content {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding-left: 18px;
-  padding-right: 18px;
+.auth-buttons button {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  background: #0b1b3a;
+  color: #fff;
 }
 
+.auth-buttons button:hover {
+  filter: brightness(1.08);
+}
+
+/* Hidden helper */
+.hidden {
+  display: none !important;
+}
+
+/* Modal overlay */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(17, 24, 39, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+/* Modal box */
+.auth-box {
+  width: min(430px, 100%);
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+  padding: 26px 24px 22px;
+  position: relative;
+}
+
+.auth-box h2 {
+  margin: 0 0 18px;
+  font-size: 28px;
+  color: #111827;
+}
+
+.close-modal {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.close-modal:hover {
+  background: #e5e7eb;
+}
+
+/* Auth forms inside modal */
+#loginForm,
+#registerForm,
+.login-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#loginForm,
+#registerForm {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#loginForm input,
+#registerForm input,
+.login-mini input {
+  height: 40px;
+  width: 100%;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid #d6d6d6;
+  outline: none;
+  background: #fff;
+  font-size: 15px;
+}
+
+.login-mini input {
+  width: 140px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+}
+
+#loginForm input:focus,
+#registerForm input:focus,
+.login-mini input:focus {
+  box-shadow: 0 0 0 3px rgba(47, 111, 255, 0.20);
+  border-color: rgba(47, 111, 255, 0.45);
+}
+
+#loginForm button,
+#registerForm button,
+.login-mini button {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  background: #0b1b3a;
+  color: #fff;
+}
+
+.login-mini button {
+  height: 34px;
+  border-radius: 10px;
+}
+
+#loginForm button:hover,
+#registerForm button:hover,
+.login-mini button:hover {
+  filter: brightness(1.08);
+}
+
+#loginFormStatus,
+#registerStatus {
+  min-height: 20px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* =========================================================
+   4. HOMEPAGE
+   ========================================================= */
 .main_hello {
   margin: 18px 0 6px;
   font-size: 36px;
@@ -179,7 +301,9 @@ main {
   color: #4b5563;
 }
 
-/* ===== CAROUSEL ===== */
+/* =========================================================
+   5. CAROUSEL
+   ========================================================= */
 .carousel-container {
   width: min(860px, 100%);
   margin: 24px auto 60px;
@@ -228,7 +352,7 @@ main {
   overflow: hidden;
 }
 
-/* arrows */
+/* Carousel arrows */
 .nav-btn {
   position: absolute;
   top: calc((clamp(240px, 40vw, 380px)) / 2);
@@ -236,7 +360,7 @@ main {
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.65);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   background: rgba(17, 24, 39, 0.55);
   color: #fff;
   cursor: pointer;
@@ -261,96 +385,9 @@ main {
   right: 12px;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1100px) {
-  .topbar-inner {
-    grid-template-columns: 150px 1fr 260px;
-  }
-
-  .topbar-center {
-    gap: 24px;
-  }
-
-  .topbar-center a {
-    font-size: 15px;
-  }
-
-  #loginForm input,
-  .login-mini input {
-    width: 120px;
-  }
-}
-
-@media (max-width: 820px) {
-  .topbar {
-    height: auto;
-  }
-
-  .topbar-inner {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 10px 14px;
-    height: auto;
-  }
-
-  .topbar-left,
-  .topbar-center,
-  .topbar-right {
-    justify-content: center;
-  }
-
-  .topbar-center {
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  #loginForm,
-  .login-mini {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .page-content,
-  main {
-    padding-top: 170px;
-  }
-}
-
-                              /*///  Professores  ///*/
-/*
-.student-meta {
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.student-right {
-  font-size: 14px;
-  font-weight: 700;
-  color: #374151;
-  white-space: nowrap;
-}
-
-.empty-state {
-  padding: 18px;
-  border-radius: 14px;
-  background: #f3f4f6;
-  color: #6b7280;
-  text-align: center;
-}
-
-@media (max-width: 720px) {
-  .student-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .student-right {
-    margin-left: 32px;
-  }
-}
-*/
-
-/* ===== PROFESSOR PAGE ===== */
+/* =========================================================
+   6. PROFESSOR PAGE
+   ========================================================= */
 .page-professor .page-content {
   max-width: 1100px;
   margin: 0 auto;
@@ -384,153 +421,117 @@ main {
   color: #6b7280;
 }
 
-.students-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.student-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 18px 20px;
+/* Filters above student list */
+.students-filters {
+  margin: 18px 0 24px;
+  padding: 18px;
   border-radius: 18px;
   background: #f8fafc;
   border: 1px solid #e5e7eb;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.student-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.07);
-}
-
-.student-left {
+.filter-row {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 0;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 
-.status-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.04);
-}
-
-.status-dot.present {
-  background: #22c55e;
-}
-
-.status-dot.absent {
-  background: #ef4444;
-}
-
-.student-info {
+.filter-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
-.student-name {
-  font-size: 20px;
-  font-weight: 700;
+.filter-group label {
+  font-size: 14px;
+  font-weight: 600;
   color: #111827;
 }
 
-.student-meta {
-  font-size: 14px;
-  color: #6b7280;
+.filter-group select,
+.form-row input,
+.form-row textarea {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  outline: none;
 }
 
-.student-right {
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  padding: 8px 12px;
+.filter-group select {
+  min-width: 180px;
+  height: 42px;
+  padding: 0 12px;
   border-radius: 12px;
-  background: #eef2ff;
-  color: #3730a3;
+  font-size: 15px;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 22px;
-  border-radius: 16px;
-  background: #f3f4f6;
-  color: #6b7280;
+.filter-group select:focus,
+.form-row input:focus,
+.form-row textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
 }
 
-
-.student-card .student-right.present-text {
-  background: rgba(34, 197, 94, 0.12);
-  color: #15803d;
+.radio-group {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
-.student-card .student-right.absent-text {
-  background: rgba(239, 68, 68, 0.12);
-  color: #b91c1c;
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
 }
 
-/* mobile */
-@media (max-width: 720px) {
-  .students-panel {
-    padding: 18px;
-    border-radius: 18px;
-  }
-
-  .students-panel-header h2 {
-    font-size: 28px;
-  }
-
-  .student-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .student-right {
-    margin-left: 32px;
-  }
+.radio-option input {
+  margin: 0;
 }
 
-/* ===== PROFESSOR PAGE ===== */
-.page-professor .page-content {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding-top: 120px;
-  padding-left: 18px;
-  padding-right: 18px;
-}
-
-.students-panel {
-  max-width: 950px;
-  margin: 0 auto;
-  background: #ffffff;
-  border-radius: 22px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
-  padding: 28px;
-}
-
-.students-panel-header {
+/* Test assignment box */
+.test-box {
+  margin-top: 8px;
   margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
 }
 
-.students-panel-header h2 {
-  margin: 0 0 8px;
-  font-size: 34px;
+.test-box h2 {
+  margin: 0 0 14px;
+  font-size: 26px;
   color: #111827;
 }
 
-.students-panel-header p {
-  margin: 0;
-  font-size: 15px;
-  color: #6b7280;
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
+.form-row label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.form-row input,
+.form-row textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Student list */
 .students-list {
   display: flex;
   flex-direction: column;
@@ -622,14 +623,66 @@ main {
   color: #6b7280;
 }
 
+/* =========================================================
+   7. RESPONSIVE
+   ========================================================= */
+@media (max-width: 1100px) {
+  .topbar-inner {
+    grid-template-columns: 150px 1fr 260px;
+  }
+
+  .topbar-center {
+    gap: 24px;
+  }
+
+  .topbar-center a {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 820px) {
+  .topbar {
+    height: auto;
+  }
+
+  .topbar-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 10px 14px;
+    height: auto;
+  }
+
+  .topbar-left,
+  .topbar-center,
+  .topbar-right {
+    justify-content: center;
+  }
+
+  .topbar-right {
+    align-items: center;
+  }
+
+  .topbar-center {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .page-content,
+  main,
+  .page-professor .page-content {
+    padding-top: 170px;
+  }
+}
+
 @media (max-width: 720px) {
   .students-panel {
     padding: 18px;
     border-radius: 18px;
   }
 
-  .students-panel-header h2 {
-    font-size: 28px;
+  .students-panel-header h2,
+  .test-box h2 {
+    font-size: 24px;
   }
 
   .student-card {
@@ -639,5 +692,19 @@ main {
 
   .student-right {
     margin-left: 32px;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .auth-box {
+    border-radius: 18px;
+    padding: 22px 18px 18px;
+  }
+
+  .auth-box h2 {
+    font-size: 24px;
   }
 }
