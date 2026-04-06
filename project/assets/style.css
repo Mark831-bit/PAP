@@ -315,3 +315,329 @@ main {
     padding-top: 170px;
   }
 }
+
+                              /*///  Professores  ///*/
+/*
+.student-meta {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.student-right {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 18px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  color: #6b7280;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .student-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-right {
+    margin-left: 32px;
+  }
+}
+*/
+
+/* ===== PROFESSOR PAGE ===== */
+.page-professor .page-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 120px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.students-panel {
+  max-width: 950px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+  padding: 28px;
+}
+
+.students-panel-header {
+  margin-bottom: 24px;
+}
+
+.students-panel-header h2 {
+  margin: 0 0 8px;
+  font-size: 34px;
+  color: #111827;
+}
+
+.students-panel-header p {
+  margin: 0;
+  font-size: 15px;
+  color: #6b7280;
+}
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.student-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.student-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.07);
+}
+
+.student-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.status-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.04);
+}
+
+.status-dot.present {
+  background: #22c55e;
+}
+
+.status-dot.absent {
+  background: #ef4444;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.student-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.student-meta {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.student-right {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 22px;
+  border-radius: 16px;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+
+.student-card .student-right.present-text {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.student-card .student-right.absent-text {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+/* mobile */
+@media (max-width: 720px) {
+  .students-panel {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .students-panel-header h2 {
+    font-size: 28px;
+  }
+
+  .student-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-right {
+    margin-left: 32px;
+  }
+}
+
+/* ===== PROFESSOR PAGE ===== */
+.page-professor .page-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 120px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.students-panel {
+  max-width: 950px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+  padding: 28px;
+}
+
+.students-panel-header {
+  margin-bottom: 24px;
+}
+
+.students-panel-header h2 {
+  margin: 0 0 8px;
+  font-size: 34px;
+  color: #111827;
+}
+
+.students-panel-header p {
+  margin: 0;
+  font-size: 15px;
+  color: #6b7280;
+}
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.student-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.student-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.07);
+}
+
+.student-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.status-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.04);
+}
+
+.status-dot.present {
+  background: #22c55e;
+}
+
+.status-dot.absent {
+  background: #ef4444;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.student-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.student-meta {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.student-right {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.student-right.present-text {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.student-right.absent-text {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 22px;
+  border-radius: 16px;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+@media (max-width: 720px) {
+  .students-panel {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .students-panel-header h2 {
+    font-size: 28px;
+  }
+
+  .student-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-right {
+    margin-left: 32px;
+  }
+}

@@ -9,3 +9,8 @@ $pdo = new PDO($dsn, $user, $pass, [
   PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ]);
  
+$conn = new mysqli("localhost", "root", "", "pap");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
