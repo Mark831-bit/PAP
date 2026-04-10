@@ -4,33 +4,99 @@ session_start();
 
 header('Content-Type: application/json');
 
-$login = trim($_POST['login'] ?? '');
-$password = trim($_POST['password'] ?? '');
 
-if ($login === '' || $password === '') {
-    echo json_encode(['ok' => false, 'error' => 'Заполните логин и пароль']);
+
+header('Content-Type: application/json; charset=utf-8');
+
+try {
+    $login = trim($_POST['login'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $nome = trim($_POST['nome'] ?? '');
+    $idade = trim($_POST['idade'] ?? '');
+    $turmaNum = trim($_POST['turma_num'] ?? '');
+    $turmaLetra = trim($_POST['turma_letra'] ?? '');
+    $turma = $turmaNum . $turmaLetra;
+    $numeroTurma = trim($_POST['numero_turma'] ?? '');
+
+    if ($login === '' || $password === '' || $nome === '' || $idade === '' || $turma === '' || $numeroTurma === '') {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Preencha todos os campos'
+        ]);
+        exit;
+    }
+
+    if (!is_numeric($idade) || (int)$idade <= 0) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Idade inválida'
+        ]);
+        exit;
+    }
+
+    if (!is_numeric($numeroTurma) || (int)$numeroTurma <= 0) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Número em turma inválido'
+        ]);
+        exit;
+    }
+
+    /* Проверка: логин уже существует? */
+    $stmt = $pdo->prepare("SELECT Login FROM login WHERE Login = ? LIMIT 1");
+    $stmt->execute([$login]);
+    $existingUser = $stmt->fetch();
+
+    if ($existingUser) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Esse login já existe'
+        ]);
+        exit;
+    }
+
+    /* Хешируем пароль */
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+    /* По умолчанию регистрируем как Aluno */
+    $role = 'Aluno';
+    $uid = '';
+
+    /* 1. Сохраняем в login */
+    $stmtLogin = $pdo->prepare("
+        INSERT INTO login (Login, Password, UID, Role)
+        VALUES (?, ?, ?, ?)
+    ");
+    $stmtLogin->execute([$login, $passwordHash, $uid, $role]);
+
+    /* 2. Сохраняем в alunos */
+    $stmtAluno = $pdo->prepare("
+        INSERT INTO alunos (`Nome`, `Idade`, `Turma`, `Número em turma`, `Presença`, `login`)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+    $stmtAluno->execute([
+        $nome,
+        (int)$idade,
+        $turma,
+        (int)$numeroTurma,
+        0,
+        $login
+    ]);
+
+    echo json_encode([
+        'ok' => true,
+        'message' => 'Conta criada com sucesso'
+    ]);
+    $_SESSION['user_id'] = $login;
+    $_SESSION['login'] = $login;
+    $_SESSION['role'] = 'Aluno';
+    exit;
+
+} catch (Throwable $e) {
+    echo json_encode([
+        'ok' => false,
+        'error' => $e->getMessage()
+    ]);
     exit;
 }
-
-$stmt = $conn->prepare("SELECT Login FROM login WHERE Login = ?");
-$stmt->bind_param("s", $login);
-$stmt->execute();
-$res = $stmt->get_result();
-
-if ($res->fetch_assoc()) {
-    echo json_encode(['ok' => false, 'error' => 'Такой логин уже существует']);
-    exit;
-}
-
-$hash = password_hash($password, PASSWORD_DEFAULT);
-$role = 'Aluno';
-$uid = '';
-
-$stmt = $conn->prepare("INSERT INTO login (Login, Password, UID, Role) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("ssss", $login, $hash, $uid, $role);
-
-if ($stmt->execute()) {
-    echo json_encode(['ok' => true, 'message' => 'Пользователь создан']);
-} else {
-    echo json_encode(['ok' => false, 'error' => 'Ошибка регистрации']);
-}
+?>

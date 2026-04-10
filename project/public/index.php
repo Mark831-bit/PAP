@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config/session.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -25,7 +26,7 @@ require_once __DIR__ . '/../../config/session.php';
         <?php if (isset($_SESSION['user_id'])): ?>
           <a href="/PAP/project/public/index.php">Principal</a>
           <a href="/PAP/api/profile.php">Pagina pessoal</a>
-          <a href="/PAP/project/public/dashboard">Horario</a>
+          <a href="/PAP/project/public/admin.php">Horario</a>
         <?php endif; ?>
       </div>
 
@@ -74,11 +75,31 @@ require_once __DIR__ . '/../../config/session.php';
         <h2>Register</h2>
 
         <form id="registerForm">
-          <input type="text" name="login" placeholder="New login" required>
-          <input type="password" name="password" placeholder="New password" required>
+          <input type="text" name="login" placeholder="Login" required>
+          <input type="password" name="password" placeholder="Password" required>
+          <input type="text" name="nome" placeholder="Nome" required>
+          <input type="number" name="idade" placeholder="Idade" min="1" required>
+        <div style="display: flex; gap: 10px;">
+          
+          <select name="turma_num" required>
+            <option value="">Ano</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+          </select>
+
+          <select name="turma_letra" required>
+            <option value="">Turma</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+
+        </div>
+          <input type="number" name="numero_turma" placeholder="Número em turma" min="1" required>
           <button type="submit">Criar conta</button>
           <div id="registerStatus"></div>
-        </form>
+      </form>
       </div>
     </div>
   <?php endif; ?>
@@ -141,3 +162,4 @@ require_once __DIR__ . '/../../config/session.php';
   <script src="/PAP/project/assets/app.js?v=3"></script>
 </body>
 </html>
+

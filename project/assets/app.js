@@ -38,63 +38,62 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   if (loginForm) {
-    loginForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-      const formData = new FormData(this);
-      const statusBox = document.getElementById("loginStatus");
+    const formData = new FormData(this);
+    const statusBox = document.getElementById("loginFormStatus");
 
-      try {
-        const response = await fetch("/PAP/api/auth.php", {
-          method: "POST",
-          body: formData
-        });
+    try {
+      const response = await fetch("/PAP/api/auth.php", {
+        method: "POST",
+        body: formData
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data.ok) {
-          if (loginModal) loginModal.classList.add("hidden");
-          location.reload();
-        } else {
-          statusBox.textContent = data.error || "Login failed";
-          statusBox.style.color = "red";
-        }
-      } catch (err) {
-        statusBox.textContent = "Ошибка запроса";
+      if (data.ok) {
+        if (loginModal) loginModal.classList.add("hidden");
+        location.reload();
+      } else {
+        statusBox.textContent = data.error || "Login failed";
         statusBox.style.color = "red";
-        console.error(err);
       }
-    });
-  }
+    } catch (err) {
+      statusBox.textContent = "Ошибка запроса";
+      statusBox.style.color = "red";
+      console.error(err);
+    }
+  });
+}
 
   if (registerForm) {
-    registerForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
+  registerForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-      const formData = new FormData(this);
-      const statusBox = document.getElementById("registerStatus");
+    const formData = new FormData(this);
+    const statusBox = document.getElementById("registerStatus");
 
-      try {
-        const response = await fetch("/PAP/api/register.php", {
-          method: "POST",
-          body: formData
-        });
+    try {
+      const response = await fetch("/PAP/api/register.php", {
+        method: "POST",
+        body: formData
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data.ok) {
-          statusBox.textContent = data.message || "Conta criada com sucesso";
-          statusBox.style.color = "green";
-          this.reset();
-        } else {
-          statusBox.textContent = data.error || "Erro no registo";
-          statusBox.style.color = "red";
-        }
-      } catch (err) {
-        statusBox.textContent = "Ошибка запроса";
+      if (data.ok) {
+        if (registerModal) registerModal.classList.add("hidden");
+        location.reload();
+      } else {
+        statusBox.textContent = data.error || "Erro no registo";
         statusBox.style.color = "red";
-        console.error(err);
       }
-    });
+    } catch (err) {
+      statusBox.textContent = "Ошибка запроса";
+      statusBox.style.color = "red";
+      console.error(err);
+    }
+  });
   }
 });

@@ -671,7 +671,7 @@ main {
   main,
   .page-professor .page-content {
     padding-top: 170px;
-  }
+  }  
 }
 
 @media (max-width: 720px) {
@@ -693,7 +693,7 @@ main {
   .student-right {
     margin-left: 32px;
   }
-
+  
   .radio-group {
     flex-direction: column;
     gap: 10px;
@@ -706,5 +706,228 @@ main {
 
   .auth-box h2 {
     font-size: 24px;
+  }
+}
+
+/* =========================
+   ADMIN PAGE
+   ========================= */
+.page-admin .page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 120px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-tab {
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.admin-tab.active {
+  background: #0b1b3a;
+  color: #fff;
+}
+
+.admin-tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-tab-content.active {
+  display: flex;
+}
+
+.admin-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+}
+
+.admin-card h2 {
+  margin: 0 0 18px;
+  font-size: 28px;
+  color: #111827;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row label {
+  font-weight: 600;
+  color: #111827;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #f9fafb;
+  padding: 12px 14px;
+  font-size: 15px;
+  outline: none;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.radio-group {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.radio-option input {
+  margin: 0;
+}
+
+.turma-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.uid-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.uid-button-wrap button,
+.secondary-btn {
+  height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #1f2937;
+  color: #fff;
+}
+
+.scan-status {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-actions button {
+  height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #0b1b3a;
+  color: #fff;
+}
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.search-bar input {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #f9fafb;
+  padding: 12px 14px;
+  font-size: 15px;
+  outline: none;
+}
+
+.search-bar button {
+  height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #0b1b3a;
+  color: #fff;
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.person-result {
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.person-result:hover {
+  background: #eef2ff;
+}
+
+@media (max-width: 720px) {
+  .turma-row,
+  .uid-row {
+    grid-template-columns: 1fr;
+  }
+
+  .search-bar {
+    flex-direction: column;
   }
 }
