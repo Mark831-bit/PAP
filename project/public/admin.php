@@ -135,6 +135,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
             <div class="form-actions">
               <button type="submit">Guardar</button>
+              <div id="addCardStatus"></div>
             </div>
           </form>
         </div>
@@ -344,18 +345,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
 
 
-<script>
-document.getElementById('saveLoginForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
 
-  const formData = new FormData(this);
 
-  const response = await fetch('/PAP/api/save_login.php', {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  alert(JSON.stringify(result));
-});
-</script>
+<script src="/PAP/project/assets/app.js?v=301"></script>

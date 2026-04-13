@@ -931,3 +931,8 @@ main {
     flex-direction: column;
   }
 }
+
+#addCardStatus {
+  min-height: 20px;
+  font-size: 14px;
+}
