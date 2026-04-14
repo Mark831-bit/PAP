@@ -14,7 +14,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=300">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=301">
 </head>
 <body class="page-admin">
 
@@ -113,7 +113,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             </div>
 
             <div class="form-row">
-              <label for="addNumeroTurma">Número na turma</label>
+              <label for="addNumeroTurma">Número em turma</label>
               <input type="number" id="addNumeroTurma" name="numero_turma" placeholder="Número">
             </div>
 
@@ -136,106 +136,84 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             <div class="form-actions">
               <button type="submit">Guardar</button>
               <div id="addCardStatus"></div>
+              
             </div>
           </form>
         </div>
 
         <!-- Atualizar -->
-        <div class="admin-card">
-          <h2>Atualizar</h2>
+      <div class="admin-card">
+        <h2>Atualizar</h2>
 
-          <div class="search-bar">
-            <input type="text" placeholder="Procurar pessoa...">
-            <button type="button">Find</button>
-          </div>
-
-          <div class="search-results">
-            <button class="person-result" type="button">Marko Nikolaienko</button>
-            <button class="person-result" type="button">Professor João</button>
-          </div>
-
-          <form class="admin-form" id="updateCardForm">
-
-            <div class="radio-group">
-              <label class="radio-option">
-                <input type="radio" name="update_role" value="Aluno" checked>
-                <span>Aluno</span>
-              </label>
-
-              <label class="radio-option">
-                <input type="radio" name="update_role" value="Professor">
-                <span>Professor</span>
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label>Nome</label>
-              <input type="text" placeholder="Nome completo">
-            </div>
-
-            <div class="form-row">
-              <label>Login</label>
-              <input type="text" placeholder="Login">
-            </div>
-
-            <div class="form-row">
-              <label>Password</label>
-              <input type="password" placeholder="Password">
-            </div>
-
-            <div class="form-row">
-              <label>Idade</label>
-              <input type="number" placeholder="Idade">
-            </div>
-
-            <div class="form-row turma-row">
-              <div>
-                <label>Turma</label>
-                <select>
-                  <option value="">Ano</option>
-                  <option value="10">10</option>
-                  <option value="11">11</option>
-                  <option value="12">12</option>
-                </select>
-              </div>
-
-              <div>
-                <label>&nbsp;</label>
-                <select>
-                  <option value="">Letra</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label>Número na turma</label>
-              <input type="number" placeholder="Número">
-            </div>
-
-            <div class="form-row uid-row">
-              <div class="uid-input-wrap">
-                <label>UID</label>
-                <input type="text" placeholder="UID do cartão">
-              </div>
-
-              <div class="uid-button-wrap">
-                <label>&nbsp;</label>
-                <button type="button" class="secondary-btn">Ler cartão</button>
-              </div>
-            </div>
-
-            <div class="scan-status">
-              Aguardando cartão...
-            </div>
-
-            <div class="form-actions">
-              <button type="submit">Atualizar</button>
-            </div>
-          </form>
+        <div class="search-bar">
+          <input type="text" id="update-search" placeholder="Pesquisar nome">
         </div>
+
+        <div id="update-results"></div>
+
+        <form id="update-form" style="display:none;">
+          <input type="hidden" id="update-id" name="person_id">
+          <input type="hidden" id="update-type" name="person_type" value="Aluno">
+
+          <div class="form-row">
+            <label for="update-nome">Nome</label>
+            <input type="text" id="update-nome" name="nome">
+          </div>
+
+          <div class="form-row">
+            <label for="update-login">Login</label>
+            <input type="text" id="update-login" name="login" readonly>
+          </div>
+
+          <div class="form-row">
+            <label for="update-password">Password</label>
+            <input type="password" id="update-password" name="password" placeholder="Novo password">
+          </div>
+
+          <div class="form-row">
+            <label for="updateI-idade">Idade</label>
+            <input type="number" id="update-idade" name="idade">
+          </div>
+
+          <div class="form-row turma-row">
+            <div>
+              <label for="updateTurmaNum">Turma</label>
+              <select id="updateTurmaNum" name="turma_num">
+                <option value="">Ano</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="updateTurmaLetra">&nbsp;</label>
+              <select id="updateTurmaLetra" name="turma_letra">
+                <option value="">Letra</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="updateNumeroTurma">Número em turma</label>
+            <input type="number" id="updateNumeroTurma" name="numero_turma">
+          </div>
+
+          <div class="form-row">
+            <label for="updateUid">UID</label>
+            <input type="text" id="updateUid" name="uid">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit">Atualizar</button>
+          </div>
+
+          <div id="updateCardStatus"></div>
+        </form>
+      </div>
 
         <!-- Encontrar -->
         <div class="admin-card">
@@ -246,24 +224,9 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             <button type="button">Find</button>
           </div>
 
-          <div class="search-results">
-            <button class="person-result" type="button">Marko Nikolaienko</button>
-            <button class="person-result" type="button">Professor João</button>
-          </div>
+       
 
           <form class="admin-form">
-
-            <div class="radio-group">
-              <label class="radio-option">
-                <input type="radio" checked disabled>
-                <span>Aluno</span>
-              </label>
-
-              <label class="radio-option">
-                <input type="radio" disabled>
-                <span>Professor</span>
-              </label>
-            </div>
 
             <div class="form-row">
               <label>Nome</label>
@@ -324,27 +287,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     </section>
   </main>
 
-  <script>
-    const tabs = document.querySelectorAll('.admin-tab');
-    const contents = document.querySelectorAll('.admin-tab-content');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        contents.forEach(c => c.classList.remove('active'));
-
-        tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-      });
-    });
-  </script>
-
+<script src="/PAP/project/assets/app.js?v=302"></script>
 </body>
+
 </html>
 
 
 
 
 
-
-<script src="/PAP/project/assets/app.js?v=301"></script>
