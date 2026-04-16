@@ -509,28 +509,6 @@ main {
   color: #111827;
 }
 
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.form-row label {
-  font-size: 15px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.form-row input,
-.form-row textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
-  font-size: 15px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
 /* Student list */
 .students-list {
   display: flex;
@@ -781,9 +759,11 @@ main {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 14px;
 }
 
 .form-row label {
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
 }
@@ -798,6 +778,7 @@ main {
   padding: 12px 14px;
   font-size: 15px;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-row input:focus,
@@ -805,27 +786,6 @@ main {
 .form-row textarea:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
-}
-
-.radio-group {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-.radio-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 10px 14px;
-  cursor: pointer;
-}
-
-.radio-option input {
-  margin: 0;
 }
 
 .turma-row {
@@ -937,13 +897,6 @@ main {
   font-size: 14px;
 }
 
-#update-results {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .update-result-item {
   display: flex;
   align-items: center;
@@ -992,4 +945,12 @@ main {
 .update-role {
   font-size: 12px;
   color: #6b7280;
+}
+
+#update-results,
+#find-results {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

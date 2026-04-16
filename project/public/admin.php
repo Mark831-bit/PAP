@@ -14,7 +14,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=301">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=302">
 </head>
 <body class="page-admin">
 
@@ -220,50 +220,68 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           <h2>Encontrar</h2>
 
           <div class="search-bar">
-            <input type="text" placeholder="Procurar pessoa...">
-            <button type="button">Find</button>
+            <input type="text" id="find-search" placeholder="Procurar pessoa...">
           </div>
 
-       
+          <div id="find-results"></div>
 
-          <form class="admin-form">
+          <form id="find-form" style="display:none;">
+            <input type="hidden" id="find-id">
+            <input type="hidden" id="find-type">
 
             <div class="form-row">
-              <label>Nome</label>
-              <input type="text" value="Marko Nikolaienko" readonly>
+              <label for="find-nome">Nome</label>
+              <input type="text" id="find-nome" readonly>
             </div>
 
             <div class="form-row">
-              <label>Login</label>
-              <input type="text" value="a12345" readonly>
+              <label for="find-login">Login</label>
+              <input type="text" id="find-login" readonly>
             </div>
 
             <div class="form-row">
-              <label>Password</label>
-              <input type="text" value="********" readonly>
+              <label for="find-password">Password</label>
+              <input type="text" id="find-password" value="********" readonly>
             </div>
 
             <div class="form-row">
-              <label>Idade</label>
-              <input type="text" value="18" readonly>
+              <label for="find-idade">Idade</label>
+              <input type="text" id="find-idade" readonly>
             </div>
 
-            <div class="form-row">
-              <label>Turma</label>
-              <input type="text" value="12C" readonly>
-            </div>
+            <div class="form-row turma-row">
+              <div>
+                <label for="findTurmaNum">Turma</label>
+                <select id="findTurmaNum" disabled>
+                  <option value="">Ano</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
+              </div>
 
-            <div class="form-row">
-              <label>Número na turma</label>
-              <input type="text" value="14" readonly>
-            </div>
-
-            <div class="form-row">
-              <label>UID</label>
-              <input type="text" value="C329471C" readonly>
-            </div>
-          </form>
+              <div>
+                <label for="findTurmaLetra">&nbsp;</label>
+                <select id="findTurmaLetra" disabled>
+                  <option value="">Letra</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                </select>
+              </div>
         </div>
+
+          <div class="form-row">
+            <label for="findNumeroTurma">Número em turma</label>
+            <input type="text" id="findNumeroTurma" readonly>
+          </div>
+
+          <div class="form-row">
+            <label for="findUid">UID</label>
+            <input type="text" id="findUid" readonly>
+          </div>
+        </form>
+      </div>
 
       </div>
 
@@ -287,7 +305,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=302"></script>
+<script src="/PAP/project/assets/app.js?v=303"></script>
 </body>
 
 </html>

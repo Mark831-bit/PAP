@@ -1,257 +1,275 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const loginModal = document.getElementById("loginModal");
+
+  // ── MODALS ────────────────────────────────────────────────
+  const loginModal    = document.getElementById("loginModal");
   const registerModal = document.getElementById("registerModal");
-
-  const openLogin = document.getElementById("openLogin");
-  const openRegister = document.getElementById("openRegister");
-
-  const loginForm = document.getElementById("loginForm");
-  const registerForm = document.getElementById("registerForm");
+  const openLogin     = document.getElementById("openLogin");
+  const openRegister  = document.getElementById("openRegister");
+  const loginForm     = document.getElementById("loginForm");
+  const registerForm  = document.getElementById("registerForm");
 
   if (openLogin && loginModal) {
-    openLogin.addEventListener("click", () => {
-      loginModal.classList.remove("hidden");
-    });
+    openLogin.addEventListener("click", () => loginModal.classList.remove("hidden"));
   }
-
   if (openRegister && registerModal) {
-    openRegister.addEventListener("click", () => {
-      registerModal.classList.remove("hidden");
-    });
+    openRegister.addEventListener("click", () => registerModal.classList.remove("hidden"));
   }
 
-  document.querySelectorAll(".close-modal").forEach(btn => {
+  document.querySelectorAll(".close-modal").forEach((btn) => {
     btn.addEventListener("click", function () {
-      const modalId = this.dataset.close;
-      const modal = document.getElementById(modalId);
+      const modal = document.getElementById(this.dataset.close);
       if (modal) modal.classList.add("hidden");
     });
   });
 
-  [loginModal, registerModal].forEach(modal => {
+  [loginModal, registerModal].forEach((modal) => {
     if (!modal) return;
-    modal.addEventListener("click", function (e) {
-      if (e.target === modal) {
-        modal.classList.add("hidden");
-      }
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.add("hidden");
     });
   });
 
   if (loginForm) {
-  loginForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const statusBox = document.getElementById("loginFormStatus");
-
-    try {
-      const response = await fetch("/PAP/api/auth.php", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (data.ok) {
-        if (loginModal) loginModal.classList.add("hidden");
-        location.reload();
-      } else {
-        statusBox.textContent = data.error || "Login failed";
-        statusBox.style.color = "red";
+    loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const statusBox = document.getElementById("loginFormStatus");
+      try {
+        const res  = await fetch("/PAP/api/auth.php", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.ok) {
+          if (loginModal) loginModal.classList.add("hidden");
+          location.reload();
+        } else if (statusBox) {
+          statusBox.textContent = data.error || "Login failed";
+          statusBox.style.color = "red";
+        }
+      } catch (err) {
+        if (statusBox) { statusBox.textContent = "Ошибка запроса"; statusBox.style.color = "red"; }
+        console.error(err);
       }
-    } catch (err) {
-      statusBox.textContent = "Ошибка запроса";
-      statusBox.style.color = "red";
-      console.error(err);
-    }
-  });
-}
+    });
+  }
 
   if (registerForm) {
-  registerForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const statusBox = document.getElementById("registerStatus");
-
-    try {
-      const response = await fetch("/PAP/api/register.php", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (data.ok) {
-        if (registerModal) registerModal.classList.add("hidden");
-        location.reload();
-      } else {
-        statusBox.textContent = data.error || "Erro no registo";
-        statusBox.style.color = "red";
+    registerForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const statusBox = document.getElementById("registerStatus");
+      try {
+        const res  = await fetch("/PAP/api/register.php", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.ok) {
+          if (registerModal) registerModal.classList.add("hidden");
+          location.reload();
+        } else if (statusBox) {
+          statusBox.textContent = data.error || "Erro no registo";
+          statusBox.style.color = "red";
+        }
+      } catch (err) {
+        if (statusBox) { statusBox.textContent = "Ошибка запроса"; statusBox.style.color = "red"; }
+        console.error(err);
       }
-    } catch (err) {
-      statusBox.textContent = "Ошибка запроса";
-      statusBox.style.color = "red";
-      console.error(err);
-    }
-  });
+    });
   }
-});
 
-document.addEventListener('DOMContentLoaded', () => {
-  const searchInput = document.getElementById('update-search');
-  const resultsBox = document.getElementById('update-results');
-  const form = document.getElementById('update-form');
+  // ── SHARED: helpers для списков пользователей ─────────────
+  async function fetchUsers() {
+    const res  = await fetch("/PAP/api/admin_update_card.php?action=list");
+    const data = await res.json();
+    if (!data.success) throw new Error("Erro ao carregar utilizadores.");
+    return data.users || [];
+  }
 
-  if (!searchInput || !resultsBox || !form) return;
+  function renderUserList(list, resultsBox, onSelect) {
+    resultsBox.innerHTML = "";
+    if (!list.length) {
+      resultsBox.innerHTML = "<p>Nenhum resultado encontrado.</p>";
+      return;
+    }
+    list.forEach((user) => {
+      const item     = document.createElement("div");
+      item.className = "update-result-item";
+      const role     = user.tipo === "professor" ? "Professor" : "Aluno";
+      const dotClass = user.tipo === "professor" ? "dot-professor" : "dot-aluno";
+      item.innerHTML = `
+        <div class="update-left">
+          <div class="update-dot ${dotClass}"></div>
+          <div>
+            <div class="update-name">${user.nome || ""}</div>
+            <div class="update-role">${role}</div>
+          </div>
+        </div>`;
+      item.addEventListener("click", () => onSelect(user));
+      resultsBox.appendChild(item);
+    });
+  }
 
-  const idInput = document.getElementById('update-id');
-  const typeInput = document.getElementById('update-type');
-  const nomeInput = document.getElementById('update-nome');
-  const loginInput = document.getElementById('update-login');
-  const idadeInput = document.getElementById('update-idade');
-  const turmaNumInput = document.getElementById('updateTurmaNum');
-  const turmaLetraInput = document.getElementById('updateTurmaLetra');
-  const numeroInput = document.getElementById('updateNumeroTurma');
-  const uidInput = document.getElementById('updateUid');
-  const passwordInput = document.getElementById('update-password');
-  const statusBox = document.getElementById('updateCardStatus');
+  function splitTurma(turma) {
+    const t = (turma || "").toString().trim();
+    if (t.length >= 2) return { num: t.slice(0, -1), letra: t.slice(-1).toUpperCase() };
+    return { num: "", letra: "" };
+  }
 
-  let users = [];
+  // ── ATUALIZAR block ───────────────────────────────────────
+  const updateSearch  = document.getElementById("update-search");
+  const updateResults = document.getElementById("update-results");
+  const updateForm    = document.getElementById("update-form");
 
-  async function loadUsers() {
-    try {
-      const response = await fetch('/PAP/api/admin_update_card.php?action=list');
-      const data = await response.json();
+  if (updateSearch && updateResults && updateForm) {
+    const updateId         = document.getElementById("update-id");
+    const updateType       = document.getElementById("update-type");
+    const updateNome       = document.getElementById("update-nome");
+    const updateLogin      = document.getElementById("update-login");
+    const updateIdade      = document.getElementById("update-idade");
+    const updateTurmaNum   = document.getElementById("updateTurmaNum");
+    const updateTurmaLetra = document.getElementById("updateTurmaLetra");
+    const updateNumero     = document.getElementById("updateNumeroTurma");
+    const updateUid        = document.getElementById("updateUid");
+    const updatePassword   = document.getElementById("update-password");
+    const updateStatus     = document.getElementById("updateCardStatus");
 
-      if (data.success) {
-        users = data.users || [];
-        renderResults(users);
-      } else {
-        resultsBox.innerHTML = '<p>Erro ao carregar utilizadores.</p>';
+    let updateUsers = [];
+
+    async function initUpdate() {
+      try {
+        updateUsers = await fetchUsers();
+        renderUserList(updateUsers, updateResults, fillUpdateForm);
+      } catch {
+        updateResults.innerHTML = "<p>Erro de ligação ao servidor.</p>";
       }
-    } catch (error) {
-      console.error('Erro ao carregar utilizadores:', error);
-      resultsBox.innerHTML = '<p>Erro de ligação ao servidor.</p>';
-    }
-  }
-
-  function renderResults(list) {
-  resultsBox.innerHTML = '';
-
-  if (!list.length) {
-    resultsBox.innerHTML = '<p>Nenhum resultado encontrado.</p>';
-    return;
-  }
-
-  list.forEach(user => {
-    const item = document.createElement('div');
-    item.className = 'update-result-item';
-
-    const role = user.tipo === 'professor' ? 'Professor' : 'Aluno';
-    const dotClass = user.tipo === 'professor' ? 'dot-professor' : 'dot-aluno';
-
-    item.innerHTML = `
-      <div class="update-left">
-        <div class="update-dot ${dotClass}"></div>
-        <div>
-          <div class="update-name">${user.nome}</div>
-          <div class="update-role">${role}</div>
-        </div>
-      </div>
-    `;
-
-    item.addEventListener('click', () => fillForm(user));
-
-    resultsBox.appendChild(item);
-  });
-}         
-
-  function fillForm(user) {
-    idInput.value = user.id || '';
-    typeInput.value = user.tipo || '';
-    nomeInput.value = user.nome || '';
-    loginInput.value = user.login || '';
-    idadeInput.value = user.idade || '';
-    numeroInput.value = user.numero_turma || '';
-    uidInput.value = user.uid || '';
-    passwordInput.value = '';
-
-    const turma = (user.turma || '').toString().trim();
-    if (turma.length >= 2) {
-      turmaNumInput.value = turma.slice(0, -1);
-      turmaLetraInput.value = turma.slice(-1).toUpperCase();
-    } else {
-      turmaNumInput.value = '';
-      turmaLetraInput.value = '';
     }
 
-    form.style.display = 'block';
+    function fillUpdateForm(user) {
+      if (updateId)       updateId.value       = user.id            ?? "";
+      if (updateType)     updateType.value     = user.tipo          ?? "";
+      if (updateNome)     updateNome.value     = user.nome          ?? "";
+      if (updateLogin)    updateLogin.value    = user.login         ?? "";
+      if (updateIdade)    updateIdade.value    = user.idade         ?? "";
+      if (updateNumero)   updateNumero.value   = user.numero_turma  ?? "";
+      if (updateUid)      updateUid.value      = user.uid           ?? "";
+      if (updatePassword) updatePassword.value = "";
 
-    const idadeRow = document.getElementById('update-idade')?.closest('.form-row');
-    const numeroRow = document.getElementById('updateNumeroTurma')?.closest('.form-row');
+      const { num, letra } = splitTurma(user.turma);
+      if (updateTurmaNum)   updateTurmaNum.value   = num;
+      if (updateTurmaLetra) updateTurmaLetra.value = letra;
 
-    if (user.tipo === 'professor') {
-      if (idadeRow) idadeRow.style.display = 'none';
-      if (numeroRow) numeroRow.style.display = 'none';
-    } else {
-      if (idadeRow) idadeRow.style.display = '';
-      if (numeroRow) numeroRow.style.display = '';
+      updateForm.style.display = "block";
+
+      const isProfessor = user.tipo === "professor";
+      const idadeRow    = updateIdade?.closest(".form-row");
+      const numeroRow   = updateNumero?.closest(".form-row");
+      if (idadeRow)  idadeRow.style.display  = isProfessor ? "none" : "";
+      if (numeroRow) numeroRow.style.display = isProfessor ? "none" : "";
     }
-  }
 
-  searchInput.addEventListener('input', () => {
-    const value = searchInput.value.toLowerCase().trim();
+    updateSearch.addEventListener("input", () => {
+      const q = updateSearch.value.toLowerCase().trim();
+      renderUserList(
+        updateUsers.filter((u) => (u.nome || "").toLowerCase().includes(q)),
+        updateResults,
+        fillUpdateForm
+      );
+    });
 
-    const filtered = users.filter(user =>
-      (user.nome || '').toLowerCase().includes(value)
-    );
-
-    renderResults(filtered);
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const turma = `${turmaNumInput.value || ''}${turmaLetraInput.value || ''}`;
-
-    const payload = {
-      id: idInput.value,
-      tipo: (typeInput.value || '').toLowerCase(),
-      nome: nomeInput.value,
-      login: loginInput.value,
-      idade: idadeInput.value,
-      turma: turma,
-      numero_turma: numeroInput.value,
-      uid: uidInput.value,
-      password: passwordInput.value
-    };
-
-    try {
-      const response = await fetch('/PAP/api/admin_update_card.php?action=update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        statusBox.textContent = 'Dados atualizados com sucesso.';
-        statusBox.style.color = 'green';
-        loadUsers();
-      } else {
-        statusBox.textContent = data.message || 'Erro ao atualizar.';
-        statusBox.style.color = 'red';
+    updateForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const turma   = `${updateTurmaNum?.value || ""}${updateTurmaLetra?.value || ""}`;
+      const payload = {
+        id:           updateId?.value       ?? "",
+        tipo:         (updateType?.value    || "").toLowerCase(),
+        nome:         updateNome?.value     ?? "",
+        login:        updateLogin?.value    ?? "",
+        idade:        updateIdade?.value    ?? "",
+        turma,
+        numero_turma: updateNumero?.value   ?? "",
+        uid:          updateUid?.value      ?? "",
+        password:     updatePassword?.value ?? "",
+      };
+      try {
+        const res  = await fetch("/PAP/api/admin_update_card.php?action=update", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (updateStatus) {
+            updateStatus.textContent = "Dados atualizados com sucesso.";
+            updateStatus.style.color = "green";
+          }
+          updateUsers = await fetchUsers();
+          renderUserList(updateUsers, updateResults, fillUpdateForm);
+        } else if (updateStatus) {
+          updateStatus.textContent = data.message || "Erro ao atualizar.";
+          updateStatus.style.color = "red";
+        }
+      } catch {
+        if (updateStatus) {
+          updateStatus.textContent = "Erro de ligação ao servidor.";
+          updateStatus.style.color = "red";
+        }
       }
-    } catch (error) {
-      console.error('Erro ao atualizar:', error);
-      statusBox.textContent = 'Erro de ligação ao servidor.';
-      statusBox.style.color = 'red';
-    }
-  });
+    });
 
-  loadUsers();
+    initUpdate();
+  }
+
+  // ── ENCONTRAR block (read-only) ───────────────────────────
+  const findSearch  = document.getElementById("find-search");
+  const findResults = document.getElementById("find-results");
+  const findForm    = document.getElementById("find-form");
+
+  if (findSearch && findResults && findForm) {
+    const findNome       = document.getElementById("find-nome");
+    const findLogin      = document.getElementById("find-login");
+    const findIdade      = document.getElementById("find-idade");
+    const findTurmaNum   = document.getElementById("findTurmaNum");
+    const findTurmaLetra = document.getElementById("findTurmaLetra");
+    const findNumero     = document.getElementById("findNumeroTurma");
+    const findUid        = document.getElementById("findUid");
+
+    let findUsers = [];
+
+    async function initFind() {
+      try {
+        findUsers = await fetchUsers();
+        renderUserList(findUsers, findResults, fillFindForm);
+      } catch {
+        findResults.innerHTML = "<p>Erro de ligação ao servidor.</p>";
+      }
+    }
+
+    function fillFindForm(user) {
+      if (findNome)   findNome.value   = user.nome          ?? "";
+      if (findLogin)  findLogin.value  = user.login         ?? "";
+      if (findIdade)  findIdade.value  = user.idade         ?? "";
+      if (findNumero) findNumero.value = user.numero_turma  ?? "";
+      if (findUid)    findUid.value    = user.uid           ?? "";
+
+      const { num, letra } = splitTurma(user.turma);
+      if (findTurmaNum)   findTurmaNum.value   = num;
+      if (findTurmaLetra) findTurmaLetra.value = letra;
+
+      findForm.style.display = "block";
+
+      const isProfessor = user.tipo === "professor";
+      const idadeRow    = findIdade?.closest(".form-row");
+      const numeroRow   = findNumero?.closest(".form-row");
+      if (idadeRow)  idadeRow.style.display  = isProfessor ? "none" : "";
+      if (numeroRow) numeroRow.style.display = isProfessor ? "none" : "";
+    }
+
+    findSearch.addEventListener("input", () => {
+      const q = findSearch.value.toLowerCase().trim();
+      renderUserList(
+        findUsers.filter((u) => (u.nome || "").toLowerCase().includes(q)),
+        findResults,
+        fillFindForm
+      );
+    });
+
+    initFind();
+  }
+
 });

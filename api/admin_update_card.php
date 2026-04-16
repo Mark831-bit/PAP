@@ -63,13 +63,13 @@ if ($action === 'update') {
     $tipo = strtolower(trim($input['tipo'] ?? ''));
     $nome = trim($input['nome'] ?? '');
     $login = trim($input['login'] ?? '');
-    $idade = trim($input['idade'] ?? '');
+    $idade = trim((string)($input['idade'] ?? ''));
     $turma = trim($input['turma'] ?? '');
-    $numero_turma = trim($input['numero_turma'] ?? '');
+    $numero_turma = trim((string)($input['numero_turma'] ?? ''));
     $uid = trim($input['uid'] ?? '');
     $password = trim($input['password'] ?? '');
 
-    if (!$id || !$tipo || !$login) {
+    if ($id === null || $id === '' || $tipo === '' || $login === '') {
         echo json_encode([
             'success' => false,
             'message' => 'ID, tipo ou login em falta.'
@@ -77,39 +77,73 @@ if ($action === 'update') {
         exit;
     }
 
+    $mainUpdated = false;
+    $uidUpdated = false;
+    $passwordUpdated = false;
+
     if ($tipo === 'aluno') {
         $stmt = $conn->prepare("
             UPDATE alunos
-            SET `Nome` = ?, `Idade` = ?, `Turma` = ?, `Número em turma` = ?, `login` = ?
+            SET `Nome` = ?, `Idade` = ?, `Turma` = ?, `Número em turma` = ?
             WHERE `ID` = ?
         ");
 
         if (!$stmt) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Erro ao preparar UPDATE de aluno.'
+                'message' => 'Erro ao preparar update de aluno.'
             ]);
             exit;
         }
 
-        $stmt->bind_param("sisssi", $nome, $idade, $turma, $numero_turma, $login, $id);
+        $idadeInt = ($idade === '') ? 0 : (int)$idade;
+        $numeroInt = ($numero_turma === '') ? 0 : (int)$numero_turma;
+        $idInt = (int)$id;
+
+        $stmt->bind_param("sisii", $nome, $idadeInt, $turma, $numeroInt, $idInt);
+
+        if (!$stmt->execute()) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao executar update de aluno.'
+            ]);
+            $stmt->close();
+            exit;
+        }
+
+        $mainUpdated = ($stmt->affected_rows > 0);
+        $stmt->close();
 
     } elseif ($tipo === 'professor') {
         $stmt = $conn->prepare("
             UPDATE professores
-            SET `Nome` = ?, `turma` = ?, `login` = ?
+            SET `Nome` = ?, `turma` = ?
             WHERE `ID` = ?
         ");
 
         if (!$stmt) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Erro ao preparar UPDATE de professor.'
+                'message' => 'Erro ao preparar update de professor.'
             ]);
             exit;
         }
 
-        $stmt->bind_param("sssi", $nome, $turma, $login, $id);
+        $idInt = (int)$id;
+
+        $stmt->bind_param("ssi", $nome, $turma, $idInt);
+
+        if (!$stmt->execute()) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao executar update de professor.'
+            ]);
+            $stmt->close();
+            exit;
+        }
+
+        $mainUpdated = ($stmt->affected_rows > 0);
+        $stmt->close();
 
     } else {
         echo json_encode([
@@ -119,17 +153,6 @@ if ($action === 'update') {
         exit;
     }
 
-    if (!$stmt->execute()) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Erro ao atualizar tabela principal.'
-        ]);
-        $stmt->close();
-        exit;
-    }
-    $stmt->close();
-
-    // обновляем UID в login
     $stmtLogin = $conn->prepare("
         UPDATE login
         SET `UID` = ?
@@ -139,7 +162,7 @@ if ($action === 'update') {
     if (!$stmtLogin) {
         echo json_encode([
             'success' => false,
-            'message' => 'Erro ao preparar UPDATE de login/UID.'
+            'message' => 'Erro ao preparar update de UID.'
         ]);
         exit;
     }
@@ -154,9 +177,10 @@ if ($action === 'update') {
         $stmtLogin->close();
         exit;
     }
+
+    $uidUpdated = ($stmtLogin->affected_rows > 0);
     $stmtLogin->close();
 
-    // обновляем пароль только если введён новый
     if ($password !== '') {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -169,7 +193,7 @@ if ($action === 'update') {
         if (!$stmtPass) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Erro ao preparar UPDATE de password.'
+                'message' => 'Erro ao preparar update de password.'
             ]);
             exit;
         }
@@ -185,14 +209,24 @@ if ($action === 'update') {
             exit;
         }
 
+        $passwordUpdated = ($stmtPass->affected_rows > 0);
         $stmtPass->close();
     }
 
-    echo json_encode([
-        'success' => true
-    ]);
+    if ($mainUpdated || $uidUpdated || $passwordUpdated) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Dados atualizados com sucesso.'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Nenhum dado foi alterado.'
+        ]);
+    }
+
     exit;
-}
+} 
 
 echo json_encode([
     'success' => false,
