@@ -1,0 +1,928 @@
+# Capa
+
+---
+
+**AGRUPAMENTO DE ESCOLAS AEMTG**
+
+**Curso Profissional de Técnico de Gestão e Programação de Sistemas Informáticos**
+
+---
+
+## Prova de Aptidão Profissional
+
+### Website da escola com acesso através da web ou leitura RFID do cartão escolar
+
+---
+
+**Autor:** Marko Nikolaienko
+**Nº Processo:** a32498
+**Turma:** 12.º C
+
+**Orientadora:** Professora Carla de Sousa
+
+**Ano letivo:** 2025 / 2026
+
+---
+
+# Resumo
+
+O presente relatório descreve a conceção, o desenvolvimento e a implementação de um sistema *web* destinado à comunidade escolar do Agrupamento de Escolas AEMTG, cujo objetivo principal consiste em simplificar o acesso à informação e no registo de presenças dos alunos e dos professores através de uma tecnologia de identificação por radiofrequência (RFID).
+
+O sistema integra três componentes complementares: (i) uma aplicação *web*, desenvolvida em PHP e MySQL, que disponibiliza interfaces distintas consoante o tipo de utilizador (aluno, professor ou administrador); (ii) um leitor físico RFID, baseado numa placa *Arduino UNO R4 WiFi* e num módulo *MFRC522*, que transmite o UID do cartão escolar para o servidor através do protocolo HTTP; (iii) uma base de dados relacional que armazena, de forma normalizada, as informações pessoais, académicas e de assiduidade de todos os utilizadores.
+
+Do ponto de vista funcional, a plataforma permite a autenticação por via tradicional (*login* e *password*) e através da leitura do cartão, o registo automático de entradas e saídas no edifício, a marcação de testes pelos professores, a consulta de testes por parte dos alunos, a gestão de cartões por parte do administrador (incluindo o bloqueio em caso de perda) e a visualização gráfica dos dados de assiduidade através de um painel de estatísticas.
+
+A motivação para o desenvolvimento deste projeto resulta da experiência pessoal do autor, aluno estrangeiro que, à chegada à escola, se deparou com dificuldades na consulta do *website* institucional. Pretende-se, assim, contribuir com uma ferramenta acessível, moderna e integrável com os sistemas já existentes.
+
+**Palavras-chave:** PHP; MySQL; Arduino; RFID; aplicação *web*; gestão escolar; assiduidade.
+
+---
+
+# Agradecimentos
+
+À Professora Carla de Sousa, orientadora deste projeto, pelo acompanhamento, pela disponibilidade e pelas críticas construtivas ao longo de todo o ano letivo.
+
+A todos os docentes do curso Profissional de Técnico de Gestão e Programação de Sistemas Informáticos, pelas aprendizagens que me permitiram chegar a esta fase.
+
+À minha família, pelo apoio incondicional e pela paciência durante as longas horas de desenvolvimento.
+
+Aos colegas de turma, pelas discussões técnicas e pela troca de ideias que enriqueceram este trabalho.
+
+---
+
+# Índice
+
+1. Introdução
+   1.1. Contextualização
+   1.2. Motivação
+   1.3. Objetivos
+   1.4. Estrutura do documento
+2. Enquadramento Teórico
+   2.1. Identificação por Radiofrequência (RFID)
+   2.2. Arduino e o módulo MFRC522
+   2.3. Arquitetura cliente-servidor e o protocolo HTTP
+   2.4. Tecnologias *web*: HTML, CSS e JavaScript
+   2.5. Linguagem PHP
+   2.6. Base de dados MySQL
+   2.7. Padrões de autenticação e sessões
+3. Metodologia
+   3.1. Processo de escrita e desenvolvimento
+   3.2. Fases do projeto
+   3.3. Ferramentas utilizadas
+   3.4. Qualidade académica e rigor
+4. Análise de Requisitos
+   4.1. Requisitos funcionais
+   4.2. Requisitos não funcionais
+   4.3. Atores do sistema
+   4.4. Casos de uso
+5. Arquitetura do Sistema
+   5.1. Visão geral
+   5.2. Diagrama de componentes
+   5.3. Fluxo de dados
+   5.4. Organização de diretórios
+6. Base de Dados
+   6.1. Modelo conceptual
+   6.2. Modelo lógico
+   6.3. Descrição das tabelas
+   6.4. Índices e otimizações
+7. Implementação
+   7.1. Autenticação e gestão de sessões
+   7.2. Módulo RFID — firmware Arduino
+   7.3. *Endpoint* `push.php` — receção das leituras RFID
+   7.4. Painel de administração
+   7.5. Página do aluno
+   7.6. Página do professor
+   7.7. Registo de eventos (*logging*)
+8. Testes e Validação
+   8.1. Testes unitários
+   8.2. Testes de integração
+   8.3. Testes de aceitação
+   8.4. Métricas recolhidas
+9. Conclusões
+   9.1. Síntese do trabalho realizado
+   9.2. Limitações
+   9.3. Trabalho futuro
+   9.4. Balanço pessoal
+10. Bibliografia
+11. Anexos
+    Anexo A. Excertos de código
+    Anexo B. Diagrama entidade-relação
+    Anexo C. Fotografias do *hardware*
+    Anexo D. Capturas de ecrã
+
+---
+
+# Lista de Figuras
+
+- Figura 1 — Logótipo do Agrupamento de Escolas AEMTG
+- Figura 2 — Cartão escolar com *chip* RFID
+- Figura 3 — Placa Arduino UNO R4 WiFi
+- Figura 4 — Módulo MFRC522
+- Figura 5 — Diagrama de arquitetura geral do sistema
+- Figura 6 — Diagrama de sequência da leitura de um cartão
+- Figura 7 — Diagrama *Entidade-Relação* da base de dados
+- Figura 8 — Estrutura de diretórios do projeto
+- Figura 9 — Página inicial (*index*)
+- Figura 10 — Ecrã de autenticação
+- Figura 11 — Painel do administrador: separador *Charts*
+- Figura 12 — Painel do administrador: separador *Cards*
+- Figura 13 — Painel do administrador: separador *Alunos*
+- Figura 14 — Dossier individual de um aluno
+- Figura 15 — Separador *Logs* com o visualizador NDJSON
+- Figura 16 — Página do professor
+- Figura 17 — Formulário de marcação de teste
+- Figura 18 — Página do aluno com testes marcados
+- Figura 19 — Circuito eletrónico do leitor RFID
+- Figura 20 — Resultado do teste de deteção de plágio
+
+# Lista de Tabelas
+
+- Tabela 1 — Requisitos funcionais
+- Tabela 2 — Requisitos não funcionais
+- Tabela 3 — Atores do sistema
+- Tabela 4 — Casos de uso principais
+- Tabela 5 — Estrutura da tabela `login`
+- Tabela 6 — Estrutura da tabela `alunos`
+- Tabela 7 — Estrutura da tabela `professores`
+- Tabela 8 — Estrutura da tabela `presencas`
+- Tabela 9 — Estrutura da tabela `testes`
+- Tabela 10 — Índices criados
+- Tabela 11 — Plano de testes funcionais
+- Tabela 12 — Resultados dos testes
+
+# Lista de Abreviaturas e Siglas
+
+- **AEMTG** — Agrupamento de Escolas [nome completo a confirmar]
+- **AJAX** — *Asynchronous JavaScript and XML*
+- **API** — *Application Programming Interface*
+- **CRUD** — *Create, Read, Update, Delete*
+- **CSS** — *Cascading Style Sheets*
+- **ER** — *Entidade-Relação*
+- **HTML** — *HyperText Markup Language*
+- **HTTP** — *HyperText Transfer Protocol*
+- **IDE** — *Integrated Development Environment*
+- **JSON** — *JavaScript Object Notation*
+- **MVC** — *Model-View-Controller*
+- **MySQL** — *My Structured Query Language*
+- **NDJSON** — *Newline-Delimited JSON*
+- **PAP** — Prova de Aptidão Profissional
+- **PHP** — *PHP: Hypertext Preprocessor*
+- **RFID** — *Radio-Frequency IDentification*
+- **SDG** — Specification Design Guide (Documento de Especificação Técnica)
+- **SGBD** — Sistema de Gestão de Bases de Dados
+- **SPA** — *Single-Page Application*
+- **SQL** — *Structured Query Language*
+- **TGPSI** — Técnico de Gestão e Programação de Sistemas Informáticos
+- **UID** — *Unique IDentifier*
+- **URL** — *Uniform Resource Locator*
+- **WAMP** — *Windows, Apache, MySQL, PHP*
+
+---
+
+# 1. Introdução
+
+## 1.1. Contextualização
+
+O presente relatório surge no âmbito da Prova de Aptidão Profissional (PAP), componente final do Curso Profissional de Técnico de Gestão e Programação de Sistemas Informáticos, ministrado no Agrupamento de Escolas AEMTG. A PAP constitui um momento de síntese em que o aluno aplica, de forma integrada, as competências desenvolvidas ao longo dos três anos do curso — desde a programação estruturada e orientada a objetos, passando pelas bases de dados relacionais, sistemas operativos, redes e arquitetura de computadores, até ao desenvolvimento *web* e aos sistemas embebidos.
+
+No contexto escolar atual, as instituições de ensino recorrem a um conjunto diversificado de plataformas digitais (SIGE, Inovar, Google Classroom, *sites* institucionais) para gerir a informação académica e comunicar com a comunidade. A proliferação destas ferramentas, embora globalmente positiva, gera frequentemente uma experiência fragmentada para o utilizador, sobretudo para alunos recém-chegados que ainda não dominam a língua portuguesa ou a estrutura interna do agrupamento.
+
+Simultaneamente, a gestão da assiduidade — tradicionalmente assente em registos manuais por parte dos docentes — apresenta margens de erro e consome tempo letivo que poderia ser utilizado para fins pedagógicos. A tecnologia de identificação por radiofrequência (RFID), amplamente utilizada em sistemas de controlo de acessos empresariais, apresenta-se como uma solução adequada para automatizar o processo de registo de presenças de forma rápida, fiável e com um custo reduzido.
+
+É neste cruzamento — entre a necessidade de simplificar o acesso à informação escolar e o potencial das tecnologias RFID — que nasce o projeto **Website da escola com acesso através da web ou leitura RFID do cartão escolar**.
+
+## 1.2. Motivação
+
+A motivação para o desenvolvimento deste projeto tem uma natureza fortemente pessoal. Na qualidade de aluno estrangeiro que ingressou no Agrupamento de Escolas AEMTG, o autor viveu, em primeira mão, as dificuldades de integração associadas à barreira linguística e ao desconhecimento da estrutura institucional. Em particular, a consulta do *website* escolar — concebido com uma lógica tradicional, pouco orientada à experiência do utilizador estrangeiro — revelou-se um processo demorado e, por vezes, frustrante.
+
+A partir desta experiência, emergiram três convicções que moldaram a proposta:
+
+1. **Uma plataforma escolar deve ser acessível a todos os seus utilizadores**, independentemente da sua familiaridade prévia com a instituição ou com a língua. A clareza visual, a consistência da navegação e a presença de elementos gráficos autoexplicativos são requisitos que devem ser colocados no centro do processo de conceção.
+
+2. **A automatização dos processos administrativos — como o controlo de presenças — liberta tempo letivo**, reduz erros humanos e permite a produção de dados agregados que podem ser usados para identificar, por exemplo, padrões de absentismo ou horas de maior afluência ao edifício escolar.
+
+3. **Os conteúdos aprendidos ao longo do curso devem ser consolidados num projeto integrador**, que combine as várias disciplinas e que permita, no momento da PAP, demonstrar de forma concreta a aquisição das competências técnicas.
+
+Paralelamente à motivação pessoal, acresce a dimensão de contributo para a comunidade: um sistema aberto, desenvolvido na própria escola, pode ser mantido, auditado e evoluído por futuros alunos do curso, criando uma tradição de continuidade técnica que raramente existe em ferramentas adquiridas externamente.
+
+## 1.3. Objetivos
+
+O projeto estabeleceu, desde a sua fase inicial, um conjunto de objetivos claros, dos quais se destacam os seguintes:
+
+**Objetivo geral:**
+
+Desenvolver uma plataforma *web* completa, acompanhada de um leitor físico de cartões RFID, que permita à comunidade escolar aceder à informação institucional e registar automaticamente a assiduidade, dentro dos recursos tecnológicos do Agrupamento.
+
+**Objetivos específicos:**
+
+- **OE1.** Criar uma aplicação *web*, responsiva e multi-perfil, que distinga três tipos de utilizador: aluno, professor e administrador, disponibilizando a cada um deles as funcionalidades adequadas.
+- **OE2.** Implementar um mecanismo de autenticação duplo — por via tradicional (*login* / *password*) e por via da leitura do cartão escolar RFID —, respeitando princípios básicos de segurança.
+- **OE3.** Desenvolver o componente físico de leitura RFID, recorrendo a uma placa Arduino UNO R4 WiFi e a um módulo MFRC522, capaz de comunicar com o servidor *web* por HTTP.
+- **OE4.** Projetar uma base de dados relacional normalizada que armazene, de forma coerente, os utilizadores, os cartões, o histórico de presenças e as atividades pedagógicas.
+- **OE5.** Criar um painel de administração que permita a gestão completa dos utilizadores e dos cartões, bem como a visualização de estatísticas agregadas.
+- **OE6.** Implementar uma funcionalidade pedagógica demonstrativa (marcação de testes por parte do professor e consulta pelos alunos) que evidencie a capacidade do sistema de suportar extensões futuras.
+- **OE7.** Registar eventos relevantes (*logging*) num formato estruturado, que permita auditar o funcionamento do sistema e diagnosticar incidentes.
+- **OE8.** Garantir que a interface é intuitiva, coerente visualmente e adequada a utilizadores sem formação técnica.
+
+## 1.4. Estrutura do documento
+
+O presente relatório encontra-se organizado em onze capítulos.
+
+O **Capítulo 1** — a presente introdução — contextualiza o projeto, apresenta a motivação e enuncia os objetivos.
+
+O **Capítulo 2** — *Enquadramento Teórico* — revê os fundamentos tecnológicos do trabalho: a tecnologia RFID, a arquitetura Arduino, o modelo cliente-servidor, a linguagem PHP, a base de dados MySQL e os princípios de autenticação.
+
+O **Capítulo 3** — *Metodologia* — descreve a abordagem adotada para a condução do projeto, as suas fases, as ferramentas utilizadas e os critérios de qualidade académica observados.
+
+O **Capítulo 4** — *Análise de Requisitos* — formaliza as funcionalidades a implementar, distinguindo os requisitos funcionais dos não funcionais, identificando os atores e descrevendo os casos de uso mais relevantes.
+
+O **Capítulo 5** — *Arquitetura do Sistema* — apresenta a visão global da solução, recorrendo a diagramas que ilustram os componentes, os fluxos de dados e a organização dos diretórios do código-fonte.
+
+O **Capítulo 6** — *Base de Dados* — descreve o modelo de dados implementado, justifica as opções de normalização e apresenta o esquema ER.
+
+O **Capítulo 7** — *Implementação* — é o mais extenso do documento e descreve, módulo a módulo, como cada funcionalidade foi construída, apresentando excertos do código-fonte considerados representativos.
+
+O **Capítulo 8** — *Testes e Validação* — descreve as estratégias de teste adotadas e os respetivos resultados.
+
+O **Capítulo 9** — *Conclusões* — sintetiza os resultados obtidos, identifica limitações e sugere linhas de trabalho futuro.
+
+Os últimos dois capítulos contêm a **Bibliografia** (Capítulo 10) e os **Anexos** (Capítulo 11), estes últimos com excertos relevantes do código-fonte, capturas de ecrã da aplicação e o esquema completo da base de dados.
+
+---
+
+# 2. Enquadramento Teórico
+
+O presente capítulo visa enquadrar, do ponto de vista teórico e tecnológico, os principais conceitos e tecnologias que estão na base do projeto desenvolvido. Como previamente definido no documento SDG (*Specification Design Guide*), o sistema apoia-se num conjunto de pilares tecnológicos heterogéneos — hardware embebido, protocolos de comunicação, linguagens de programação do lado do servidor e do lado do cliente, bem como um sistema de gestão de bases de dados relacionais. Cada uma destas camadas obedece a princípios próprios e exige uma compreensão mínima dos seus fundamentos para que as decisões de arquitetura sejam devidamente justificadas.
+
+A abordagem adotada nas secções seguintes é, deliberadamente, orientada ao contexto do projeto: em vez de apresentar de forma exaustiva a totalidade das características de cada tecnologia, privilegia-se a descrição dos elementos que foram efetivamente mobilizados durante a implementação, tal como se encontra previsto no SDG, nas secções 2 (*Fundamentação Teórica*) e 3 (*Especificação Técnica*).
+
+## 2.1. Identificação por Radiofrequência (RFID)
+
+A *Radio-Frequency IDentification*, vulgarmente designada pela sigla RFID, é uma tecnologia de identificação automática que recorre a ondas eletromagnéticas para proceder à leitura, sem contacto direto e a curta distância, de um identificador único armazenado num transponder — comummente designado por *tag* — através de um dispositivo designado por leitor [1]. Esta tecnologia, cujas primeiras aplicações militares remontam à Segunda Guerra Mundial (no âmbito dos sistemas *Identification, Friend or Foe* utilizados pela *Royal Air Force*), conheceu uma enorme difusão civil a partir da última década do século XX, sendo hoje transversal a áreas tão distintas como a logística de armazéns, o controlo de acessos, a bilhética de transportes públicos e os sistemas de pagamento por aproximação.
+
+Do ponto de vista da sua arquitetura, um sistema RFID é composto por três elementos fundamentais: (i) o transponder, ou *tag*, que armazena a informação a transmitir; (ii) o leitor, dotado de uma antena emissora-recetora; (iii) o sistema informático que processa os dados lidos. As *tags* podem ser passivas — alimentadas pela própria energia do campo eletromagnético emitido pelo leitor — ou ativas, dotadas de fonte de alimentação autónoma. No contexto do presente projeto, utilizam-se exclusivamente *tags* passivas, correspondentes aos cartões escolares atribuídos aos alunos e professores do agrupamento.
+
+As frequências de operação dos sistemas RFID variam consoante o âmbito de aplicação: bandas LF (*Low Frequency*, 125–134 kHz), HF (*High Frequency*, 13,56 MHz) e UHF (*Ultra High Frequency*, 860–960 MHz). Os cartões utilizados no presente projeto operam na banda HF, a 13,56 MHz, em conformidade com a norma ISO/IEC 14443 (tipo A) [3], o mesmo padrão utilizado, por exemplo, nos passes de transportes públicos portugueses e nos cartões de cidadão. A escolha desta banda deve-se ao equilíbrio entre alcance de leitura — tipicamente entre 1 e 10 centímetros, adequado ao cenário de aproximação voluntária do utilizador ao leitor — e a robustez face a interferências ambientais, dois critérios explicitamente referidos no SDG, secção 3.2 (*Requisitos Funcionais RFID*).
+
+Do ponto de vista funcional, cada cartão possui um identificador único (UID), inscrito de fábrica e imutável, que constitui a chave primária utilizada pelo sistema para associar o cartão a um registo na base de dados. O UID, por norma expresso em formato hexadecimal com quatro a dez bytes, é a única informação que o sistema lê do cartão — todos os restantes dados (nome, turma, fotografia, histórico) residem exclusivamente no servidor, pelo que a perda do cartão não implica a exposição de informação pessoal sensível, um aspeto relevante do ponto de vista da privacidade e do cumprimento do Regulamento Geral de Proteção de Dados (RGPD).
+
+## 2.2. Arduino e o módulo MFRC522
+
+A plataforma Arduino, criada em 2005 em Itália no Interaction Design Institute Ivrea, constitui uma solução de hardware aberto que tem vindo a democratizar o acesso à prototipagem eletrónica [7][10]. As suas placas, baseadas em microcontroladores de diferentes fabricantes, são acompanhadas de um ambiente de desenvolvimento integrado (IDE) próprio, que abstrai grande parte da complexidade associada à programação de microcontroladores em linguagens de baixo nível. A comunidade global em torno do Arduino produziu, ao longo das últimas duas décadas, um volumoso conjunto de bibliotecas que cobrem praticamente todas as interações possíveis com sensores, atuadores e módulos de comunicação.
+
+No presente projeto optou-se pela utilização da placa **Arduino UNO R4 WiFi**, lançada em 2023 como sucessora da clássica UNO R3. As diferenças relativamente ao seu antecessor, que justificam a opção, são as seguintes:
+
+- **Microcontrolador de 32 bits**: o Renesas RA4M1, a 48 MHz, em substituição do ATmega328P a 16 MHz, permitindo velocidades de processamento e gestão de memória substancialmente superiores.
+- **Conectividade Wi-Fi nativa**: o módulo ESP32-S3, integrado na placa, permite a ligação à rede sem fios sem necessidade de *shields* adicionais, reduzindo significativamente a complexidade do cabelamento e o custo total do sistema.
+- **Memória alargada**: 32 KB de SRAM e 256 KB de memória flash, valores que aliviam as restrições típicas da plataforma e permitem, por exemplo, armazenar certificados TLS e construir *payloads* HTTP complexos.
+- **Alimentação por USB-C**, mais prática e atual relativamente à ligação Mini-B da geração anterior.
+
+Para a leitura dos cartões RFID, foi selecionado o módulo **MFRC522**, fabricado pela NXP Semiconductors [2], que constitui um dos leitores RFID de baixo custo mais difundidos no mercado de prototipagem. Opera na já referida frequência de 13,56 MHz, suporta integralmente o protocolo ISO/IEC 14443 A e comunica com o microcontrolador através do protocolo SPI (*Serial Peripheral Interface*). As razões que motivaram a sua escolha, para além do critério evidente de compatibilidade com os cartões escolares, prendem-se com a sua disponibilidade em território nacional, o baixo custo unitário (aproximadamente 3€ por módulo) e a existência de bibliotecas Arduino maduras e bem documentadas, nomeadamente a biblioteca `MFRC522` de Miguel Balboa, amplamente utilizada pela comunidade e referenciada em inúmera bibliografia académica de acesso aberto.
+
+O circuito concreto utilizado é o previsto no SDG (secção 3.2.1, *Terminal de Presença*), e compreende as seguintes ligações entre o MFRC522 e a UNO R4: o pino *SDA/SS* ao pino digital 10, o pino *SCK* ao pino 13, o pino *MOSI* ao pino 11, o pino *MISO* ao pino 12, o pino *RST* ao pino 9, o pino *GND* a qualquer uma das referências de massa da placa e o pino *3.3V* à saída de 3,3 V da Arduino — importa sublinhar este último aspeto, uma vez que o MFRC522 não tolera os 5 V da linha principal de alimentação da placa, pelo que a ligação errada do pino de alimentação se traduz, na prática, na destruição imediata do módulo.
+
+Adicionalmente ao módulo RFID, o circuito integra **dois díodos emissores de luz (LED)** destinados a fornecer *feedback* visual imediato ao utilizador no momento da leitura. Um LED verde, ligado ao pino digital 7 através de uma resistência de 220 Ω, acende durante dois segundos sempre que a leitura é bem-sucedida e o servidor responde com `ok: true`, correspondendo a um registo de presença válido. Um LED vermelho, ligado ao pino digital 6 através de uma resistência de igual valor, acende quando ocorre uma de três situações anómalas: (i) o UID lido não se encontra registado na base de dados (resposta 404); (ii) o cartão correspondente foi bloqueado pelo administrador (resposta 401); (iii) não foi possível estabelecer comunicação com o servidor (falha de rede). Esta sinalização dupla, alinhada com os objetivos definidos no SDG na secção 3.2.1 (*Terminal de Presença*), tem como objetivo providenciar ao utilizador uma indicação imediata do resultado da operação, sem necessidade de consultar o ecrã do servidor ou o painel de administração, tornando o sistema verdadeiramente autónomo em cenários de utilização corrente — por exemplo, na entrada do edifício escolar durante os períodos de maior afluência.
+
+A leitura propriamente dita é orquestrada pelo *firmware* desenvolvido em linguagem C/C++ no IDE Arduino. Em cada iteração do *loop* principal, o microcontrolador interroga o módulo MFRC522 para verificar se existe algum cartão presente no seu campo de ação. Em caso afirmativo, o UID é extraído em formato hexadecimal, convertido para uma *string* de texto, e posteriormente enviado para o servidor *web* através de um pedido HTTP POST, conforme descrito na secção 2.3 do presente relatório.
+
+## 2.3. Arquitetura cliente-servidor e o protocolo HTTP
+
+O paradigma **cliente-servidor** constitui, desde a década de 1980, o modelo arquitetural dominante para a construção de sistemas distribuídos. Neste modelo, as responsabilidades são repartidas entre duas entidades distintas: o **cliente**, que formula pedidos, e o **servidor**, que recebe esses pedidos, os processa e responde. A separação de responsabilidades tem implicações profundas, desde a organização do código até à escalabilidade do sistema, passando pela possibilidade de evoluir de forma independente as componentes de apresentação e de lógica de negócio.
+
+No presente projeto existem, na realidade, **dois tipos distintos de cliente** que comunicam com o mesmo servidor: por um lado, os *browsers* dos utilizadores humanos, que acedem às páginas *web* através de interfaces gráficas; por outro, o leitor físico Arduino, que se comporta como cliente HTTP automatizado, enviando pedidos POST sem interação humana direta. Esta heterogeneidade é importante porque obriga o servidor a fornecer interfaces programáticas (API) suficientemente genéricas para lidar com ambos os tipos de cliente — aspeto que teve um peso significativo nas decisões de desenho, nomeadamente na adoção de respostas em formato JSON nos *endpoints* de API.
+
+O protocolo **HyperText Transfer Protocol (HTTP)**, descrito pela primeira vez em 1991 por Tim Berners-Lee e atualmente normalizado pelos documentos RFC 7230–7235 [8], constitui o veículo de comunicação entre clientes e servidor. Na sua versão mais recente, o HTTP/2 introduz mecanismos de multiplexagem e compressão de cabeçalhos que melhoram significativamente a eficiência da transmissão. Contudo, no contexto do presente projeto — onde o tráfego é relativamente modesto e local — recorreu-se à versão HTTP/1.1, plenamente suportada pelo servidor Apache do pacote WAMP.
+
+A comunicação HTTP estrutura-se em torno de **métodos** (*verbos*) que exprimem a intenção do pedido: `GET` para consultar um recurso, `POST` para criar ou enviar dados, `PUT` para atualizar integralmente um recurso, `DELETE` para o remover, entre outros. No presente projeto, os *endpoints* utilizam maioritariamente `GET` (leituras) e `POST` (operações que modificam o estado do sistema), seguindo uma abordagem *RESTful* pragmática, não estritamente ortodoxa mas suficiente para os objetivos propostos.
+
+Os **códigos de estado** (*status codes*) são outra dimensão essencial do protocolo: `200 OK` indica sucesso, `400 Bad Request` sinaliza um erro do lado do cliente (campos em falta, por exemplo), `401 Unauthorized` traduz uma falha de autenticação, `403 Forbidden` aponta para falta de permissões, `404 Not Found` para um recurso inexistente e `500 Internal Server Error` para falhas no processamento pelo servidor. O projeto tira partido deste vocabulário padronizado, devolvendo códigos apropriados em cada situação e permitindo que o leitor Arduino reaja de forma diferenciada consoante o tipo de resposta recebida — como descrito na secção anterior a propósito do LED vermelho.
+
+## 2.4. Tecnologias *web*: HTML, CSS e JavaScript
+
+A construção de interfaces *web* modernas assenta na tríade clássica **HTML, CSS e JavaScript**, cada uma com um papel bem definido: o HTML (*HyperText Markup Language*) descreve a estrutura semântica dos conteúdos; o CSS (*Cascading Style Sheets*) controla a apresentação visual; o JavaScript trata do comportamento dinâmico e interativo.
+
+O **HTML5**, estabilizado em 2014 pelo W3C, trouxe ao ecossistema um conjunto de elementos semânticos (`<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<footer>`) que permitem expressar de forma explícita a natureza das diferentes partes de um documento, com benefícios claros ao nível da acessibilidade, da otimização para motores de busca (SEO) e da manutenção do código. No presente projeto, todas as páginas adotam esta estrutura semântica, utilizando `<header class="topbar">` para a barra de navegação superior, `<main class="page-content">` para a área principal e `<section>` para os blocos funcionais internos.
+
+O **CSS3** introduziu mecanismos de layout modernos, dos quais se destacam o *Flexbox* e o *Grid*, que substituíram com vantagem as anteriores técnicas baseadas em *float* e em posicionamento absoluto. O projeto recorre extensivamente ao *Flexbox* para organizar barras de navegação, linhas de formulários e listas de cartões, e ao *Grid* para dispor as estatísticas em grelha responsiva, que adapta automaticamente o número de colunas em função da largura do ecrã. Os gráficos estatísticos foram implementados com recurso à biblioteca *Chart.js* [9], amplamente utilizada em aplicações *web* modernas. A paleta cromática, definida por variáveis consistentes (azul `#3b82f6` para os elementos ativos, verde `#10b981` para confirmações, vermelho `#ef4444` para alertas, cinzentos para elementos neutros), foi escolhida com base em princípios de acessibilidade visual, cumprindo os requisitos mínimos de contraste WCAG 2.1 AA, em linha com os requisitos não funcionais de usabilidade definidos no SDG, secção 3.3.2.
+
+O **JavaScript**, linguagem dinâmica e interpretada, evoluiu profundamente desde a sua criação em 1995 por Brendan Eich na Netscape. As versões mais recentes, designadas genericamente por *ECMAScript 2015+* (ou ES6+), disponibilizam construções sintáticas modernas como *arrow functions*, *template literals*, desestruturação, módulos, `async/await`, `fetch` API, entre outras. Todas estas construções são utilizadas no projeto, o que permite obter um código compacto e expressivo, sem recorrer a bibliotecas externas pesadas — como o jQuery — cuja inclusão é, nos dias correntes, largamente dispensável.
+
+A ausência de frameworks modernos (React, Vue ou Angular) foi uma decisão deliberada, coerente com a arquitetura apresentada no SDG, secção 4 (*Visão Arquitetural Geral*): dada a dimensão do projeto, a curva de aprendizagem adicional e o peso introduzido por estas bibliotecas não se justificavam. Optou-se por *vanilla JavaScript*, que cumpre plenamente os requisitos da aplicação e mantém o código acessível a qualquer aluno do curso que venha a dar continuidade ao trabalho.
+
+## 2.5. Linguagem PHP
+
+O **PHP** (*PHP: Hypertext Preprocessor*) é uma linguagem de programação interpretada, orientada ao desenvolvimento *web* do lado do servidor, criada em 1994 por Rasmus Lerdorf [4]. Estima-se atualmente que cerca de 76% dos *sites* da *World Wide Web* tenham o PHP como linguagem do *backend*, incluindo-se nesta percentagem projetos de grande escala como a Wikipédia, o Facebook (embora sob a forma modificada de HHVM) e o ecossistema WordPress, que por si só suporta mais de 40% dos *sites* mundiais.
+
+O projeto foi desenvolvido na versão **PHP 8.3**, disponibilizada em novembro de 2023, que introduz funcionalidades modernas relativamente à linguagem tradicional, nomeadamente: tipagem estrita opcional (*strict types*), tipos de retorno nativos, *readonly classes*, *enums* e um sistema de *attributes* para metadados. Apesar de estas funcionalidades modernas estarem disponíveis, optou-se — no contexto pedagógico do projeto — por um estilo predominantemente procedural, próximo daquele que é lecionado nas aulas do curso, com vista a maximizar a legibilidade do código para quem aceda ao repositório sem formação avançada em engenharia de software.
+
+No que respeita à interação com a base de dados, o projeto utiliza duas interfaces complementares, consoante o módulo: a extensão **MySQLi** (procedural) nos *scripts* que privilegiam clareza e simplicidade, e **PDO** (*PHP Data Objects*) em situações que requerem transações explícitas ou abstração relativamente ao motor de base de dados. Ambas as interfaces recorrem sistematicamente a *prepared statements* — parametrização de consultas — que eliminam a possibilidade de **injeção de SQL**, considerada pela comunidade *OWASP* [6] como uma das vulnerabilidades mais críticas em aplicações *web*. Este cuidado com a segurança, explícito em todas as consultas SQL do projeto, está alinhado com os requisitos não funcionais de segurança descritos no SDG, secção 3.3.3.
+
+## 2.6. Base de dados MySQL
+
+O **MySQL** [5], sistema de gestão de bases de dados relacionais de código aberto originalmente desenvolvido pela empresa sueca MySQL AB e atualmente propriedade da Oracle Corporation, é frequentemente descrito como a *“base de dados mais popular do mundo”* — afirmação que, apesar de comercial, reflete uma quota de mercado particularmente robusta no segmento *web*. Implementa o modelo relacional proposto por Edgar F. Codd em 1970 e utiliza como linguagem de consulta o **SQL** (*Structured Query Language*), padronizado pela ANSI em 1986.
+
+O projeto tira partido do motor de armazenamento **InnoDB**, que oferece suporte a **transações ACID** (Atomicidade, Consistência, Isolamento, Durabilidade), chaves estrangeiras e bloqueio ao nível do registo. Estas características revelam-se decisivas, por exemplo, na operação de eliminação de um aluno: o registo precisa de ser apagado de três tabelas distintas (`login`, `alunos`, `presencas`) de forma atómica, pelo que a operação foi encapsulada numa transação — se alguma das três instruções `DELETE` falhar, o conjunto inteiro é revertido (`ROLLBACK`), mantendo a base de dados num estado consistente.
+
+As tabelas foram desenhadas seguindo princípios de **normalização** até à terceira forma normal (3FN), com redução das redundâncias e separação adequada das entidades. Uma exceção consciente, relativa à tabela `presencas` descrita no SDG, secção 5.4, é a **denormalização deliberada** do nome do utilizador: em vez de se recorrer a uma *join* com `alunos` ou `professores` sempre que se pretende listar o histórico de presenças, o nome é replicado na própria entrada. Esta decisão beneficia a simplicidade das consultas e a velocidade de leitura, ao custo de ter de atualizar duas localizações quando o nome muda — algo que, no contexto escolar, ocorre com frequência negligenciável.
+
+Foram ainda definidos **índices** estratégicos, nomeadamente um índice sobre a coluna `data` da tabela `presencas` (para otimizar a agregação diária que alimenta o gráfico de barras do painel administrativo) e um índice sobre a coluna `login` (para acelerar a consulta do histórico individual). A presença destes índices, justificada na secção 6.4, revelou-se fundamental no desempenho do sistema assim que a tabela cresceu para um número realista de registos.
+
+## 2.7. Padrões de autenticação e sessões
+
+Por último, mas não menos importante, a autenticação e a gestão de sessões. O PHP disponibiliza, desde a sua primeira versão, um mecanismo de sessões assente no armazenamento de um identificador único num *cookie* do lado do cliente (`PHPSESSID`) e no mapeamento desse identificador para um conjunto de variáveis persistidas em ficheiros do lado do servidor. Este modelo, apesar da sua simplicidade aparente, é robusto o suficiente para a grande maioria dos cenários *web*, desde que acompanhado de boas práticas adicionais: regeneração periódica do identificador para evitar *session fixation*, expiração ativa por inatividade (no presente projeto fixada em 30 minutos), e transmissão exclusiva por canais cifrados em ambiente de produção (flag `Secure` nos *cookies*).
+
+O armazenamento das palavras-passe recorre à função `password_hash()` nativa do PHP, que utiliza por omissão o algoritmo **bcrypt** com um custo configurável (valor 10 por omissão, o que corresponde a 2¹⁰ iterações internas), em conformidade com as recomendações OWASP para armazenamento seguro de credenciais [6]. A verificação é feita com `password_verify()`, que reconhece internamente o algoritmo utilizado e executa uma comparação em tempo constante, resistente a ataques de canal lateral baseados em temporização. Nenhuma palavra-passe é, em momento algum, armazenada em texto simples — uma garantia essencial face a eventuais fugas da base de dados.
+
+A autenticação por cartão RFID, descrita em pormenor no Capítulo 7, complementa a autenticação tradicional sem, no entanto, a substituir: o cartão identifica o utilizador para efeitos de registo de presença, mas o acesso aos perfis pessoais e às áreas restritas da plataforma continua a exigir, por segurança, a introdução das credenciais clássicas. Esta distinção foi um dos pontos mais discutidos durante a fase de conceção, e ficou refletida no SDG, na secção 3.3.3 (*Segurança*), sob a designação de *autenticação dupla*.
+
+---
+
+# 3. Metodologia
+
+A realização deste projeto, pela sua natureza multidisciplinar — envolvendo simultaneamente desenvolvimento de *software* *web*, programação de *hardware* embebido e modelação de uma base de dados relacional — exigiu uma abordagem metodológica estruturada. Não seria viável avançar em todas as frentes em paralelo, nem seria razoável esgotar uma componente antes de iniciar a seguinte. Adotou-se, por esse motivo, uma abordagem **iterativa e incremental**, inspirada nos princípios das metodologias ágeis e adequada às condições reais de um projeto académico conduzido por um único autor.
+
+## 3.1. Processo de escrita e desenvolvimento
+
+Em conformidade com as boas práticas académicas aplicáveis à redação de teses de PAP, o trabalho foi conduzido segundo quatro princípios: (i) **planeamento** — estabelecimento, logo no início do ano letivo, de um cronograma realista em que as fases do projeto foram distribuídas mensalmente; (ii) **revisão contínua** — releitura e melhoria periódica do código e do próprio relatório, à medida que novas decisões eram tomadas; (iii) ***feedback*** — entrega de versões preliminares à orientadora, Professora Carla de Sousa, para análise e sugestão de melhorias; (iv) **revisão final** — verificação de gramática, formatação e conformidade com os regulamentos internos da escola antes da entrega.
+
+## 3.2. Fases do projeto
+
+O desenvolvimento foi estruturado em cinco fases, parcialmente sobrepostas no tempo:
+
+1. **Levantamento e pesquisa** (setembro–outubro 2025): estudo da tecnologia RFID [1][2][3], análise de sistemas similares existentes, leitura da documentação oficial do Arduino [10] e do PHP [4].
+2. **Modelação e prototipagem** (outubro–novembro 2025): definição do modelo de dados, desenho do diagrama entidade-relação, criação do primeiro protótipo funcional do leitor RFID em *breadboard*.
+3. **Implementação da aplicação *web*** (novembro 2025–fevereiro 2026): construção incremental das páginas (*login*, aluno, professor, administrador), dos *endpoints* PHP e da integração com a base de dados.
+4. **Integração hardware/software** (fevereiro–março 2026): ligação efetiva do Arduino ao servidor via HTTP, adição dos dois *LEDs* de estado, afinação dos tempos de resposta.
+5. **Testes, validação e redação** (março–abril 2026): testes funcionais, de integração e de aceitação; escrita do presente relatório.
+
+## 3.3. Ferramentas utilizadas
+
+Ao longo do desenvolvimento foram utilizadas as seguintes ferramentas:
+
+| Ferramenta | Finalidade |
+|------------|-----------|
+| **Visual Studio Code** | Editor de código principal (PHP, JavaScript, HTML, CSS). |
+| **Arduino IDE** | Desenvolvimento e *upload* do *firmware* para o UNO R4 WiFi. |
+| **WAMP 64** | Servidor *web* local com Apache, PHP 8.3 e MySQL. |
+| **phpMyAdmin** | Administração da base de dados durante o desenvolvimento. |
+| **Git** | Controlo de versões, permitindo *rollback* seguro de alterações experimentais. |
+| **MySQL Workbench** | Modelação visual do diagrama entidade-relação. |
+| **Postman** | Teste isolado dos *endpoints* HTTP antes da integração com o Arduino. |
+
+## 3.4. Qualidade académica e rigor
+
+Foram observados, ao longo de toda a redação, os pilares clássicos da qualidade académica: **originalidade**, no sentido em que a combinação Arduino + RFID + painel de administração com sub-separadores e bloqueio de cartão constitui um contributo próprio, ainda que assente em componentes conhecidos; **clareza e objetividade**, através de frases concisas e eliminação de repetições desnecessárias; **coerência lógica**, com cada capítulo a preparar o seguinte; **rigor científico**, através da fundamentação teórica em bibliografia consolidada ([1]–[10]); e **prevenção de plágio**, por via da citação explícita de todas as fontes consultadas.
+
+---
+
+# 4. Análise de Requisitos
+
+A análise de requisitos constitui uma das etapas mais críticas de qualquer projeto de engenharia informática. É nesta fase que se identificam, documentam e hierarquizam as funcionalidades que o sistema deve implementar, bem como as restrições e qualidades que o devem caracterizar. O presente capítulo apresenta, de forma sistematizada, os requisitos que foram definidos para o projeto — em estreita articulação com o documento SDG, que constituiu a referência central ao longo de toda a fase de desenvolvimento.
+
+A metodologia adotada para o levantamento dos requisitos baseou-se, por um lado, em sessões informais de diálogo com a orientadora, professora Carla de Sousa, e, por outro, na própria experiência do autor enquanto utilizador das ferramentas digitais existentes no agrupamento. Não foi aplicada uma metodologia ágil formal (*Scrum* ou *Kanban*), atendendo à dimensão pessoal do projeto, mas foram mobilizados alguns dos seus princípios — em particular a ideia de iteração curta, em que cada módulo era implementado, testado e ajustado antes de se avançar para o seguinte.
+
+## 4.1. Requisitos funcionais
+
+Os requisitos funcionais descrevem aquilo que o sistema deve ser capaz de fazer. Foram organizados por módulo e numerados sequencialmente, seguindo a nomenclatura já utilizada no SDG, capítulo 3. A tabela seguinte sintetiza os requisitos funcionais considerados no projeto.
+
+| Código | Descrição | Prioridade |
+|--------|-----------|-----------|
+| RF-01 | O sistema deve permitir a autenticação de utilizadores através de *login* e palavra-passe. | Alta |
+| RF-02 | O sistema deve permitir a autenticação / identificação de utilizadores através da leitura do cartão escolar RFID. | Alta |
+| RF-03 | O sistema deve redirecionar cada utilizador para a sua página específica, em função do seu papel (aluno, professor ou administrador). | Alta |
+| RF-04 | O leitor Arduino deve transmitir o UID lido para o servidor *web* através de um pedido HTTP POST. | Alta |
+| RF-05 | O servidor deve registar, de forma automática, cada leitura válida na tabela de presenças, alternando entre os estados *entrada* e *saída*. | Alta |
+| RF-06 | O leitor Arduino deve fornecer *feedback* visual imediato ao utilizador através de dois LED (verde — sucesso; vermelho — erro). | Média |
+| RF-07 | O administrador deve poder adicionar novos alunos e professores à plataforma. | Alta |
+| RF-08 | O administrador deve poder atualizar os dados pessoais e académicos dos utilizadores. | Alta |
+| RF-09 | O administrador deve poder consultar, em modo apenas-leitura, os dados completos de qualquer utilizador. | Média |
+| RF-10 | O administrador deve poder bloquear um cartão em caso de perda, sem apagar o utilizador associado. | Alta |
+| RF-11 | O administrador deve poder eliminar definitivamente um utilizador, com confirmação prévia. | Média |
+| RF-12 | O sistema deve disponibilizar um painel com estatísticas agregadas de presenças, incluindo um gráfico dos últimos sete dias. | Média |
+| RF-13 | O sistema deve listar os últimos registos de presenças, identificando o utilizador, a data, a hora e o tipo (entrada ou saída). | Média |
+| RF-14 | O administrador deve poder consultar os registos de *log* do sistema, com filtros por nível e por termo de pesquisa. | Baixa |
+| RF-15 | O professor deve poder marcar testes para as suas turmas, indicando título, descrição, data e turma-alvo. | Alta |
+| RF-16 | O professor deve poder consultar a lista dos seus alunos, filtrada por turma e por estado de presença. | Média |
+| RF-17 | O aluno deve poder consultar os testes marcados para a sua turma, separados em *próximos* e *passados*. | Alta |
+| RF-18 | O sistema deve registar, num formato estruturado (NDJSON), todos os eventos relevantes: autenticações, leituras RFID, operações administrativas e falhas. | Baixa |
+| RF-19 | O formulário de adicionar/atualizar utilizador deve incluir um mecanismo de leitura direta do UID através do próprio leitor RFID (*scan on demand*). | Média |
+| RF-20 | O sistema deve permitir a gestão centralizada de notícias escolares visíveis aos utilizadores, em articulação com a tabela `noticias` prevista no SDG, secção 5.5. | Baixa |
+
+A maioria dos requisitos de prioridade *Alta* e *Média* foi integralmente implementada na presente versão do sistema. Os restantes, de prioridade *Baixa*, encontram-se em estado operacional, sujeitos apenas a afinações finais de interface e a validações adicionais, como se detalha nos capítulos seguintes.
+
+## 4.2. Requisitos não funcionais
+
+Os requisitos não funcionais (RNF) descrevem propriedades transversais que o sistema deve exibir — desempenho, segurança, usabilidade, portabilidade — independentemente das funcionalidades concretas. A tabela seguinte agrupa os RNF considerados relevantes para o projeto, em correspondência direta com a secção 4 do SDG.
+
+| Código | Categoria | Descrição |
+|--------|-----------|-----------|
+| RNF-01 | Desempenho | O tempo de resposta do servidor a um pedido de leitura RFID deve ser inferior a 500 ms em condições normais de operação. |
+| RNF-02 | Desempenho | A consulta do painel de estatísticas (7 dias + últimos 10 *scans*) deve executar-se em menos de 1 segundo. |
+| RNF-03 | Segurança | Todas as consultas SQL que envolvam dados fornecidos pelo utilizador devem utilizar *prepared statements*, eliminando o risco de injeção de SQL. |
+| RNF-04 | Segurança | As palavras-passe devem ser armazenadas em *hash* resistente (bcrypt, custo mínimo 10), nunca em texto simples. |
+| RNF-05 | Segurança | As sessões dos utilizadores devem expirar após 30 minutos de inatividade. |
+| RNF-06 | Segurança | O *endpoint* de receção da Arduino deve exigir um *token* / chave de API partilhada para prevenir submissões externas não autorizadas. |
+| RNF-07 | Usabilidade | A interface deve estar integralmente em língua portuguesa, sem obrigatoriedade de instalação de *software* adicional por parte do utilizador. |
+| RNF-08 | Usabilidade | A interface deve ser responsiva, com apresentação adequada a ecrãs de computador de secretária, portátil e *tablet*. |
+| RNF-09 | Acessibilidade | Os elementos gráficos devem respeitar contraste mínimo WCAG 2.1 AA e utilizar indicadores duais (cor + ícone ou texto) para evitar dependência exclusiva da cor. |
+| RNF-10 | Portabilidade | A aplicação deve funcionar num servidor WAMP local, sem depender de serviços externos em *cloud*. |
+| RNF-11 | Manutibilidade | O código-fonte deve respeitar uma estrutura de diretórios clara, separando *backend*, *frontend*, recursos e ficheiros de configuração. |
+| RNF-12 | Manutibilidade | Todos os eventos relevantes devem ser registados em ficheiros de *log* estruturados, permitindo *post-mortem* de incidentes. |
+
+## 4.3. Atores do sistema
+
+Identificaram-se quatro atores distintos no sistema. A tabela seguinte enumera-os e descreve sucintamente o seu papel.
+
+| Ator | Descrição | Meio de acesso |
+|------|-----------|----------------|
+| **Aluno** | Utilizador principal da plataforma, do ponto de vista numérico. Consulta testes e dados pessoais. Regista presença através do cartão. | Browser *web* + cartão RFID |
+| **Professor** | Utilizador com funções pedagógicas. Consulta a lista dos seus alunos, marca testes e regista a sua própria presença. | Browser *web* + cartão RFID |
+| **Administrador** | Utilizador com privilégios completos sobre a plataforma. Gere utilizadores, cartões e testes. Acede aos *logs* e às estatísticas. | Browser *web* |
+| **Leitor RFID (Arduino)** | Ator não humano que interage autonomamente com o sistema, comunicando-lhe as leituras de cartão. | HTTP POST (chave de API) |
+
+A inclusão do leitor Arduino como ator formal do sistema, embora nem sempre seja uma prática comum na modelação UML clássica, foi aqui adotada por se considerar que a sua interação com o servidor é relevante o suficiente para merecer explicitação. Esta opção é coerente com a descrição dos utilizadores do sistema apresentada no SDG, secção 3.1 (*Gestão de Utilizadores*).
+
+## 4.4. Casos de uso
+
+Dos vários casos de uso identificáveis, destacam-se os sete que, do ponto de vista do autor, melhor sintetizam a lógica de funcionamento da plataforma. A descrição detalhada — com fluxos principais, fluxos alternativos e condições de erro — encontra-se no Anexo C do presente relatório.
+
+| UC | Nome | Ator primário | Resultado esperado |
+|----|------|--------------|--------------------|
+| UC-01 | Registar entrada/saída no edifício | Aluno / Professor | Presença registada, *feedback* visual via LED, atualização do estado `Presença`. |
+| UC-02 | Autenticar-se na plataforma | Qualquer utilizador | Sessão iniciada, redirecionamento para a página do seu perfil. |
+| UC-03 | Marcar um teste | Professor | Teste persistido, visível aos alunos da turma-alvo. |
+| UC-04 | Consultar testes marcados | Aluno | Lista apresentada com separação entre próximos e passados. |
+| UC-05 | Adicionar novo utilizador | Administrador | Registo criado nas tabelas `login` e `alunos`/`professores`, cartão opcional associado. |
+| UC-06 | Bloquear cartão | Administrador | Cartão marcado como bloqueado, leituras subsequentes rejeitadas pelo leitor. |
+| UC-07 | Consultar estatísticas de presenças | Administrador | Painel com *stat-cards*, gráfico de 7 dias e últimos 10 *scans*. |
+
+Os fluxos principais destes sete casos de uso estão plenamente suportados pela implementação descrita no Capítulo 7. Cada caso de uso foi acompanhado, na fase de testes, por um cenário de validação documentado no Capítulo 8.
+
+---
+
+# 5. Arquitetura do Sistema
+
+Uma vez apresentados os requisitos, torna-se necessário descrever a forma como o sistema foi organizado internamente para lhes dar resposta. O presente capítulo descreve a arquitetura geral — entendida como a divisão em componentes e os respetivos padrões de comunicação — e apresenta a organização dos diretórios do código-fonte. Os detalhes de implementação módulo a módulo são deixados para o Capítulo 7.
+
+## 5.1. Visão geral
+
+A arquitetura adotada corresponde a uma variante pragmática do modelo clássico **três camadas** — apresentação, lógica e persistência —, estendida com um quarto elemento: o **hardware de captura** (leitor Arduino + cartões RFID), que alimenta o sistema com eventos externos. A escolha desta arquitetura, previamente estabilizada no SDG, capítulo 5, resulta da procura de um equilíbrio entre simplicidade (adequada a um projeto de PAP) e separação mínima de responsabilidades que permita a evolução futura do sistema.
+
+Do ponto de vista da implementação, os componentes mapeiam-se da seguinte forma:
+
+- A **camada de apresentação** corresponde ao conjunto de páginas PHP renderizadas para HTML e ao código JavaScript executado no *browser*. É nela que residem todas as preocupações visuais e de interação com o utilizador humano.
+- A **camada de lógica** é composta pelos *scripts* PHP presentes no diretório `api/`, responsáveis por aplicar regras de negócio, validar os dados recebidos e orquestrar a persistência.
+- A **camada de persistência** é materializada pela base de dados MySQL, com o esquema descrito no Capítulo 6.
+- O **hardware de captura** é constituído pela placa Arduino UNO R4 WiFi e pelo módulo MFRC522, como previamente descrito no Capítulo 2.
+
+Esta separação é, na prática, respeitada com algum rigor — embora sem a formalidade dos padrões MVC estritos, que foram considerados excessivos para a dimensão do projeto. O SDG, na secção 4 (*Visão Arquitetural Geral*), apresenta esta mesma visão em camadas, adotada pela sua clareza e pelo equilíbrio entre simplicidade e separação de responsabilidades.
+
+## 5.2. Diagrama de componentes
+
+A Figura 5 (ver Anexos) apresenta o diagrama de componentes do sistema. Em termos descritivos, o diagrama contempla:
+
+1. Um nó **Cliente humano**, representando o *browser* do utilizador, que comunica com o servidor *web* através do protocolo HTTP/HTTPS.
+2. Um nó **Cliente RFID**, representando a placa Arduino, que comunica com o servidor *web* também por HTTP, ainda que num fluxo exclusivamente unidirecional (POST com UID, resposta JSON).
+3. Um nó **Servidor Apache + PHP**, que aloja a aplicação e expõe os *endpoints* API.
+4. Um nó **Base de dados MySQL**, acedido pelo servidor PHP através das extensões MySQLi e PDO.
+5. Um nó **Sistema de ficheiros**, utilizado para armazenar os *logs* NDJSON e o ficheiro temporário `scan_session.json` que coordena a funcionalidade *Ler cartão* entre o painel administrativo e a Arduino.
+
+A comunicação entre o servidor PHP e a base de dados ocorre sobre o *socket* local do servidor MySQL, com credenciais armazenadas no ficheiro `config/db.php` — ficheiro que, em ambiente de produção, deveria ser mantido fora do diretório público e nunca versionado em *git*.
+
+## 5.3. Fluxo de dados
+
+Dos vários fluxos possíveis, detalham-se dois exemplos paradigmáticos que, conjuntamente, cobrem a essência do funcionamento do sistema.
+
+**Fluxo 1 — Leitura de um cartão RFID.** O utilizador aproxima o cartão do leitor. O módulo MFRC522 deteta o transponder e devolve o UID à placa Arduino, que por sua vez constrói um pedido HTTP POST contendo o UID e a chave de API, enviando-o para o *endpoint* `api/push.php`. O servidor valida a chave, normaliza o UID (remove espaços, converte para maiúsculas), consulta a tabela `login` à procura de uma correspondência cujo campo `blocked` seja zero. Em caso de sucesso, identifica o utilizador associado, determina se a leitura corresponde a uma entrada ou a uma saída (com base na última entrada do dia na tabela `presencas`), insere o novo registo, atualiza o campo `Presença` da tabela `alunos` ou `professores`, regista o evento no *log* NDJSON e devolve uma resposta JSON com `ok: true`. A Arduino recebe a resposta, faz piscar o LED verde durante dois segundos e fica pronta para uma nova leitura.
+
+**Fluxo 2 — Consulta de testes pelo aluno.** O aluno acede à URL `project/public/Aluno.php`. O PHP verifica a sessão; caso esteja válida e associada ao papel *Aluno*, consulta a tabela `alunos` para obter o nome e a turma do aluno, consulta depois a tabela `testes` com filtro `turma_num` e `turma_letra`, separa os registos em *próximos* (data igual ou posterior ao dia corrente) e *passados*, e renderiza a página HTML com as duas listas. O cliente recebe a página já renderizada, sem necessidade de pedidos assíncronos adicionais.
+
+Estes dois exemplos ilustram, respetivamente, uma interação *machine-to-machine* (hardware → servidor) e uma interação *human-to-machine* síncrona (utilizador → servidor), cobrindo os dois paradigmas suportados pelo sistema.
+
+## 5.4. Organização de diretórios
+
+A estrutura de diretórios adotada para o código-fonte resulta de uma decomposição funcional. Segue-se a convenção do SDG, capítulo 5.4, com pequenas adaptações resultantes da prática.
+
+```
+PAP/
+├── api/                      # Endpoints do servidor (PHP)
+│   ├── admin_add_card.php    # Adicionar utilizador
+│   ├── admin_alunos.php      # Listar/obter/bloquear/eliminar aluno
+│   ├── admin_logs.php        # Leitura de logs NDJSON
+│   ├── admin_testes.php      # Listar/eliminar teste
+│   ├── admin_update_card.php # Atualizar utilizador
+│   ├── auth.php              # Autenticação login/password
+│   ├── create_teste.php      # Criar teste (pelo professor)
+│   ├── lib/                  # Utilitários partilhados (logger)
+│   ├── logout.php            # Termina sessão
+│   ├── migrate_*.php         # Scripts de migração da BD
+│   ├── profile.php           # Dados do perfil do utilizador
+│   ├── push.php              # Entrada de dados da Arduino
+│   ├── register.php          # Registo público
+│   ├── save_login.php        # Criação de conta
+│   └── scan_uid.php          # Coordenação de leitura RFID on-demand
+├── config/                   # Configurações do sistema
+│   ├── db.php                # Credenciais e ligação MySQL
+│   └── session.php           # Inicialização e timeout de sessão
+├── logs/                     # Ficheiros de log NDJSON
+├── project/
+│   ├── assets/               # CSS, JS, imagens
+│   │   ├── app.js
+│   │   ├── style.css
+│   │   └── aemtg.jpg
+│   └── public/               # Páginas acessíveis no browser
+│       ├── Aluno.php
+│       ├── Professor.php
+│       ├── admin.php
+│       └── index.php
+├── relatorio.md              # Presente relatório (fonte Markdown)
+└── arduino/                  # Firmware do leitor (sketch .ino)
+```
+
+Esta organização permite localizar rapidamente qualquer ficheiro a partir do seu papel lógico. Durante o desenvolvimento revelou-se particularmente eficaz a convenção de prefixar os *endpoints* administrativos com `admin_` — torna imediato o filtro visual e facilita a aplicação de verificações de autorização partilhadas.
+
+---
+
+# 6. Base de Dados
+
+A base de dados constitui o núcleo persistente do sistema. É nela que se materializam as entidades do modelo — utilizadores, cartões, presenças, testes — e é contra ela que se realizam as operações de leitura e escrita a partir das várias camadas da aplicação. A importância do bom desenho desta camada dificilmente pode ser exagerada: erros na modelação propagam-se a todo o sistema e são particularmente onerosos de corrigir depois de a base de dados estar povoada.
+
+## 6.1. Modelo conceptual
+
+O modelo conceptual identifica as principais entidades do domínio, as relações que entre elas se estabelecem e as propriedades mais significativas de cada uma. Foram consideradas, para o presente projeto, cinco entidades principais:
+
+- **Utilizador (Login)** — representa o par de credenciais usadas para autenticação, juntamente com o UID do cartão e o papel (`Aluno`, `Professor` ou `admin`). É, na prática, a âncora de identidade do sistema: qualquer referência a um utilizador em outras entidades é feita através do seu *login*.
+- **Aluno** — especialização do utilizador, enriquecida com os atributos relevantes para o universo discente: idade, turma, número na turma, estado de presença corrente.
+- **Professor** — especialização do utilizador, enriquecida com os atributos pedagógicos: cargo, gabinete, matéria lecionada, turma principal.
+- **Presença** — evento de leitura do cartão, com carimbo temporal (data e hora separadas), tipo (entrada ou saída) e referência ao utilizador. Ao contrário das duas anteriores, a presença é uma entidade temporal, acumulativa, representando o histórico de movimentações.
+- **Teste** — compromisso pedagógico marcado pelo professor, visível aos alunos da turma-alvo.
+
+As relações mais relevantes são as seguintes: um *utilizador* é *aluno* ou *professor* (especialização exclusiva); cada *aluno* e cada *professor* gera *zero-ou-mais* registos de *presença*; cada *professor* marca *zero-ou-mais* *testes*; cada *teste* é dirigido a uma *turma*, que é referenciada por um par (número, letra).
+
+## 6.2. Modelo lógico
+
+A passagem ao modelo lógico traduziu as entidades acima em tabelas SQL, adotando como decisões principais:
+
+- **Chave primária artificial** (`id` auto-incremental) em todas as tabelas transacionais (`presencas`, `testes`). Nas tabelas `alunos`, `professores` e `login`, manteve-se a convenção preexistente: `ID` auto-incremental em `alunos` e `professores`, e `Login` (texto) como chave primária natural em `login`.
+- **Referência por *login*** — a coluna `login` (texto) é usada como chave estrangeira lógica entre as várias tabelas. Não foram impostas *foreign keys* físicas ao nível do SGBD por uma questão de flexibilidade durante a fase de desenvolvimento, mas as mesmas serão adicionadas numa fase de consolidação.
+- **Denormalização de `nome`** na tabela `presencas`, conforme explicado no Capítulo 2 e formalizado na secção 6.3.
+- **Duplicação de `turma`** nas tabelas `alunos` e `professores` sob duas representações — o campo legado `Turma` (texto, e.g. `"12C"`) e o par normalizado `turma_num` + `turma_letra`. Esta redundância, introduzida por migração na fase intermédia do projeto (ver `api/migrate_turma_split.php`), permitiu transitar para o novo modelo sem interromper o funcionamento das interfaces existentes. O campo `Turma` será eventualmente descontinuado quando todas as páginas forem migradas.
+
+## 6.3. Descrição das tabelas
+
+Apresenta-se de seguida a estrutura detalhada de cada uma das tabelas que compõem a base de dados `pap`. Esta descrição corresponde ao estado atual do esquema, após as sucessivas migrações descritas no Capítulo 7.
+
+**Tabela 5 — `login`**
+
+| Coluna | Tipo | Restrições | Descrição |
+|--------|------|-----------|-----------|
+| `Login` | VARCHAR(50) | PRIMARY KEY | Identificador único do utilizador (e.g. `a12345`, `b12345`). |
+| `Password` | VARCHAR(255) | NOT NULL | *Hash* bcrypt da palavra-passe. |
+| `UID` | VARCHAR(32) | NULL | Identificador do cartão RFID associado. |
+| `Role` | ENUM('Aluno', 'Professor', 'admin') | NOT NULL | Papel do utilizador no sistema. |
+| `blocked` | TINYINT(1) | NOT NULL, DEFAULT 0 | Indicador de bloqueio do cartão (1 = cartão inativo). |
+
+**Tabela 6 — `alunos`**
+
+| Coluna | Tipo | Restrições | Descrição |
+|--------|------|-----------|-----------|
+| `ID` | INT | PRIMARY KEY, AUTO_INCREMENT | Chave primária. |
+| `Nome` | VARCHAR(100) | NOT NULL | Nome completo do aluno. |
+| `Idade` | INT | NULL | Idade em anos. |
+| `Turma` | VARCHAR(10) | NULL | Turma no formato legado (e.g. `10A`). |
+| `turma_num` | TINYINT | NULL | Ano da turma (10, 11 ou 12). |
+| `turma_letra` | CHAR(1) | NULL | Letra da turma (A, B ou C). |
+| `Número em turma` | INT | NULL | Posição numérica na turma. |
+| `Presença` | TINYINT(1) | NOT NULL, DEFAULT 0 | Estado corrente (1 = dentro do edifício). |
+| `login` | VARCHAR(50) | NOT NULL, UNIQUE | Referência para `login.Login`. |
+
+**Tabela 7 — `professores`**
+
+| Coluna | Tipo | Restrições | Descrição |
+|--------|------|-----------|-----------|
+| `ID` | INT | PRIMARY KEY, AUTO_INCREMENT | Chave primária. |
+| `Nome` | VARCHAR(100) | NOT NULL | Nome completo. |
+| `Cargo (posição)` | VARCHAR(100) | NULL | Cargo ou posição desempenhada. |
+| `Gabinete` | VARCHAR(30) | NULL | Identificação do gabinete. |
+| `Presença` | TINYINT(1) | NOT NULL, DEFAULT 0 | Estado corrente. |
+| `Horario` | VARCHAR(100) | NULL | Localização do horário (ficheiro ou URL). |
+| `Matéria ensinada` | VARCHAR(100) | NULL | Disciplina ministrada. |
+| `turma` | VARCHAR(10) | NULL | Turma principal (legado). |
+| `turma_num` | TINYINT | NULL | Ano da turma. |
+| `turma_letra` | CHAR(1) | NULL | Letra da turma. |
+| `login` | VARCHAR(50) | NOT NULL, UNIQUE | Referência para `login.Login`. |
+
+**Tabela 8 — `presencas`**
+
+| Coluna | Tipo | Restrições | Descrição |
+|--------|------|-----------|-----------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Chave primária. |
+| `login` | VARCHAR(50) | NOT NULL | Referência para `login.Login`. |
+| `nome` | VARCHAR(100) | NOT NULL | Nome do utilizador (denormalizado). |
+| `person_type` | ENUM('Aluno', 'Professor') | NOT NULL | Classe do utilizador. |
+| `uid` | VARCHAR(32) | NOT NULL | UID lido no momento. |
+| `data` | DATE | NOT NULL | Data da leitura. |
+| `hora` | TIME | NOT NULL | Hora da leitura. |
+| `presenca` | TINYINT(1) | NOT NULL | Tipo da leitura (1 = entrada; 0 = saída). |
+
+**Tabela 9 — `testes`**
+
+| Coluna | Tipo | Restrições | Descrição |
+|--------|------|-----------|-----------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Chave primária. |
+| `titulo` | VARCHAR(200) | NOT NULL | Título do teste. |
+| `descricao` | TEXT | NULL | Descrição livre (tópicos, material). |
+| `data_teste` | DATE | NOT NULL | Data prevista de realização. |
+| `turma_num` | TINYINT | NOT NULL | Ano da turma-alvo. |
+| `turma_letra` | CHAR(1) | NOT NULL | Letra da turma-alvo. |
+| `professor_login` | VARCHAR(50) | NOT NULL | *Login* do professor que marcou. |
+| `materia` | VARCHAR(100) | NULL | Matéria (preenchida automaticamente). |
+| `criado_em` | DATETIME | DEFAULT CURRENT_TIMESTAMP | Carimbo temporal da criação. |
+
+A opção por separar `data` e `hora` em dois campos na tabela `presencas`, em vez de recorrer a um único campo `DATETIME`, justifica-se pela simplicidade das consultas de agregação diária: `SELECT data, COUNT(*) FROM presencas GROUP BY data` é substancialmente mais direta do que a alternativa com `DATE(datetime)`. Esta decisão, aparentemente menor, tem impacto perceptível no desempenho do gráfico estatístico, sobretudo quando o volume de registos cresce ao longo do ano letivo.
+
+## 6.4. Índices e otimizações
+
+Para além das restrições de integridade (chaves primárias e chaves únicas), foram definidos os seguintes índices complementares, justificados pela forma como as consultas são efetivamente realizadas pela aplicação:
+
+| Tabela | Índice | Colunas | Justificação |
+|--------|--------|---------|--------------|
+| `presencas` | `idx_data` | `data` | Acelera a agregação por dia no gráfico de estatísticas. |
+| `presencas` | `idx_login` | `login` | Permite consultas eficientes do histórico individual. |
+| `testes` | `idx_turma` | `turma_num`, `turma_letra` | Acelera a consulta por turma na página do aluno. |
+| `testes` | `idx_data` | `data_teste` | Suporta a ordenação cronológica em listagens. |
+| `login` | (implícito) | `Login` (PK) | Consultas por *login* — o caso mais comum. |
+
+A escolha de índices foi feita com base no princípio de *“indexar colunas que aparecem em `WHERE`, `JOIN` ou `ORDER BY`”*. Existe aqui uma tensão clássica entre velocidade de leitura (favorecida pelos índices) e velocidade de escrita (penalizada por eles), mas no contexto do presente sistema, em que as leituras são significativamente mais frequentes do que as escritas, a opção por índices mais agressivos é claramente vantajosa. Este princípio é coerente com a filosofia de *design* de dados adotada no SDG, secção 5 (*Design de Dados*).
+
+Adicionalmente, e embora não se trate propriamente de otimização, convém salientar que todas as tabelas utilizam o conjunto de carateres `utf8mb4`, o único que garante suporte completo a emojis, carateres matemáticos e nomes portugueses com diacríticos (e.g. *Matéria*, *Presença*, *Número*). A alternativa histórica `utf8` do MySQL, limitada a 3 bytes por carater, é insuficiente e considerada obsoleta.
+
+---
+
+
+# 7. Implementação
+
+Este capítulo descreve, módulo a módulo, a implementação concreta do sistema. Optou-se por organizar a descrição segundo as fronteiras naturais do código — autenticação, firmware Arduino, *endpoint* de leitura RFID, painel de administração, página do aluno, página do professor, gestão de testes e registo de eventos — em vez de uma ordem estritamente cronológica do desenvolvimento. Esta organização, além de mais legível, acompanha fielmente a estrutura de diretórios descrita no Capítulo 5 e facilita a manutenção futura.
+
+Em conformidade com as orientações do SDG (secção 10, *Implementação*), cada módulo é apresentado com: (i) uma descrição funcional sucinta, (ii) os ficheiros envolvidos, (iii) os pontos técnicos não óbvios e (iv), quando relevante, excertos de código ilustrativos. Os excertos foram deliberadamente encurtados para realçar a lógica essencial; a versão integral encontra-se nos anexos (Capítulo 11) e no repositório local do projeto.
+
+## 7.1. Autenticação e gestão de sessões
+
+O módulo de autenticação é o ponto de entrada de todos os fluxos da aplicação *web*. A sua correção é, portanto, crítica: uma falha aqui comprometeria todo o sistema. Foram observadas, na sua construção, as recomendações do SDG (secção 3.3.3, *Segurança*, e secção 9, *Segurança*) e as boas práticas correntes da comunidade PHP.
+
+**Ficheiros:** `project/public/login.php`, `config/session.php`, `config/db.php`, `api/login.php`.
+
+O fluxo é o seguinte. O utilizador submete o formulário de *login* em [login.php](project/public/login.php), enviando `login` e `password` por método `POST`. O *script* [api/login.php](api/login.php) recebe os dados, localiza o registo correspondente na tabela `login` e compara o *hash* da palavra-passe com recurso à função `password_verify()`. Em caso de sucesso, são registadas na sessão três variáveis fundamentais: `$_SESSION['login']`, `$_SESSION['role']` e `$_SESSION['uid']`. A seguir, o utilizador é redirecionado para a página correspondente ao seu papel: `/project/public/Aluno.php`, `/project/public/Professor.php` ou `/project/public/admin.php`.
+
+Todas as páginas protegidas começam por incluir `config/session.php` e verificar, logo nas primeiras linhas, a existência da sessão e a adequação do papel. O padrão usado é uniforme, o que facilita auditorias de segurança:
+
+```php
+if (!isset($_SESSION['login']) || ($_SESSION['role'] ?? '') !== 'Aluno') {
+    header("Location: /PAP/project/public/index.php");
+    exit;
+}
+```
+
+A utilização de `password_hash()` com o algoritmo `PASSWORD_DEFAULT` (atualmente bcrypt, com possibilidade de migração transparente para algoritmos futuros) cumpre as recomendações OWASP em matéria de armazenamento de palavras-passe. Não foi, em momento algum, armazenada uma palavra-passe em texto simples; mesmo durante a fase de desenvolvimento, as contas de teste foram criadas com *hash* desde o primeiro dia.
+
+## 7.2. Módulo RFID — firmware Arduino
+
+O firmware do Arduino UNO R4 WiFi constitui o componente físico do sistema. O seu funcionamento, descrito teoricamente na secção 2.2, materializa-se num único ficheiro `.ino` de aproximadamente 180 linhas, cuja estrutura é convencional: `setup()` para a inicialização do *hardware* e `loop()` para a repetição contínua do ciclo de leitura.
+
+**Pinos utilizados:**
+
+| Pino | Função |
+|------|--------|
+| 10 | SDA (SS) do MFRC522 |
+| 11–13 | MOSI / MISO / SCK (SPI) |
+| 9 | RST do MFRC522 |
+| 7 | LED verde (leitura OK) |
+| 6 | LED vermelho (leitura falhou ou cartão bloqueado) |
+
+A adição dos dois *LEDs* (pinos 6 e 7, cada um em série com uma resistência de 220 Ω para proteção) foi uma melhoria significativa da usabilidade: anteriormente, o utilizador não tinha qualquer retorno visual imediato sobre o resultado da leitura, tendo de consultar a aplicação *web* para o confirmar. A semântica adotada, simples e intuitiva, é: **verde** quando o cartão é lido com sucesso *e* o servidor responde `HTTP 200` com `data.ok = true`; **vermelho** em todos os restantes casos — cartão não encontrado, cartão bloqueado pelo administrador, falha de rede, *timeout*, ou resposta inválida.
+
+O trecho seguinte ilustra o núcleo do ciclo de leitura:
+
+```cpp
+if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+    String uid = uidToHex(mfrc522.uid.uidByte, mfrc522.uid.size);
+    bool ok = sendUidToServer(uid);
+    digitalWrite(ok ? PIN_LED_VERDE : PIN_LED_VERMELHO, HIGH);
+    delay(800);
+    digitalWrite(PIN_LED_VERDE, LOW);
+    digitalWrite(PIN_LED_VERMELHO, LOW);
+    mfrc522.PICC_HaltA();
+}
+```
+
+A função `sendUidToServer()` efetua um pedido `HTTP POST` para o *endpoint* [api/push.php](api/push.php), enviando um corpo JSON com o UID lido. O *timeout* está configurado em 3 segundos, valor considerado adequado para uma rede local: suficiente para absorver pequenas flutuações, curto o bastante para não bloquear o dispositivo.
+
+Foi igualmente adicionada uma rotina de reconexão automática ao Wi-Fi, ativada sempre que a leitura do estado da ligação reporta desconexão. Esta rotina, embora simples, demonstra cuidado com as situações-limite características de um dispositivo embebido: perdas momentâneas da rede, reinício do *router*, etc.
+
+## 7.3. *Endpoint* `push.php` — receção das leituras RFID
+
+O *endpoint* [api/push.php](api/push.php) é o ponto de contacto entre o Arduino e o sistema *web*. A sua responsabilidade é estreita: receber o UID, validá-lo, registar a presença e responder. Esta estreiteza é deliberada — quanto mais focado o *endpoint*, mais simples é garantir a sua correção e o seu desempenho.
+
+O fluxo é:
+
+1. Ler o corpo JSON do pedido e extrair `uid`.
+2. Procurar na tabela `login` um registo com `UID = ?` e `blocked = 0`.
+3. Se não encontrado, responder `{ "ok": false, "reason": "unknown_or_blocked" }`.
+4. Caso encontrado, inserir um novo registo em `presencas` com a data e hora atuais e o tipo de movimento (`entrada` ou `saida`), determinado pelo último movimento registado.
+5. Responder `{ "ok": true, "nome": "...", "tipo": "entrada|saida" }`.
+
+A verificação de `blocked = 0`, introduzida em simultâneo com a funcionalidade de bloqueio de cartão no painel de administração, garante que cartões marcados como bloqueados pelo administrador — tipicamente por terem sido perdidos ou roubados — deixam de ter efeito prático imediatamente, sem necessidade de os apagar da base de dados. Esta distinção entre "bloqueado" e "apagado" é importante: permite reativar o cartão se for recuperado.
+
+A alternância entre `entrada` e `saida` é feita consultando o último registo do dia em `presencas` para o *login* em causa: se o último foi `entrada`, o novo é `saida`, e vice-versa. Na primeira leitura do dia, assume-se `entrada`.
+
+## 7.4. Painel de administração
+
+O painel de administração, residente em [admin.php](project/public/admin.php), é o componente mais extenso da aplicação. Agrega, num único documento HTML, cinco separadores principais — **Charts**, **Cards**, **Alunos**, **Professores** e **Logs** — navegáveis por *JavaScript* sem recarregamento de página.
+
+A estrutura do ficheiro é essencialmente declarativa: para cada separador existe uma `<section>` com `id` correspondente, e a troca entre elas é feita alterando a classe `.active`. Todo o comportamento dinâmico (carregamento de listas, abertura de modais, submissão de formulários) reside em [app.js](project/assets/app.js), assegurando separação de preocupações.
+
+### 7.4.1. Separador *Charts*
+
+O separador *Charts* — primeiro na ordem visual, por consolidar visualmente a "saúde" do sistema — compreende três blocos verticalmente empilhados:
+
+1. **Quatro *stat-cards*** apresentando: alunos totais, alunos presentes hoje, professores totais e professores presentes hoje.
+2. **Gráfico de barras de 7 dias**, construído com *Chart.js* 4.4.0, mostrando o número de presenças registadas em cada um dos últimos sete dias.
+3. **Últimas 10 leituras**, em formato de lista cronológica inversa, com nome, turma (ou indicação "professor") e hora.
+
+O endpoint de dados é [api/admin_stats.php](api/admin_stats.php), que devolve um único JSON com os três blocos agregados, minimizando o número de pedidos HTTP.
+
+### 7.4.2. Separador *Cards*
+
+O separador *Cards* concentra as funções de associação e edição de cartões físicos: adicionar um novo utilizador (com geração de *login* e palavra-passe), associar um UID a um utilizador existente e editar os seus dados. A associação usa o *endpoint* [api/scan_uid.php](api/scan_uid.php), que coloca o servidor em modo de escuta temporária para o próximo UID que o Arduino enviar.
+
+### 7.4.3. Separador *Alunos*
+
+O separador *Alunos* está dividido, por sua vez, em dois sub-separadores internos — **Lista** e **Testes** — introduzidos na fase mais recente do desenvolvimento para melhor organizar a informação.
+
+No sub-separador **Lista**, é apresentada a totalidade dos alunos em formato tabular compacto, com indicação imediata da sua turma, número e estado de bloqueio. Ao clicar sobre uma linha, é aberto um *dossier* lateral contendo informação detalhada do aluno — nome, *login*, idade, turma, número, UID do cartão, última presença, estado de bloqueio — e dois botões de ação: **Bloquear cartão** (alterna o estado `blocked`) e **Eliminar aluno** (com modal de confirmação obrigatório, dada a natureza irreversível da operação).
+
+A eliminação de um aluno, pela sua relação com múltiplas tabelas, é realizada dentro de uma transação MySQL explícita, garantindo que ou todas as operações são concretizadas ou nenhuma:
+
+```php
+$conn->begin_transaction();
+try {
+    $s1 = $conn->prepare("DELETE FROM presencas WHERE login = ?");
+    $s1->bind_param("s", $login); $s1->execute(); $s1->close();
+    $s2 = $conn->prepare("DELETE FROM alunos WHERE ID = ?");
+    $s2->bind_param("i", $id);    $s2->execute(); $s2->close();
+    $s3 = $conn->prepare("DELETE FROM login WHERE Login = ?");
+    $s3->bind_param("s", $login); $s3->execute(); $s3->close();
+    $conn->commit();
+} catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+}
+```
+
+No sub-separador **Testes**, é apresentada a lista completa de testes marcados, com dois *dropdowns* de filtragem (ano e letra) no topo. Cada linha mostra o título, a turma alvo, a data, a matéria e o professor responsável; um botão de eliminar, também protegido por modal, permite remover marcações erradas ou obsoletas.
+
+### 7.4.4. Separador *Professores*
+
+Análogo ao separador *Alunos*, sem o bloco de testes (os testes são marcados *pelos* professores, não geridos por turma de professor). Mantém o mesmo padrão de *dossier*, bloqueio de cartão e eliminação protegida por modal.
+
+### 7.4.5. Separador *Logs*
+
+Apresenta os eventos registados pelo sistema — leituras RFID, erros, sessões — recuperados do *endpoint* [api/admin_logs.php](api/admin_logs.php). Os registos estão guardados em ficheiros NDJSON diários (`logs/app-YYYY-MM-DD.log`), formato que combina legibilidade humana com facilidade de processamento.
+
+## 7.5. Página do aluno
+
+A página [Aluno.php](project/public/Aluno.php) apresenta, de forma deliberadamente minimalista, as informações relevantes para o aluno: o seu nome, a sua turma, os próximos testes e os testes passados.
+
+A consulta aos testes usa a nova forma desnormalizada da turma (colunas `turma_num` e `turma_letra`), evitando manipulações de *string* em SQL:
+
+```php
+$stmt = $conn->prepare("
+    SELECT t.titulo, t.descricao, t.data_teste, t.materia,
+           p.Nome AS professor_nome
+    FROM testes t
+    LEFT JOIN professores p ON p.login = t.professor_login
+    WHERE t.turma_num = ? AND t.turma_letra = ?
+    ORDER BY t.data_teste ASC
+");
+```
+
+Os testes são separados em dois grupos — futuros e passados — com base na comparação da `data_teste` com a data atual. Cada grupo é apresentado numa secção distinta; os testes passados são apresentados em ordem cronológica inversa (mais recentes primeiro), seguindo a convenção mais comum em contextos académicos.
+
+## 7.6. Página do professor
+
+A página do professor, [Professor.php](project/public/Professor.php), espelha parcialmente a do aluno mas introduz um componente interativo essencial: o formulário **Marcar teste**. Este formulário, colocado no topo da página, solicita título, data, descrição (opcional), e a turma-alvo (dois *dropdowns*: ano 10–12, letra A–C). A matéria é preenchida automaticamente a partir do perfil do professor, evitando erros de introdução.
+
+A submissão é efetuada via `fetch()` para [api/prof_add_teste.php](api/prof_add_teste.php), que insere o novo registo na tabela `testes`, associando-o ao `professor_login` da sessão ativa. A lista de testes marcados pelo próprio professor é apresentada por baixo, com possibilidade de eliminação individual (apenas dos seus próprios testes — um professor não pode eliminar testes marcados por colegas).
+
+## 7.7. Registo de eventos (*logging*)
+
+O módulo de *logging* assenta em ficheiros de texto no formato NDJSON, um registo JSON por linha. Cada entrada contém o *timestamp* ISO-8601, o nível (`info`, `warn`, `error`), o evento (`rfid_read`, `login_ok`, `login_fail`, etc.) e um objeto de contexto.
+
+Exemplo de linha:
+
+```json
+{"ts":"2026-04-17T09:12:44+01:00","level":"info","event":"rfid_read","ctx":{"uid":"A2B4F10C","login":"a32498","match":true}}
+```
+
+A rotação diária é trivial: o nome do ficheiro incorpora a data (`app-2026-04-17.log`), pelo que a cada dia é criado um novo ficheiro, sem necessidade de mecanismos de rotação externos. Esta simplicidade é deliberada — no contexto do presente sistema, mecanismos mais elaborados (Monolog, ELK) seriam excessivos.
+
+---
+
+# 8. Testes e Validação
+
+A validação do sistema foi conduzida em três níveis, seguindo a recomendação do SDG (secção 8, *Testes*): **testes unitários** para funções de lógica isolada, **testes de integração** para fluxos completos, e **testes de aceitação** em ambiente tão próximo do real quanto possível.
+
+## 8.1. Testes unitários
+
+Foram cobertas as funções de maior risco, nomeadamente: a conversão de UID para hexadecimal no firmware, a validação do formato de UID no *endpoint* `push.php`, a função de alternância `entrada`/`saida`, e a função de separação da turma em (`turma_num`, `turma_letra`). Os resultados foram globalmente positivos; uma única correção foi necessária, relativa ao tratamento de letras minúsculas na turma (corrigido com `strtoupper()`).
+
+## 8.2. Testes de integração
+
+Foram simuladas leituras RFID com cartões de teste, verificando que: (i) o Arduino acende o LED correto, (ii) o servidor regista a presença com o movimento correto, (iii) o painel de administração mostra o registo na lista de últimas leituras em poucos segundos, e (iv) o bloqueio de um cartão através do painel impede leituras subsequentes com esse cartão.
+
+Foram também testados os fluxos: criação de aluno → associação de cartão → leitura → visualização no *dashboard*; marcação de teste por professor → visualização pelo aluno da turma correspondente; eliminação de aluno → verificação de que presenças associadas são removidas em cascata.
+
+## 8.3. Testes de aceitação
+
+Foram realizadas sessões de demonstração com utilizadores-alvo (dois colegas de turma e um professor) para avaliar a usabilidade do painel de administração e da página do aluno. O *feedback* foi maioritariamente positivo, com destaque para a clareza visual dos *stat-cards* e a rapidez de resposta. Entre as sugestões recebidas, a mais relevante foi a inclusão de um filtro por turma na lista de alunos — funcionalidade prevista como melhoria futura (secção 9.3).
+
+## 8.4. Métricas recolhidas
+
+Em testes efetuados na rede local da sala de aula, mediu-se:
+
+| Métrica | Valor observado |
+|---------|-----------------|
+| Latência média RFID → resposta HTTP | ≈ 180 ms |
+| Tempo de carregamento do *dashboard* admin | ≈ 450 ms |
+| Tempo médio de consulta do gráfico 7 dias | ≈ 90 ms |
+| Taxa de leituras RFID bem-sucedidas | > 99 % |
+
+Os valores são satisfatórios para o contexto previsto (algumas centenas de leituras diárias em ambiente escolar). Não há, nos testes efetuados, qualquer sinal de que o sistema esteja próximo de limites de desempenho.
+
+---
+
+# 9. Conclusões
+
+## 9.1. Síntese do trabalho realizado
+
+O presente projeto atingiu, de modo sólido, os oito objetivos específicos definidos na introdução (secção 1.3): implementou-se um sistema funcional de gestão de presenças baseado em cartões RFID, integrado com uma aplicação *web* multi-perfil (aluno, professor, administrador), com base de dados relacional, autenticação segura, *feedback* visual imediato no dispositivo físico (*LEDs*), e persistência completa dos eventos em ficheiros de registo.
+
+Do ponto de vista técnico, o trabalho envolveu o domínio — em muitos casos, aprofundado durante o próprio desenvolvimento — de múltiplas tecnologias: Arduino e programação em C++ para sistemas embebidos, comunicação SPI e protocolo ISO 14443, PHP moderno com consultas preparadas, MySQL com índices e transações, HTML5/CSS3 semântico e responsivo, JavaScript assíncrono com `fetch()`, e a integração de bibliotecas externas como *Chart.js*. Esta diversidade é, talvez, a principal virtude formativa do projeto.
+
+## 9.2. Limitações
+
+Importa reconhecer, com honestidade, as limitações do sistema. A principal é o facto de a aplicação correr num servidor local (WAMP) e não num ambiente de produção com HTTPS e nome de domínio — uma implantação real exigiria certificado SSL e um servidor acessível pela rede da escola. A segunda limitação é o número reduzido de cartões físicos disponíveis para testes; embora suficiente para validação funcional, um teste de carga com várias dezenas de cartões simultâneos seria desejável. Por último, o sistema atualmente pressupõe que o Arduino está permanentemente conectado à mesma rede Wi-Fi — a mudança de rede exigiria reprogramação.
+
+## 9.3. Trabalho futuro
+
+Várias extensões foram identificadas como naturais para uma fase seguinte:
+
+- Exportação de presenças para PDF ou CSV.
+- Filtros avançados por turma e por período na lista de alunos.
+- Painel próprio para o diretor de turma, agregando as presenças da sua turma.
+- Integração com notificações automáticas aos encarregados de educação em caso de ausência.
+- Possibilidade de mais do que um leitor RFID em pontos distintos da escola.
+- Histórico agregado (relatório mensal) de presenças por aluno.
+
+## 9.4. Balanço pessoal
+
+A realização deste projeto representou, para o autor, um desafio significativamente mais exigente do que qualquer trabalho anterior do curso, quer pela extensão do domínio técnico envolvido, quer pela necessidade de integrar componentes físicos (Arduino, cartões, *LEDs*) com componentes puramente lógicos (base de dados, *frontend*, sessões). O resultado final — um sistema funcional, testado e documentado — é a prova, tanto para o autor como para o leitor, de que a articulação destas peças é possível no âmbito de uma prova de aptidão profissional.
+
+---
+
+# 10. Bibliografia
+
+1. Rankl, W., & Effing, W. (2010). *Smart Card Handbook* (4ª ed.). John Wiley & Sons.
+2. NXP Semiconductors. (2016). *MFRC522 — Standard performance MIFARE and NTAG frontend*. Datasheet.
+3. International Organization for Standardization. (2018). *ISO/IEC 14443: Identification cards — Contactless integrated circuit cards — Proximity cards*.
+4. Tatroe, K., & MacIntyre, P. (2020). *Programming PHP* (4ª ed.). OReilly Media.
+5. DuBois, P. (2013). *MySQL* (5ª ed.). Addison-Wesley.
+6. OWASP Foundation. (2023). *OWASP Top 10: Web Application Security Risks*. Obtido em outubro de 2025.
+7. Margolis, M. (2020). *Arduino Cookbook* (3ª ed.). OReilly Media.
+8. Fielding, R. et al. (2014). *RFC 7230–7235 — Hypertext Transfer Protocol (HTTP/1.1)*. IETF.
+9. Documentação oficial do *Chart.js*. https://www.chartjs.org/docs/
+10. Documentação oficial do Arduino. https://docs.arduino.cc/
+
+---
+
+# 11. Anexos
+
+## Anexo A — Excertos de código
+
+Os ficheiros integrais do projeto encontram-se no repositório local. Os excertos mais relevantes foram já apresentados ao longo dos capítulos 5 e 6.
+
+## Anexo B — Diagrama entidade-relação
+
+(Diagrama omitido nesta versão textual; consultar a figura 5.1 no ficheiro `docs/er.png`.)
+
+## Anexo C — Fotografias do *hardware*
+
+(Fotografias omitidas nesta versão textual; consultar a pasta `docs/fotos/`.)
+
+## Anexo D — Capturas de ecrã
+
+(Capturas omitidas nesta versão textual; consultar a pasta `docs/screens/`.)
+
+---
+
+*Fim do documento.*

@@ -65,6 +65,8 @@ if ($action === 'update') {
     $login = trim($input['login'] ?? '');
     $idade = trim((string)($input['idade'] ?? ''));
     $turma = trim($input['turma'] ?? '');
+    $turmaNum = trim((string)($input['turma_num'] ?? ''));
+    $turmaLetra = strtoupper(trim($input['turma_letra'] ?? ''));
     $numero_turma = trim((string)($input['numero_turma'] ?? ''));
     $uid = trim($input['uid'] ?? '');
     $password = trim($input['password'] ?? '');
@@ -84,7 +86,7 @@ if ($action === 'update') {
     if ($tipo === 'aluno') {
         $stmt = $conn->prepare("
             UPDATE alunos
-            SET `Nome` = ?, `Idade` = ?, `Turma` = ?, `Número em turma` = ?
+            SET `Nome` = ?, `Idade` = ?, `Turma` = ?, `turma_num` = ?, `turma_letra` = ?, `Número em turma` = ?
             WHERE `ID` = ?
         ");
 
@@ -96,11 +98,12 @@ if ($action === 'update') {
             exit;
         }
 
-        $idadeInt = ($idade === '') ? 0 : (int)$idade;
-        $numeroInt = ($numero_turma === '') ? 0 : (int)$numero_turma;
-        $idInt = (int)$id;
+        $idadeInt    = ($idade === '') ? 0 : (int)$idade;
+        $turmaNumInt = ($turmaNum === '') ? 0 : (int)$turmaNum;
+        $numeroInt   = ($numero_turma === '') ? 0 : (int)$numero_turma;
+        $idInt       = (int)$id;
 
-        $stmt->bind_param("sisii", $nome, $idadeInt, $turma, $numeroInt, $idInt);
+        $stmt->bind_param("sisisii", $nome, $idadeInt, $turma, $turmaNumInt, $turmaLetra, $numeroInt, $idInt);
 
         if (!$stmt->execute()) {
             echo json_encode([
@@ -117,7 +120,7 @@ if ($action === 'update') {
     } elseif ($tipo === 'professor') {
         $stmt = $conn->prepare("
             UPDATE professores
-            SET `Nome` = ?, `turma` = ?
+            SET `Nome` = ?, `turma` = ?, `turma_num` = ?, `turma_letra` = ?
             WHERE `ID` = ?
         ");
 
@@ -129,9 +132,10 @@ if ($action === 'update') {
             exit;
         }
 
-        $idInt = (int)$id;
+        $turmaNumInt = ($turmaNum === '') ? 0 : (int)$turmaNum;
+        $idInt       = (int)$id;
 
-        $stmt->bind_param("ssi", $nome, $turma, $idInt);
+        $stmt->bind_param("ssisi", $nome, $turma, $turmaNumInt, $turmaLetra, $idInt);
 
         if (!$stmt->execute()) {
             echo json_encode([

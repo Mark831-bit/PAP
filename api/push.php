@@ -43,6 +43,25 @@ if ($uid === '') {
     exit;
 }
 
+// Если admin-страница ожидает скан — записываем UID в сессию
+$scanSessionFile = __DIR__ . '/../logs/scan_session.json';
+if (file_exists($scanSessionFile)) {
+    $scanData = json_decode(file_get_contents($scanSessionFile), true);
+    if (
+        is_array($scanData) &&
+        ($scanData['state'] ?? '') === 'waiting' &&
+        (time() - ($scanData['started_at'] ?? 0)) < 60
+    ) {
+        file_put_contents($scanSessionFile, json_encode([
+            'state'      => 'ready',
+            'uid'        => $uid,
+            'started_at' => $scanData['started_at'],
+        ]), LOCK_EX);
+
+        log_event("INFO", "uid forwarded to admin scan session", ["uid" => $uid]);
+    }
+}
+
 $mysqli = new mysqli("localhost", "root", "", "pap");
 
 if ($mysqli->connect_error) {
@@ -63,6 +82,7 @@ try {
         SELECT `Login`, `Role`, `UID`
         FROM `login`
         WHERE UPPER(REPLACE(`UID`, ' ', '')) = ?
+          AND `blocked` = 0
         LIMIT 1
     ");
 
@@ -76,19 +96,81 @@ try {
 
     if ($row = $res->fetch_assoc()) {
         $stmt->close();
+
+        $login = $row['Login'];
+        $role  = $row['Role'];
+
+        // Только Aluno и Professor попадают в presencas
+        $nome = null;
+        if ($role === 'Aluno') {
+            $qn = $mysqli->prepare("SELECT Nome FROM alunos WHERE login = ? LIMIT 1");
+            $qn->bind_param("s", $login);
+            $qn->execute();
+            $rn = $qn->get_result()->fetch_assoc();
+            $nome = $rn['Nome'] ?? null;
+            $qn->close();
+        } elseif ($role === 'Professor') {
+            $qn = $mysqli->prepare("SELECT Nome FROM professores WHERE login = ? LIMIT 1");
+            $qn->bind_param("s", $login);
+            $qn->execute();
+            $rn = $qn->get_result()->fetch_assoc();
+            $nome = $rn['Nome'] ?? null;
+            $qn->close();
+        }
+
+        if ($nome !== null && ($role === 'Aluno' || $role === 'Professor')) {
+            // Смотрим последнюю запись за сегодня
+            $today = date('Y-m-d');
+            $qLast = $mysqli->prepare("
+                SELECT presenca FROM presencas
+                WHERE login = ? AND data = ?
+                ORDER BY hora DESC
+                LIMIT 1
+            ");
+            $qLast->bind_param("ss", $login, $today);
+            $qLast->execute();
+            $last = $qLast->get_result()->fetch_assoc();
+            $qLast->close();
+
+            // Если последняя = 1 (entrada) → сейчас saida (0). Иначе entrada (1).
+            $newPresenca = ($last && (int)$last['presenca'] === 1) ? 0 : 1;
+            $now = date('H:i:s');
+
+            $qIns = $mysqli->prepare("
+                INSERT INTO presencas (login, nome, person_type, uid, data, hora, presenca)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $qIns->bind_param("ssssssi", $login, $nome, $role, $uid, $today, $now, $newPresenca);
+            $qIns->execute();
+            $qIns->close();
+
+            // Обновляем текущее состояние в alunos/professores
+            $table = ($role === 'Aluno') ? 'alunos' : 'professores';
+            $qUpd = $mysqli->prepare("UPDATE `$table` SET `Presença` = ? WHERE login = ?");
+            $qUpd->bind_param("is", $newPresenca, $login);
+            $qUpd->execute();
+            $qUpd->close();
+
+            log_event("INFO", "presenca registered", [
+                "login" => $login,
+                "role" => $role,
+                "presenca" => $newPresenca
+            ]);
+        }
+
         $mysqli->close();
 
         log_event("INFO", "uid matched", [
             "uid" => $uid,
-            "login" => $row['Login'],
-            "role" => $row['Role']
+            "login" => $login,
+            "role" => $role
         ]);
 
         echo json_encode([
             "ok" => true,
             "uid" => $uid,
-            "login" => $row['Login'],
-            "role" => $row['Role']
+            "login" => $login,
+            "role" => $role
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }

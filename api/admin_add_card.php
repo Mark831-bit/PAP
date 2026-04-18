@@ -72,21 +72,23 @@ try {
         }
 
         $stmtAluno = $pdo->prepare("
-            INSERT INTO alunos (`Nome`, `Idade`, `Turma`, `Número em turma`, `Presença`, `login`)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO alunos (`Nome`, `Idade`, `Turma`, `turma_num`, `turma_letra`, `Número em turma`, `Presença`, `login`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmtAluno->execute([
             $nome,
             (int)$idade,
             $turma,
+            (int)$turmaNum,
+            strtoupper($turmaLetra),
             (int)$numeroTurma,
             0,
             $login
         ]);
     } else {
         $stmtProfessor = $pdo->prepare("
-            INSERT INTO professores (`Nome`, `Cargo (posição)`, `Gabinete`, `Presença`, `Horario`, `Matéria ensinada`, `turma`, `login`)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO professores (`Nome`, `Cargo (posição)`, `Gabinete`, `Presença`, `Horario`, `Matéria ensinada`, `turma`, `turma_num`, `turma_letra`, `login`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmtProfessor->execute([
             $nome,
@@ -96,6 +98,8 @@ try {
             '',
             '',
             $turma,
+            (int)$turmaNum,
+            strtoupper($turmaLetra),
             $login
         ]);
     }

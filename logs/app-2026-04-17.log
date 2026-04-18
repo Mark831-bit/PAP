@@ -1,0 +1,73 @@
+{"time":"2026-04-17 13:08:38","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 13:08:38","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 14:16:55","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"b12345"}}
+{"time":"2026-04-17 14:16:55","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"b12345","role":"Professor"}}
+{"time":"2026-04-17 14:30:43","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"b12345"}}
+{"time":"2026-04-17 14:30:59","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 14:30:59","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 14:34:35","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"c12345"}}
+{"time":"2026-04-17 14:34:42","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"b12345"}}
+{"time":"2026-04-17 14:34:42","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"b12345","role":"Professor"}}
+{"time":"2026-04-17 14:39:30","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"b12345"}}
+{"time":"2026-04-17 14:39:59","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 14:39:59","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 16:38:02","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 16:38:02","level":"WARN","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"wrong password","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 16:38:09","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 16:38:09","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 16:48:36","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"push request received","ctx":{"uid":"C329471C"}}
+{"time":"2026-04-17 16:48:36","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"presenca registered","ctx":{"login":"a12345","role":"Aluno","presenca":1}}
+{"time":"2026-04-17 16:48:36","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"uid matched","ctx":{"uid":"C329471C","login":"a12345","role":"Aluno"}}
+{"time":"2026-04-17 16:48:47","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"push request received","ctx":{"uid":"A33B4A14"}}
+{"time":"2026-04-17 16:48:47","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"presenca registered","ctx":{"login":"b12345","role":"Professor","presenca":1}}
+{"time":"2026-04-17 16:48:47","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"uid matched","ctx":{"uid":"A33B4A14","login":"b12345","role":"Professor"}}
+{"time":"2026-04-17 16:49:00","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"push request received","ctx":{"uid":"A33B4A14"}}
+{"time":"2026-04-17 16:49:00","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"presenca registered","ctx":{"login":"b12345","role":"Professor","presenca":0}}
+{"time":"2026-04-17 16:49:00","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"uid matched","ctx":{"uid":"A33B4A14","login":"b12345","role":"Professor"}}
+{"time":"2026-04-17 16:49:10","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"push request received","ctx":{"uid":"C329471C"}}
+{"time":"2026-04-17 16:49:11","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"presenca registered","ctx":{"login":"a12345","role":"Aluno","presenca":0}}
+{"time":"2026-04-17 16:49:11","level":"INFO","ip":"10.105.70.253","uri":"\/PAP\/api\/push.php","msg":"uid matched","ctx":{"uid":"C329471C","login":"a12345","role":"Aluno"}}
+{"time":"2026-04-17 17:14:25","level":"INFO","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_presencas.php","msg":"push request received","ctx":{"uid":""}}
+{"time":"2026-04-17 17:14:25","level":"WARN","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_presencas.php","msg":"unauthorized push","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:27","level":"INFO","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testesphp","msg":"push request received","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:27","level":"WARN","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testesphp","msg":"unauthorized push","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:34","level":"INFO","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testes.php","msg":"push request received","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:34","level":"WARN","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testes.php","msg":"unauthorized push","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:44","level":"INFO","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testes.php","msg":"push request received","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:44","level":"WARN","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testes.php","msg":"unauthorized push","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:45","level":"INFO","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testesphp","msg":"push request received","ctx":{"uid":""}}
+{"time":"2026-04-17 17:15:45","level":"WARN","ip":"::1","uri":"\/PAP\/api\/push.php\/migrate_testesphp","msg":"unauthorized push","ctx":{"uid":""}}
+{"time":"2026-04-17 17:16:31","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"c12345"}}
+{"time":"2026-04-17 17:16:38","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"b12345"}}
+{"time":"2026-04-17 17:16:38","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"b12345","role":"Professor"}}
+{"time":"2026-04-17 17:17:02","level":"INFO","ip":"::1","uri":"\/PAP\/api\/create_teste.php","msg":"teste created","ctx":{"professor":"b12345","turma":"11A","titulo":"Teste1"}}
+{"time":"2026-04-17 17:29:22","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"b12345"}}
+{"time":"2026-04-17 17:29:29","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-04-17 17:29:29","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}
+{"time":"2026-04-17 17:29:37","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"a12345"}}
+{"time":"2026-04-17 17:29:43","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 17:29:43","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 17:30:24","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"c12345"}}
+{"time":"2026-04-17 17:30:33","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"b12345"}}
+{"time":"2026-04-17 17:30:33","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"b12345","role":"Professor"}}
+{"time":"2026-04-17 17:31:30","level":"INFO","ip":"::1","uri":"\/PAP\/api\/create_teste.php","msg":"teste created","ctx":{"professor":"b12345","turma":"12B","titulo":"awovgwenlvoewnvqwlon"}}
+{"time":"2026-04-17 17:42:08","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"b12345"}}
+{"time":"2026-04-17 17:42:18","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-04-17 17:42:18","level":"WARN","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"wrong password","ctx":{"login":"a12345"}}
+{"time":"2026-04-17 17:42:19","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-04-17 17:42:19","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}
+{"time":"2026-04-17 17:43:05","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"a12345"}}
+{"time":"2026-04-17 17:43:11","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 17:43:11","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 17:43:29","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"c12345"}}
+{"time":"2026-04-17 17:43:39","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-04-17 17:43:39","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}
+{"time":"2026-04-17 17:43:52","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"a12345"}}
+{"time":"2026-04-17 17:43:59","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 17:43:59","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}
+{"time":"2026-04-17 19:10:23","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"с12345"}}
+{"time":"2026-04-17 19:10:23","level":"WARN","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login not found","ctx":{"login":"с12345"}}
+{"time":"2026-04-17 19:10:29","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"с12345"}}
+{"time":"2026-04-17 19:10:29","level":"WARN","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login not found","ctx":{"login":"с12345"}}
+{"time":"2026-04-17 19:10:54","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"c12345"}}
+{"time":"2026-04-17 19:10:54","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"c12345","role":"admin"}}

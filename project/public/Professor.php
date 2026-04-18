@@ -110,7 +110,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professor - Os meus alunos</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=200">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=308">
 </head>
 <body class="page-professor">
 
@@ -149,34 +149,63 @@ while ($row = $resultAlunos->fetch_assoc()) {
          <div class="test-box">
             <h2>Назначить тест</h2>
 
-            <div class="form-row">
-                <label for="testTitle">Название</label>
-                <input
-                    type="text"
-                    id="testTitle"
-                    name="test_title"
-                    placeholder="Тест / контрольная работа"
-                >
-            </div>
+            <form id="testeForm">
+                <div class="form-row turma-row">
+                    <div>
+                        <label for="testeTurmaNum">Turma</label>
+                        <select id="testeTurmaNum" name="turma_num">
+                            <option value="">Ano</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
 
-            <div class="form-row">
-                <label for="testDate">Дата</label>
-                <input
-                    type="date"
-                    id="testDate"
-                    name="test_date"
-                >
-            </div>
+                    <div>
+                        <label for="testeTurmaLetra">&nbsp;</label>
+                        <select id="testeTurmaLetra" name="turma_letra">
+                            <option value="">Letra</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                </div>
 
-            <div class="form-row">
-                <label for="testDescription">Описание</label>
-                <textarea
-                    id="testDescription"
-                    name="test_description"
-                    rows="4"
-                    placeholder="Опиши тему, материалы, инструкции..."
-                ></textarea>
-            </div>
+                <div class="form-row">
+                    <label for="testTitle">Название</label>
+                    <input
+                        type="text"
+                        id="testTitle"
+                        name="titulo"
+                        placeholder="Тест / контрольная работа"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="testDate">Дата</label>
+                    <input
+                        type="date"
+                        id="testDate"
+                        name="data_teste"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="testDescription">Описание</label>
+                    <textarea
+                        id="testDescription"
+                        name="descricao"
+                        rows="4"
+                        placeholder="Опиши тему, материалы, инструкции..."
+                    ></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit">Назначить</button>
+                    <div id="testeStatus"></div>
+                </div>
+            </form>
         </div>
 
         <form class="students-filters" method="GET">
@@ -250,6 +279,35 @@ while ($row = $resultAlunos->fetch_assoc()) {
         </div>
     </section>
 </main>
+
+<script>
+document.getElementById("testeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form   = e.target;
+    const status = document.getElementById("testeStatus");
+    const fd     = new FormData(form);
+
+    status.textContent = "A enviar...";
+    status.style.color = "#6b7280";
+
+    try {
+        const res  = await fetch("/PAP/api/create_teste.php", { method: "POST", body: fd });
+        const data = await res.json();
+
+        if (data.ok) {
+            status.textContent = "Teste criado.";
+            status.style.color = "#10b981";
+            form.reset();
+        } else {
+            status.textContent = "Erro: " + (data.error || "desconhecido");
+            status.style.color = "#ef4444";
+        }
+    } catch (err) {
+        status.textContent = "Erro de rede";
+        status.style.color = "#ef4444";
+    }
+});
+</script>
 
 </body>
 </html>
