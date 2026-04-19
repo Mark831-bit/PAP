@@ -75,6 +75,7 @@ if ($action === 'get') {
 }
 
 if ($action === 'toggle_block') {
+    csrf_check();
     $login = $_POST['login'] ?? '';
     if ($login === '') {
         http_response_code(400);
@@ -98,6 +99,7 @@ if ($action === 'toggle_block') {
 }
 
 if ($action === 'delete') {
+    csrf_check();
     $login = $_POST['login'] ?? '';
     if ($login === '') {
         http_response_code(400);

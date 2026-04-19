@@ -1,8 +1,23 @@
 <?php
 header('Content-Type: application/json');
+require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/lib/logger.php';
+
+if (!isset($_SESSION['login']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Acesso negado.'
+    ]);
+    exit;
+}
 
 $action = $_GET['action'] ?? '';
+
+if ($action === 'update') {
+    csrf_check();
+}
 
 if ($action === 'list') {
     $users = [];
@@ -218,6 +233,14 @@ if ($action === 'update') {
     }
 
     if ($mainUpdated || $uidUpdated || $passwordUpdated) {
+        log_event("ADMIN_ACTION", "card_updated", [
+            "admin"           => $_SESSION['login'] ?? null,
+            "target_login"    => $login,
+            "target_tipo"     => $tipo,
+            "main_updated"    => $mainUpdated,
+            "uid_updated"     => $uidUpdated,
+            "password_changed"=> $passwordUpdated,
+        ]);
         echo json_encode([
             'success' => true,
             'message' => 'Dados atualizados com sucesso.'

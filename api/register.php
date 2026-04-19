@@ -1,12 +1,11 @@
 <?php
+require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
-session_start();
-
-header('Content-Type: application/json');
-
-
+require_once __DIR__ . '/lib/logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+csrf_check();
 
 try {
     $login = trim($_POST['login'] ?? '');
@@ -83,19 +82,24 @@ try {
         $login
     ]);
 
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $login;
+    $_SESSION['login'] = $login;
+    $_SESSION['role'] = 'Aluno';
+
     echo json_encode([
         'ok' => true,
         'message' => 'Conta criada com sucesso'
     ]);
-    $_SESSION['user_id'] = $login;
-    $_SESSION['login'] = $login;
-    $_SESSION['role'] = 'Aluno';
     exit;
 
 } catch (Throwable $e) {
+    log_event("ERROR", "register exception", [
+        "msg" => $e->getMessage()
+    ]);
     echo json_encode([
         'ok' => false,
-        'error' => $e->getMessage()
+        'error' => 'Erro interno do servidor.'
     ]);
     exit;
 }

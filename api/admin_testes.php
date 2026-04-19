@@ -56,6 +56,7 @@ if ($action === 'list') {
 }
 
 if ($action === 'delete') {
+    csrf_check();
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) {
         http_response_code(400);

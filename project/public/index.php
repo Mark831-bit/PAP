@@ -1,5 +1,14 @@
 <?php
 require_once __DIR__ . '/../../config/session.php';
+require_once __DIR__ . '/../../config/db.php';
+
+$noticias = [];
+$res = $conn->query("SELECT titulo, corpo, imagem FROM noticias WHERE ativo = 1 ORDER BY criado_em DESC, id DESC");
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $noticias[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -7,8 +16,9 @@ require_once __DIR__ . '/../../config/session.php';
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>PAP - Main</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=3">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=5">
 </head>
 
 <body class="page-index">
@@ -103,63 +113,57 @@ require_once __DIR__ . '/../../config/session.php';
       </div>
     </div>
   <?php endif; ?>
-
+    
   <main class="page-content">
-    <h1 class="main_hello">Bom dia</h1>
-    <p class="main_text">Texto muito importante</p>
-
+    <h1 class="main_hello">Bem-vindo à plataforma RFID escolar</h1>
+    <br>
+    <p class="main_text">É um prazer tê-lo aqui. A nossa plataforma foi criada para tornar a vida escolar
+  mais simples e organizada.</p>
+  
+    <p>Através deste sistema, pode acompanhar a sua presença, aceder ao seu perfil e
+  utilizar diferentes funcionalidades de forma rápida e segura.
+</p>
+    <br>
+    <?php if (count($noticias) > 0): ?>
     <section class="carousel-container" aria-label="News carousel">
       <div class="carousel" id="carousel">
-
-        <article class="slide">
-          <img src="../assets/1_1.jpg" alt="Slide 1">
-          <div class="slide-caption">
-            <h3>Dia Internacional da Educação</h3>
-            <p>
-              Любой тестовый текст под картинкой. Потом сюда будем подставлять новости из БД.
-              Можно 2–3 строки, дальше будет "…"
-            </p>
-          </div>
-        </article>
-
-        <article class="slide">
-          <img src="../assets/2_2.jpg" alt="Slide 2">
-          <div class="slide-caption">
-            <h3>“SaborLeia” — активности в библиотеке</h3>
-            <p>
-              Пример описания: дата, место, учитель, что происходило. Текст обрезается по строкам.
-            </p>
-          </div>
-        </article>
-
-        <article class="slide">
-          <img src="../assets/3_3.jpg" alt="Slide 3">
-          <div class="slide-caption">
-            <h3>Dia em Memória das Vítimas do Holocausto</h3>
-            <p>
-              Ещё один пример новости. Позже это можно сделать ссылкой на отдельную страницу.
-            </p>
-          </div>
-        </article>
-
-        <article class="slide">
-          <img src="../assets/4_4.jpg" alt="Slide 4">
-          <div class="slide-caption">
-            <h3>“SaborLeia” — активности в библиотеке</h3>
-            <p>
-              Пример описания: дата, место, учитель, что происходило. Текст обрезается по строкам.
-            </p>
-          </div>
-        </article>
-
+        <?php foreach ($noticias as $i => $n): ?>
+          <article class="slide">
+            <?php if (!empty($n['imagem'])): ?>
+              <img src="<?= htmlspecialchars($n['imagem']) ?>" alt="<?= htmlspecialchars($n['titulo']) ?>">
+            <?php endif; ?>
+            <div class="slide-caption">
+              <h3><?= htmlspecialchars($n['titulo']) ?></h3>
+              <p><?= nl2br(htmlspecialchars($n['corpo'])) ?></p>
+            </div>
+          </article>
+        <?php endforeach; ?>
       </div>
 
-      <button class="nav-btn prev" type="button" aria-label="Previous slide">❮</button>
-      <button class="nav-btn next" type="button" aria-label="Next slide">❯</button>
+      <?php if (count($noticias) > 1): ?>
+        <button class="nav-btn prev" type="button" aria-label="Previous slide">❮</button>
+        <button class="nav-btn next" type="button" aria-label="Next slide">❯</button>
+      <?php endif; ?>
     </section>
+    <?php endif; ?>
+    <p>Esperamos que tenha uma excelente experiência!</p>
   </main>
+  <footer class="site-footer">
+    <div class="footer-top-line"></div>
 
-  <script src="/PAP/project/assets/app.js?v=3"></script>
+    <div class="footer-content">
+      <p>
+        <a href="https://classroom.google.com/?pli=1">Classroom</a> | <a href="https://inovar.aemtg.pt/inovaralunos/Inicial.wgx">Inovar</a> | <a href="https://aepombal.unicard.pt">SIGE</a>
+      </p>
+      <p class="footer-projects">
+        Os nossos projetos: <strong>PAP RFID School System</strong>
+      </p>
+      
+    </div>
+  </footer>
+  <script src="/PAP/project/assets/app.js?v=4"></script>
 </body>
 </html>
+
+
 

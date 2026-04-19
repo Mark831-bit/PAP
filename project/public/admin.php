@@ -69,6 +69,7 @@ if ($res = $conn->query("
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>Admin Panel</title>
   <link rel="stylesheet" href="/PAP/project/assets/style.css?v=310">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -103,6 +104,7 @@ if ($res = $conn->query("
         <button class="admin-tab" data-tab="cards">Cards</button>
         <button class="admin-tab" data-tab="alunos">Alunos</button>
         <button class="admin-tab" data-tab="professores">Professores</button>
+        <button class="admin-tab" data-tab="noticias">Notícias</button>
         <button class="admin-tab" data-tab="logs">Logs</button>
       </div>
 
@@ -496,6 +498,45 @@ if ($res = $conn->query("
 
       <div class="admin-tab-content" id="tab-professores">
         <div class="admin-card"><h2>Professores</h2><p>Em desenvolvimento...</p></div>
+      </div>
+
+      <div class="admin-tab-content" id="tab-noticias">
+        <div class="admin-card">
+          <h2>Nova notícia</h2>
+          <form id="noticiaForm" class="noticia-form">
+            <input type="hidden" id="noticiaId" name="id" value="">
+            <div class="form-row">
+              <label for="noticiaTitulo">Título</label>
+              <input type="text" id="noticiaTitulo" name="titulo" maxlength="200" required>
+            </div>
+            <div class="form-row">
+              <label for="noticiaCorpo">Corpo</label>
+              <textarea id="noticiaCorpo" name="corpo" rows="4" required></textarea>
+            </div>
+            <div class="form-row">
+              <label for="noticiaImagem">URL da imagem (opcional)</label>
+              <input type="text" id="noticiaImagem" name="imagem" maxlength="300" placeholder="../assets/1_1.jpg ou https://...">
+            </div>
+            <div class="form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="noticiaAtivo" name="ativo" value="1" checked>
+                Ativa (mostrar no carrossel)
+              </label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" id="noticiaSubmit">Criar notícia</button>
+              <button type="button" id="noticiaCancel" class="secondary-btn" style="display:none;">Cancelar edição</button>
+              <div id="noticiaStatus"></div>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-card">
+          <h2>Notícias existentes</h2>
+          <div id="noticiasList" class="noticias-admin-list">
+            <p class="logs-empty">A carregar...</p>
+          </div>
+        </div>
       </div>
 
       <div class="admin-tab-content" id="tab-logs">

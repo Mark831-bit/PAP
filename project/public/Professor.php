@@ -109,6 +109,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Professor - Os meus alunos</title>
     <link rel="stylesheet" href="/PAP/project/assets/style.css?v=308">
 </head>
@@ -153,7 +154,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <div class="form-row turma-row">
                     <div>
                         <label for="testeTurmaNum">Turma</label>
-                        <select id="testeTurmaNum" name="turma_num">
+                        <select id="testeTurmaNum" name="turma_num" required>
                             <option value="">Ano</option>
                             <option value="10">10</option>
                             <option value="11">11</option>
@@ -163,7 +164,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
 
                     <div>
                         <label for="testeTurmaLetra">&nbsp;</label>
-                        <select id="testeTurmaLetra" name="turma_letra">
+                        <select id="testeTurmaLetra" name="turma_letra" required>
                             <option value="">Letra</option>
                             <option value="A">A</option>
                             <option value="B">B</option>
@@ -246,10 +247,120 @@ while ($row = $resultAlunos->fetch_assoc()) {
 
        
 
+        <div class="admin-card">
+            <h2>Lançar nota</h2>
+            <form id="notaForm" class="agenda-form">
+                <div class="form-row">
+                    <label for="notaAluno">Aluno</label>
+                    <select id="notaAluno" name="login_aluno" required>
+                        <option value="">A carregar alunos...</option>
+                    </select>
+                </div>
+                <div class="form-row turma-row">
+                    <div>
+                        <label for="notaTipo">Tipo</label>
+                        <select id="notaTipo" name="tipo" required>
+                            <option value="">Tipo de avaliação</option>
+                            <option value="Teste">Teste</option>
+                            <option value="Trabalho">Trabalho</option>
+                            <option value="Oral">Oral</option>
+                            <option value="Participação">Participação</option>
+                            <option value="Projeto">Projeto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="notaValor">Valor (0–20)</label>
+                        <input type="number" id="notaValor" name="valor" min="0" max="20" step="0.1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="notaData">Data</label>
+                    <input type="date" id="notaData" name="data" required>
+                </div>
+                <div class="form-row">
+                    <label for="notaObservacao">Observação (opcional)</label>
+                    <textarea id="notaObservacao" name="observacao" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Lançar nota</button>
+                    <div id="notaStatus"></div>
+                </div>
+            </form>
+
+            <h3 class="subsection-title">Notas lançadas</h3>
+            <div id="notasList" class="notas-list">
+                <p class="empty-state">A carregar...</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>Sumários</h2>
+            <form id="sumarioForm" class="agenda-form">
+                <div class="form-row turma-row">
+                    <div>
+                        <label for="sumTurmaNum">Turma</label>
+                        <select id="sumTurmaNum" name="turma_num" required>
+                            <option value="">Ano</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sumTurmaLetra">&nbsp;</label>
+                        <select id="sumTurmaLetra" name="turma_letra" required>
+                            <option value="">Letra</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="sumData">Data</label>
+                    <input type="date" id="sumData" name="data" required>
+                </div>
+                <div class="form-row">
+                    <label for="sumDescricao">Descrição (inclui justificações de faltas, se houver)</label>
+                    <textarea id="sumDescricao" name="descricao" rows="4" required placeholder="Tema da aula, matérias abordadas, justificações de faltas..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Criar sumário</button>
+                    <div id="sumStatus"></div>
+                </div>
+            </form>
+
+            <div id="sumariosList" class="sumarios-list">
+                <p class="empty-state">A carregar...</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>A minha agenda</h2>
+            <form id="agendaForm" class="agenda-form">
+                <div class="form-row">
+                    <label for="agTitulo">Título</label>
+                    <input type="text" id="agTitulo" name="titulo" maxlength="200" required placeholder="O que preciso de fazer">
+                </div>
+                <div class="form-row">
+                    <label for="agData">Data (opcional)</label>
+                    <input type="date" id="agData" name="data">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Adicionar</button>
+                    <div id="agStatus"></div>
+                </div>
+            </form>
+
+            <div id="agendaList" class="agenda-list">
+                <p class="empty-state">A carregar...</p>
+            </div>
+        </div>
+
         <div class="students-list">
             <?php if (count($alunos) > 0): ?>
                 <?php foreach ($alunos as $aluno): ?>
-                    <div class="student-card">
+                    <div class="student-card" data-aluno-id="<?= (int)$aluno['ID'] ?>">
                         <div class="student-left">
                             <span class="status-dot <?= ((int)$aluno['presenca'] === 1) ? 'present' : 'absent' ?>"></span>
 
@@ -291,7 +402,12 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
     status.style.color = "#6b7280";
 
     try {
-        const res  = await fetch("/PAP/api/create_teste.php", { method: "POST", body: fd });
+        const csrf = document.querySelector('meta[name="csrf-token"]').content;
+        const res  = await fetch("/PAP/api/create_teste.php", {
+            method: "POST",
+            headers: { "X-CSRF-Token": csrf },
+            body: fd
+        });
         const data = await res.json();
 
         if (data.ok) {
@@ -307,7 +423,45 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
         status.style.color = "#ef4444";
     }
 });
+
+(function () {
+    const turma = <?= json_encode($filtroTurma) ?>;
+    if (!turma) return;
+
+    async function refreshPresence() {
+        try {
+            const res = await fetch("/PAP/api/presence.php?turma=" + encodeURIComponent(turma), {
+                credentials: "same-origin"
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!data.ok || !Array.isArray(data.alunos)) return;
+
+            data.alunos.forEach(a => {
+                const card = document.querySelector('.student-card[data-aluno-id="' + a.id + '"]');
+                if (!card) return;
+
+                const dot   = card.querySelector('.status-dot');
+                const right = card.querySelector('.student-right');
+                const presente = a.presenca === 1;
+
+                if (dot) {
+                    dot.classList.toggle('present', presente);
+                    dot.classList.toggle('absent', !presente);
+                }
+                if (right) {
+                    right.classList.toggle('present-text', presente);
+                    right.classList.toggle('absent-text', !presente);
+                    right.textContent = presente ? 'Presente' : 'Falta';
+                }
+            });
+        } catch (e) { /* silencioso */ }
+    }
+
+    setInterval(refreshPresence, 5000);
+})();
 </script>
 
+<script src="/PAP/project/assets/app.js?v=6"></script>
 </body>
 </html>

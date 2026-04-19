@@ -56,6 +56,7 @@ $stmt->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Aluno</title>
     <link rel="stylesheet" href="/PAP/project/assets/style.css?v=310">
 </head>
@@ -141,7 +142,47 @@ $stmt->close();
                     </div>
                 </div>
             <?php endif; ?>
+            <div class="admin-card">
+                <h2>As minhas notas</h2>
+                <div id="notasChartWrap" style="display:none; margin-bottom: 18px;">
+                    <canvas id="notasChart" height="100"></canvas>
+                </div>
+                <div id="notasAluno" class="notas-aluno">
+                    <p class="empty-state">A carregar...</p>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h2>Sumários da minha turma</h2>
+                <div id="sumariosList" class="sumarios-list">
+                    <p class="empty-state">A carregar...</p>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h2>A minha agenda</h2>
+                <form id="agendaForm" class="agenda-form">
+                    <div class="form-row">
+                        <label for="agTitulo">Título</label>
+                        <input type="text" id="agTitulo" name="titulo" maxlength="200" required placeholder="O que preciso de fazer">
+                    </div>
+                    <div class="form-row">
+                        <label for="agData">Data (opcional)</label>
+                        <input type="date" id="agData" name="data">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit">Adicionar</button>
+                        <div id="agStatus"></div>
+                    </div>
+                </form>
+
+                <div id="agendaList" class="agenda-list">
+                    <p class="empty-state">A carregar...</p>
+                </div>
+            </div>
         </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/PAP/project/assets/app.js?v=6"></script>
 </body>
 </html>

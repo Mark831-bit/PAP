@@ -11,6 +11,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Professor' || empty($_SE
     exit;
 }
 
+csrf_check();
+
 $login      = $_SESSION['login'];
 $titulo     = trim($_POST['titulo'] ?? '');
 $descricao  = trim($_POST['descricao'] ?? '');

@@ -1,9 +1,20 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/lib/logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['login']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Acesso negado.'
+    ]);
+    exit;
+}
+
+csrf_check();
 
 try {
     $login = trim($_POST['login'] ?? '');
@@ -97,9 +108,13 @@ try {
     }
 
 } catch (Throwable $e) {
+    log_event("ERROR", "save_login exception", [
+        "admin" => $_SESSION['login'] ?? null,
+        "msg"   => $e->getMessage(),
+    ]);
     echo json_encode([
         'ok' => false,
-        'error' => $e->getMessage()
+        'error' => 'Erro interno do servidor.'
     ]);
     exit;
 }

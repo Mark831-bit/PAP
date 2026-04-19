@@ -1,10 +1,11 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/lib/logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+csrf_check();
 
 $login = trim($_POST['login'] ?? '');
 $password = trim($_POST['password'] ?? '');
@@ -33,6 +34,8 @@ if (!password_verify($password, $user['Password'])) {
     ]);
     exit;
 }
+
+session_regenerate_id(true);
 
 $_SESSION['user_id'] = $user['UID'];
 $_SESSION['role'] = $user['Role'];

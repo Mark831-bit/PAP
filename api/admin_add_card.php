@@ -1,16 +1,20 @@
 <?php
-require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/session.php';
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/lib/logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    http_response_code(403);
     echo json_encode([
         'ok' => false,
         'error' => 'Acesso negado'
     ]);
     exit;
 }
+
+csrf_check();
 
 try {
     $role = trim($_POST['role'] ?? '');
@@ -106,6 +110,13 @@ try {
 
     $pdo->commit();
 
+    log_event("ADMIN_ACTION", "user_created", [
+        "admin"        => $_SESSION['login'] ?? null,
+        "target_login" => $login,
+        "target_role"  => $role,
+        "has_uid"      => ($uid !== ''),
+    ]);
+
     echo json_encode([
         'ok' => true,
         'message' => $role . ' criado com sucesso'
@@ -117,9 +128,14 @@ try {
         $pdo->rollBack();
     }
 
+    log_event("ERROR", "admin_add_card exception", [
+        "admin" => $_SESSION['login'] ?? null,
+        "msg"   => $e->getMessage(),
+    ]);
+
     echo json_encode([
         'ok' => false,
-        'error' => $e->getMessage()
+        'error' => 'Erro interno do servidor.'
     ]);
     exit;
 }

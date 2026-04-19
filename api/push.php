@@ -6,8 +6,7 @@ ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/lib/logger.php';
-
-$API_KEY = "pds_arduino_2026";
+require_once __DIR__ . '/../config/secrets.php';
 
 $key    = $_POST['key'] ?? '';
 $uidRaw = $_POST['uid'] ?? '';
@@ -19,7 +18,7 @@ log_event("INFO", "push request received", [
     "uid" => $uid
 ]);
 
-if ($key !== $API_KEY) {
+if (!is_string($key) || !hash_equals(ARDUINO_API_KEY, $key)) {
     log_event("WARN", "unauthorized push", [
         "uid" => $uid
     ]);
@@ -146,6 +145,9 @@ try {
 
             // Обновляем текущее состояние в alunos/professores
             $table = ($role === 'Aluno') ? 'alunos' : 'professores';
+            if (!in_array($table, ['alunos', 'professores'], true)) {
+                throw new Exception("invalid target table");
+            }
             $qUpd = $mysqli->prepare("UPDATE `$table` SET `Presença` = ? WHERE login = ?");
             $qUpd->bind_param("is", $newPresenca, $login);
             $qUpd->execute();
