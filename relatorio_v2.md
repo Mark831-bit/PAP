@@ -57,6 +57,7 @@ Aos colegas de turma, pelas trocas de ideias que ajudaram a melhorar o trabalho.
    1.2. Motivação
    1.3. Objetivos
    1.4. Estrutura do documento
+   1.5. Apresentação do Projeto
 2. Enquadramento Teórico
    2.1. Identificação por Radiofrequência (RFID)
    2.2. Arduino e o módulo MFRC522
@@ -247,6 +248,56 @@ O **Capítulo 8** (*Testes e Validação*) cobre as estratégias de teste e os r
 O **Capítulo 9** (*Conclusões*) faz o balanço, aponta limitações e sugere trabalho futuro.
 
 A **Bibliografia** (Capítulo 10) e os **Anexos** (Capítulo 11) encerram o documento.
+
+## 1.5. Apresentação do Projeto
+
+Esta secção reproduz a proposta inicial do projeto, tal como foi submetida e aprovada no arranque da PAP. Serve de referência para comparar o que foi prometido com o que foi efetivamente implementado e documentado nos capítulos seguintes.
+
+### 1.5.1. Identificação
+
+- **Aluno:** Marko Nikolaienko
+- **Nº de Processo:** a32498
+- **Turma:** 12.º C
+- **Título do projeto:** *Website da escola com acesso através da web ou leitura RFID do cartão escolar*
+- **Orientação:** Professora Carla de Sousa
+
+### 1.5.2. Descrição geral
+
+O projeto proposto como PAP tem como objetivo principal criar acessibilidade e usabilidade para alunos e professores. Foi desenvolvido um *website* escolar ao qual se pode aceder pela *web* ou pela leitura do cartão escolar com recurso a RFID. A plataforma permite a criação autónoma de perfis de acesso, com permissões adequadas a cada tipo de utilizador. Para além da gestão de perfis, previu-se a integração — total ou parcial — com as restantes plataformas digitais utilizadas no agrupamento (SIGE, Inovar e Classroom).
+
+### 1.5.3. Perfis previstos
+
+**Perfil de Aluno.** Acesso às notícias escolares, aos eventos futuros e passados e às plataformas educativas agregadas à escola (SIGE, Classroom e Inovar). No próprio perfil, o aluno pode consultar o seu horário, a agenda escolar, as avaliações, a marcação de refeições, o saldo do cartão e o gráfico de progresso avaliativo.
+
+**Perfil de Professor.** Autonomia para gerir o próprio perfil: inserir os horários das turmas que leciona e o seu horário pessoal, registar os perfis dos alunos, anexar documentação agregada a cargos de direção de curso e de turma, manter o cronograma de aulas e os sumários, e acompanhar o progresso de aprendizagem e a assiduidade dos alunos, bem como a sua própria agenda.
+
+### 1.5.4. Desenvolvimento do projeto
+
+O *front-end* é desenvolvido em **HTML, CSS e JavaScript**. No *back-end* é utilizada a linguagem **PHP**, com base de dados em **MySQL** (SGBD relacional, SQL) e integração com um **Arduino** equipado com módulo RFID MFRC522 para leitura do cartão escolar.
+
+### 1.5.5. Objetivos declarados
+
+- Contribuir para a comunidade escolar com uma nova ferramenta.
+- Implementar acessibilidade e usabilidade, com particular atenção aos alunos estrangeiros.
+- Dar apoio a alunos e professores.
+- Aplicar as aprendizagens desenvolvidas no curso profissional de Programação Informática.
+- Criar uma ferramenta acessível e de fácil utilização para qualquer aluno.
+
+### 1.5.6. Recursos necessários
+
+**Recursos humanos:**
+
+- Tempo pessoal do aluno.
+- Orientação dada pela professora Carla de Sousa.
+
+**Recursos tecnológicos:**
+
+- Computador e acesso à Internet.
+- *Arduino* e módulo RFID (MFRC522).
+- Documentação e manuais de SQL e PHP.
+- Software de desenvolvimento (editor de código, servidor local *WAMP*, SGBD, controlo de versões).
+
+> **Nota.** A proposta foi assinada a 17 de outubro de 2025. Os capítulos seguintes documentam em detalhe como cada um destes objetivos foi concretizado; as limitações e os pontos deixados para trabalho futuro são discutidos no *Capítulo 9 (Conclusões)*.
 
 ---
 

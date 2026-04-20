@@ -321,6 +321,35 @@ Em testes efetuados na rede local da sala de aula, obtiveram-se os valores apres
 
 ---
 
+## 17. Acrescentar secção 1.5 — Apresentação do Projeto
+
+**Motivação.** A professora orientadora pediu que fosse incluída, no Capítulo 1, uma secção que reproduza a proposta formal do projeto (ficheiro de arranque assinado em 17 de outubro de 2025 — `Marko.docx`). Serve como referência da proposta inicial aprovada, para poder ser comparada com o que foi efetivamente entregue nos capítulos seguintes.
+
+**Onde inserir.** Imediatamente depois da secção **1.4. Estrutura do documento** e antes do Capítulo 2 (*Enquadramento Teórico*).
+
+**Também atualizar o Índice:** acrescentar a linha `1.5. Apresentação do Projeto` por baixo de `1.4. Estrutura do documento`.
+
+**Conteúdo da nova secção (já redigido em [relatorio_v2.md](relatorio_v2.md) §1.5):**
+
+- **1.5.1. Identificação** — aluno, nº processo, turma, título do projeto, orientação.
+- **1.5.2. Descrição geral** — objetivo principal (acessibilidade e usabilidade), *website* com acesso *web* + RFID, criação autónoma de perfis, integração prevista com SIGE / Inovar / Classroom.
+- **1.5.3. Perfis previstos** — Aluno (notícias, eventos, plataformas, horário, agenda, avaliações, cartão, gráfico de progresso) e Professor (horários, sumários, gestão de perfis de aluno, documentação, assiduidade, agenda).
+- **1.5.4. Desenvolvimento do projeto** — *front-end* (HTML/CSS/JS), *back-end* (PHP + MySQL), *hardware* (Arduino + MFRC522).
+- **1.5.5. Objetivos declarados** — lista de 5 pontos tal como na proposta assinada.
+- **1.5.6. Recursos necessários** — recursos humanos e tecnológicos.
+- Nota final — data da assinatura (17/10/2025) e remissão para o *Capítulo 9* onde se discutem limitações e o que ficou por concretizar.
+
+**Como aplicar em Word:**
+
+1. Coloca o cursor no final da §1.4 (*Estrutura do documento*).
+2. Insere quebra de página ou parágrafo e digita `1.5. Apresentação do Projeto` com o estilo **Heading 2**.
+3. Copia os parágrafos da §1.5 de `relatorio_v2.md` para o Word.
+4. Usa **Heading 3** para `1.5.1.` … `1.5.6.`.
+5. Atualiza o **Índice** (*Referências → Atualizar Tabela → Atualizar tabela inteira*).
+6. Atualiza também a **Lista de Figuras / Tabelas** se for preciso (nesta secção não há figuras nem tabelas novas).
+
+---
+
 ## Nota sobre hiperligação para o SDG
 
 Em todas as ocorrências da palavra **"SDG"** no documento (há ~21), seleciona a palavra e aplica **Insert → Link → Existing File → `SDG_corrigido (2).docx`**. Alternativa mais prática: cria um **Bookmark** único chamado "SDG" no início do documento e faz todas as ligações apontarem para esse bookmark — assim, se renomeares o ficheiro, basta atualizar o bookmark uma vez.
