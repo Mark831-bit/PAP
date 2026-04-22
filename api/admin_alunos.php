@@ -17,18 +17,17 @@ if ($action === 'list') {
     $alunos = [];
     $sql = "
         SELECT
-            a.ID           AS id,
-            a.Nome         AS nome,
-            a.Idade        AS idade,
-            a.Turma        AS turma,
-            a.`Número em turma` AS numero_turma,
-            a.`Presença`   AS presenca,
-            a.login        AS login,
-            l.UID          AS uid,
-            l.blocked      AS blocked
+            a.ID                 AS id,
+            a.Nome               AS nome,
+            a.data_nascimento    AS data_nascimento,
+            CONCAT(a.turma_num, a.turma_letra) AS turma,
+            a.`Presença`         AS presenca,
+            a.login              AS login,
+            l.UID                AS uid,
+            l.blocked            AS blocked
         FROM alunos a
         LEFT JOIN login l ON l.Login = a.login
-        ORDER BY a.Turma ASC, a.`Número em turma` ASC, a.Nome ASC
+        ORDER BY a.turma_num ASC, a.turma_letra ASC, a.Nome ASC
     ";
     if ($res = $conn->query($sql)) {
         while ($row = $res->fetch_assoc()) $alunos[] = $row;
@@ -46,15 +45,14 @@ if ($action === 'get') {
     }
     $stmt = $conn->prepare("
         SELECT
-            a.ID           AS id,
-            a.Nome         AS nome,
-            a.Idade        AS idade,
-            a.Turma        AS turma,
-            a.`Número em turma` AS numero_turma,
-            a.`Presença`   AS presenca,
-            a.login        AS login,
-            l.UID          AS uid,
-            l.blocked      AS blocked
+            a.ID                 AS id,
+            a.Nome               AS nome,
+            a.data_nascimento    AS data_nascimento,
+            CONCAT(a.turma_num, a.turma_letra) AS turma,
+            a.`Presença`         AS presenca,
+            a.login              AS login,
+            l.UID                AS uid,
+            l.blocked            AS blocked
         FROM alunos a
         LEFT JOIN login l ON l.Login = a.login
         WHERE a.login = ?

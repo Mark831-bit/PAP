@@ -32,7 +32,7 @@ if ($action === 'list') {
             SELECT n.id, n.login_aluno, n.materia, n.tipo, n.valor,
                    n.data, n.professor_login, n.observacao, n.criado_em,
                    a.Nome AS aluno_nome,
-                   a.`Número em turma` AS aluno_numero,
+                   '' AS aluno_numero,
                    a.Turma AS aluno_turma
             FROM notas n
             LEFT JOIN alunos a ON a.login = n.login_aluno
@@ -75,10 +75,10 @@ if ($action === 'alunos_da_turma') {
     }
 
     $stmt = $conn->prepare("
-        SELECT login, Nome AS nome, `Número em turma` AS numero
+        SELECT login, Nome AS nome
         FROM alunos
         WHERE Turma = ?
-        ORDER BY `Número em turma` ASC, Nome ASC
+        ORDER BY Nome ASC
     ");
     $stmt->bind_param("s", $p['turma']);
     $stmt->execute();
@@ -180,37 +180,6 @@ if ($action === 'create') {
         echo json_encode(['ok' => false, 'error' => 'db error']);
     }
     $ins->close();
-    exit;
-}
-
-if ($action === 'delete') {
-    if ($role !== 'Professor') {
-        http_response_code(403);
-        echo json_encode(['ok' => false, 'error' => 'forbidden']);
-        exit;
-    }
-    csrf_check();
-
-    $id = (int)($_POST['id'] ?? 0);
-    if ($id <= 0) {
-        http_response_code(400);
-        echo json_encode(['ok' => false, 'error' => 'id required']);
-        exit;
-    }
-
-    $stmt = $conn->prepare("DELETE FROM notas WHERE id = ? AND professor_login = ?");
-    $stmt->bind_param("is", $id, $login);
-    $stmt->execute();
-    $affected = $stmt->affected_rows;
-    $stmt->close();
-
-    if ($affected === 0) {
-        http_response_code(404);
-        echo json_encode(['ok' => false, 'error' => 'not found']);
-        exit;
-    }
-
-    echo json_encode(['ok' => true]);
     exit;
 }
 

@@ -22,10 +22,9 @@ try {
     $nome = trim($_POST['nome'] ?? '');
     $login = trim($_POST['login'] ?? '');
     $password = trim($_POST['password'] ?? '');
-    $idade = trim($_POST['idade'] ?? '');
+    $dataNascimento = trim($_POST['data_nascimento'] ?? '');
     $turmaNum = trim($_POST['turma_num'] ?? '');
     $turmaLetra = trim($_POST['turma_letra'] ?? '');
-    $numeroTurma = trim($_POST['numero_turma'] ?? '');
     $uid = trim($_POST['uid'] ?? '');
 
     $turma = $turmaNum . $turmaLetra;
@@ -54,6 +53,25 @@ try {
         exit;
     }
 
+    if ($role === 'Aluno') {
+        if ($dataNascimento === '') {
+            echo json_encode([
+                'ok' => false,
+                'error' => 'Para Aluno, Data de nascimento é obrigatória'
+            ]);
+            exit;
+        }
+
+        $dt = DateTime::createFromFormat('Y-m-d', $dataNascimento);
+        if (!$dt || $dt->format('Y-m-d') !== $dataNascimento) {
+            echo json_encode([
+                'ok' => false,
+                'error' => 'Data de nascimento inválida'
+            ]);
+            exit;
+        }
+    }
+
     $stmtCheck = $pdo->prepare("SELECT Login FROM login WHERE Login = ? LIMIT 1");
     $stmtCheck->execute([$login]);
     if ($stmtCheck->fetch()) {
@@ -75,26 +93,16 @@ try {
     $stmtLogin->execute([$login, $passwordHash, $uid, $role]);
 
     if ($role === 'Aluno') {
-        if ($idade === '' || $numeroTurma === '') {
-            $pdo->rollBack();
-            echo json_encode([
-                'ok' => false,
-                'error' => 'Para Aluno, Idade e Número na turma são obrigatórios'
-            ]);
-            exit;
-        }
-
         $stmtAluno = $pdo->prepare("
-            INSERT INTO alunos (`Nome`, `Idade`, `Turma`, `turma_num`, `turma_letra`, `Número em turma`, `Presença`, `login`)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO alunos (`Nome`, `data_nascimento`, `Turma`, `turma_num`, `turma_letra`, `Presença`, `login`)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         $stmtAluno->execute([
             $nome,
-            (int)$idade,
+            $dataNascimento,
             $turma,
             (int)$turmaNum,
             strtoupper($turmaLetra),
-            (int)$numeroTurma,
             0,
             $login
         ]);

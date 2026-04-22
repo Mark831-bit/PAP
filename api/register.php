@@ -12,13 +12,12 @@ try {
     $login = trim($_POST['login'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $nome = trim($_POST['nome'] ?? '');
-    $idade = trim($_POST['idade'] ?? '');
+    $dataNascimento = trim($_POST['data_nascimento'] ?? '');
     $turmaNum = trim($_POST['turma_num'] ?? '');
     $turmaLetra = trim($_POST['turma_letra'] ?? '');
     $turma = $turmaNum . $turmaLetra;
-    $numeroTurma = trim($_POST['numero_turma'] ?? '');
 
-    if ($login === '' || $password === '' || $nome === '' || $idade === '' || $turma === '' || $numeroTurma === '') {
+    if ($login === '' || $password === '' || $nome === '' || $dataNascimento === '' || $turma === '') {
         echo json_encode([
             'ok' => false,
             'error' => 'Preencha todos os campos'
@@ -34,18 +33,11 @@ try {
         exit;
     }
 
-    if (!is_numeric($idade) || (int)$idade <= 0) {
+    $dt = DateTime::createFromFormat('Y-m-d', $dataNascimento);
+    if (!$dt || $dt->format('Y-m-d') !== $dataNascimento) {
         echo json_encode([
             'ok' => false,
-            'error' => 'Idade inválida'
-        ]);
-        exit;
-    }
-
-    if (!is_numeric($numeroTurma) || (int)$numeroTurma <= 0) {
-        echo json_encode([
-            'ok' => false,
-            'error' => 'Número em turma inválido'
+            'error' => 'Data de nascimento inválida'
         ]);
         exit;
     }
@@ -58,7 +50,6 @@ try {
         exit;
     }
 
-    /* Проверка: логин уже существует? */
     $stmt = $pdo->prepare("SELECT Login FROM login WHERE Login = ? LIMIT 1");
     $stmt->execute([$login]);
     $existingUser = $stmt->fetch();
@@ -71,30 +62,26 @@ try {
         exit;
     }
 
-    /* Хешируем пароль */
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-    /* По умолчанию регистрируем как Aluno */
     $role = 'Aluno';
     $uid = '';
 
-    /* 1. Сохраняем в login */
     $stmtLogin = $pdo->prepare("
         INSERT INTO login (Login, Password, UID, Role)
         VALUES (?, ?, ?, ?)
     ");
     $stmtLogin->execute([$login, $passwordHash, $uid, $role]);
 
-    /* 2. Сохраняем в alunos */
     $stmtAluno = $pdo->prepare("
-        INSERT INTO alunos (`Nome`, `Idade`, `Turma`, `Número em turma`, `Presença`, `login`)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO alunos (`Nome`, `data_nascimento`, `Turma`, `turma_num`, `turma_letra`, `Presença`, `login`)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
     $stmtAluno->execute([
         $nome,
-        (int)$idade,
+        $dataNascimento,
         $turma,
-        (int)$numeroTurma,
+        (int)$turmaNum,
+        strtoupper($turmaLetra),
         0,
         $login
     ]);

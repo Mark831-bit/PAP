@@ -58,7 +58,7 @@ if ($res) {
         <?php if (isset($_SESSION['user_id'])): ?>
 
           <div class="user-status" style="color: black;">
-            Sessão iniciada como: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+            Sessão iniciada como: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
           </div>
 
           <div id="logoutBox">

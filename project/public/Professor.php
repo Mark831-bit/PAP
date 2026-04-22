@@ -45,10 +45,10 @@ $professorNome = $professor['Nome'];
 $turmas = [];
 
 $stmtTurmas = $conn->prepare("
-    SELECT DISTINCT Turma
+    SELECT DISTINCT CONCAT(`turma_num`, `turma_letra`) AS turma
     FROM alunos
-    WHERE Turma IS NOT NULL AND Turma <> ''
-    ORDER BY Turma ASC
+    WHERE `turma_num` IS NOT NULL AND `turma_letra` IS NOT NULL
+    ORDER BY `turma_num` ASC, `turma_letra` ASC
 ");
 
 if ($stmtTurmas) {
@@ -56,7 +56,7 @@ if ($stmtTurmas) {
     $resultTurmas = $stmtTurmas->get_result();
 
     while ($row = $resultTurmas->fetch_assoc()) {
-        $turmas[] = $row['Turma'];
+        $turmas[] = $row['turma'];
     }
 }
 
@@ -66,16 +66,15 @@ $filtroPresenca = $_GET['presenca'] ?? '';
 
 /* 4. Получаем учеников по выбранной turma + presença */
 $sqlAlunos = "
-    SELECT 
-        ID,
-        Nome AS nome,
-        Idade AS idade,
-        Turma AS turma,
-        `Número em turma` AS numero_turma,
+    SELECT
+        `ID`,
+        `Nome` AS nome,
+        TIMESTAMPDIFF(YEAR, `data_nascimento`, CURDATE()) AS idade,
+        CONCAT(`turma_num`, `turma_letra`) AS turma,
         `Presença` AS presenca,
-        login
+        `login`
     FROM alunos
-    WHERE Turma = ?
+    WHERE CONCAT(`turma_num`, `turma_letra`) = ?
 ";
 
 $params = [$filtroTurma];
@@ -87,7 +86,7 @@ if ($filtroPresenca !== '' && ($filtroPresenca === '0' || $filtroPresenca === '1
     $types .= "i";
 }
 
-$sqlAlunos .= " ORDER BY `Número em turma` ASC, Nome ASC";
+$sqlAlunos .= " ORDER BY `turma_num` ASC, `turma_letra` ASC, `Nome` ASC";
 
 $stmtAlunos = $conn->prepare($sqlAlunos);
 
@@ -124,12 +123,31 @@ while ($row = $resultAlunos->fetch_assoc()) {
         </div>
 
         <div class="topbar-center">
-            <a href="/PAP/project/public/index.php">Principal</a>
-            <a href="/PAP/api/profile.php">Página pessoal</a>
+                <a href="/PAP/project/public/index.php">Principal</a>
+                <a href="/PAP/api/profile.php">Página pessoal</a>
         </div>
 
         <div class="topbar-right">
-            <h1>Professor</h1>
+                <div class="topbar-right">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+
+                    <div class="user-status" style="color: black;">
+                        Sessão iniciada como: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+                    </div>
+
+                    <div id="logoutBox">
+                        <a href="/PAP/api/logout.php">Logout</a>
+                    </div>
+
+                    <?php else: ?>
+
+                    <div class="auth-buttons">
+                        <button type="button" class="button" id="openLogin">Login</button>
+                        <button type="button" class="button" id="openRegister">Register</button>
+                    </div>
+
+                    <?php endif; ?>
+                </div>
         </div>
     </div>
 </header>
@@ -369,8 +387,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
                                 </div>
 
                                 <div class="student-meta">
-                                    Nº <?= htmlspecialchars($aluno['numero_turma']) ?> •
-                                    Idade <?= htmlspecialchars($aluno['idade']) ?> •
+                                    <?php if (!empty($aluno['idade'])): ?>Idade <?= htmlspecialchars($aluno['idade']) ?> • <?php endif; ?>
                                     Turma <?= htmlspecialchars($aluno['turma']) ?>
                                 </div>
                             </div>

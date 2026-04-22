@@ -27,9 +27,10 @@ if ($action === 'list') {
         SELECT 
             a.`ID` AS id,
             a.`Nome` AS nome,
-            a.`Idade` AS idade,
+            a.`data_nascimento` AS data_nascimento,
             a.`Turma` AS turma,
-            a.`Número em turma` AS numero_turma,
+            a.`turma_num` AS turma_num,
+            a.`turma_letra` AS turma_letra,
             a.`login` AS login,
             l.`UID` AS uid,
             'aluno' AS tipo
@@ -48,9 +49,10 @@ if ($action === 'list') {
         SELECT 
             p.`ID` AS id,
             p.`Nome` AS nome,
-            '' AS idade,
+            '' AS data_nascimento,
             p.`turma` AS turma,
-            '' AS numero_turma,
+            p.`turma_num` AS turma_num,
+            p.`turma_letra` AS turma_letra,
             p.`login` AS login,
             l.`UID` AS uid,
             'professor' AS tipo
@@ -79,11 +81,10 @@ if ($action === 'update') {
     $tipo = strtolower(trim($input['tipo'] ?? ''));
     $nome = trim($input['nome'] ?? '');
     $login = trim($input['login'] ?? '');
-    $idade = trim((string)($input['idade'] ?? ''));
+    $dataNascimento = trim((string)($input['data_nascimento'] ?? ''));
     $turma = trim($input['turma'] ?? '');
     $turmaNum = trim((string)($input['turma_num'] ?? ''));
     $turmaLetra = strtoupper(trim($input['turma_letra'] ?? ''));
-    $numero_turma = trim((string)($input['numero_turma'] ?? ''));
     $uid = trim($input['uid'] ?? '');
     $password = trim($input['password'] ?? '');
 
@@ -110,6 +111,17 @@ if ($action === 'update') {
         exit;
     }
 
+    if ($tipo === 'aluno' && $dataNascimento !== '') {
+        $dt = DateTime::createFromFormat('Y-m-d', $dataNascimento);
+        if (!$dt || $dt->format('Y-m-d') !== $dataNascimento) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data de nascimento inválida.'
+            ]);
+            exit;
+        }
+    }
+
     $mainUpdated = false;
     $uidUpdated = false;
     $passwordUpdated = false;
@@ -117,7 +129,7 @@ if ($action === 'update') {
     if ($tipo === 'aluno') {
         $stmt = $conn->prepare("
             UPDATE alunos
-            SET `Nome` = ?, `Idade` = ?, `Turma` = ?, `turma_num` = ?, `turma_letra` = ?, `Número em turma` = ?
+            SET `Nome` = ?, `data_nascimento` = ?, `Turma` = ?, `turma_num` = ?, `turma_letra` = ?
             WHERE `ID` = ?
         ");
 
@@ -129,12 +141,10 @@ if ($action === 'update') {
             exit;
         }
 
-        $idadeInt    = ($idade === '') ? 0 : (int)$idade;
         $turmaNumInt = ($turmaNum === '') ? 0 : (int)$turmaNum;
-        $numeroInt   = ($numero_turma === '') ? 0 : (int)$numero_turma;
         $idInt       = (int)$id;
 
-        $stmt->bind_param("sisisii", $nome, $idadeInt, $turma, $turmaNumInt, $turmaLetra, $numeroInt, $idInt);
+        $stmt->bind_param("sssisi", $nome, $dataNascimento, $turma, $turmaNumInt, $turmaLetra, $idInt);
 
         if (!$stmt->execute()) {
             echo json_encode([
@@ -250,12 +260,12 @@ if ($action === 'update') {
 
     if ($mainUpdated || $uidUpdated || $passwordUpdated) {
         log_event("ADMIN_ACTION", "card_updated", [
-            "admin"           => $_SESSION['login'] ?? null,
-            "target_login"    => $login,
-            "target_tipo"     => $tipo,
-            "main_updated"    => $mainUpdated,
-            "uid_updated"     => $uidUpdated,
-            "password_changed"=> $passwordUpdated,
+            "admin"            => $_SESSION['login'] ?? null,
+            "target_login"     => $login,
+            "target_tipo"      => $tipo,
+            "main_updated"     => $mainUpdated,
+            "uid_updated"      => $uidUpdated,
+            "password_changed" => $passwordUpdated,
         ]);
         echo json_encode([
             'success' => true,
@@ -269,7 +279,7 @@ if ($action === 'update') {
     }
 
     exit;
-} 
+}
 
 echo json_encode([
     'success' => false,

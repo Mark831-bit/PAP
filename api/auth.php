@@ -41,6 +41,34 @@ $_SESSION['user_id'] = $user['UID'];
 $_SESSION['role'] = $user['Role'];
 $_SESSION['login'] = $user['Login'];
 
+// ── GET USER NAME ─────────────────────────────
+$nome = '';
+
+$role = strtolower(trim($user['Role'] ?? ''));
+
+if ($role === 'aluno') {
+    $stmtNome = $pdo->prepare("SELECT Nome FROM alunos WHERE login = ? LIMIT 1");
+    $stmtNome->execute([$login]);
+    $row = $stmtNome->fetch();
+    if ($row && !empty($row['Nome'])) {
+        $nome = $row['Nome'];
+    }
+} elseif ($role === 'professor') {
+    $stmtNome = $pdo->prepare("SELECT Nome FROM professores WHERE login = ? LIMIT 1");
+    $stmtNome->execute([$login]);
+    $row = $stmtNome->fetch();
+    if ($row && !empty($row['Nome'])) {
+        $nome = $row['Nome'];
+    }
+}
+
+// fallback если вдруг не нашли
+if (trim($nome) === '') {
+    $nome = $user['Login'];
+}
+
+$_SESSION['nome'] = $nome;
+
 log_event("INFO", "login success", [
     "login" => $user['Login'],
     "role" => $user['Role']

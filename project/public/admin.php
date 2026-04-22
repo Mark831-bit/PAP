@@ -71,7 +71,7 @@ if ($res = $conn->query("
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=311">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=312">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="page-admin">
@@ -90,7 +90,28 @@ if ($res = $conn->query("
       </div>
 
       <div class="topbar-right">
-        <h1>Admin</h1>
+        
+                <div class="topbar-right">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+
+                    <div class="user-status" style="color: black;">
+                        Sessão iniciada como: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+                    </div>
+
+                    <div id="logoutBox">
+                        <a href="/PAP/api/logout.php">Logout</a>
+                    </div>
+
+                    <?php else: ?>
+
+                    <div class="auth-buttons">
+                        <button type="button" class="button" id="openLogin">Login</button>
+                        <button type="button" class="button" id="openRegister">Register</button>
+                    </div>
+
+                    <?php endif; ?>
+                
+        </div>
       </div>
     </div>
   </header>
@@ -209,8 +230,8 @@ if ($res = $conn->query("
             </div>
 
             <div class="form-row">
-              <label for="addIdade">Idade</label>
-              <input type="number" id="addIdade" name="idade" placeholder="Idade">
+              <label for="addDataNascimento">Data de nascimento</label>
+              <input type="date" id="addDataNascimento" name="data_nascimento">
             </div>
 
             <div class="form-row turma-row">
@@ -235,10 +256,6 @@ if ($res = $conn->query("
               </div>
             </div>
 
-            <div class="form-row">
-              <label for="addNumeroTurma">Número em turma</label>
-              <input type="number" id="addNumeroTurma" name="numero_turma" placeholder="Número">
-            </div>
 
             <div class="form-row uid-row">
               <div class="uid-input-wrap">
@@ -292,8 +309,8 @@ if ($res = $conn->query("
           </div>
 
           <div class="form-row">
-            <label for="updateI-idade">Idade</label>
-            <input type="number" id="update-idade" name="idade">
+            <label for="update-data-nascimento">Data de nascimento</label>
+            <input type="date" id="update-data-nascimento" name="data_nascimento">
           </div>
 
           <div class="form-row turma-row">
@@ -318,10 +335,6 @@ if ($res = $conn->query("
             </div>
           </div>
 
-          <div class="form-row">
-            <label for="updateNumeroTurma">Número em turma</label>
-            <input type="number" id="updateNumeroTurma" name="numero_turma">
-          </div>
 
           <div class="form-row uid-row">
             <div class="uid-input-wrap">
@@ -375,8 +388,8 @@ if ($res = $conn->query("
             </div>
 
             <div class="form-row">
-              <label for="find-idade">Idade</label>
-              <input type="text" id="find-idade" readonly>
+              <label for="find-data-nascimento">Data de nascimento</label>
+              <input type="text" id="find-data-nascimento" readonly>
             </div>
 
             <div class="form-row turma-row">
@@ -401,10 +414,6 @@ if ($res = $conn->query("
               </div>
         </div>
 
-          <div class="form-row">
-            <label for="findNumeroTurma">Número em turma</label>
-            <input type="text" id="findNumeroTurma" readonly>
-          </div>
 
           <div class="form-row">
             <label for="findUid">UID</label>
@@ -441,9 +450,9 @@ if ($res = $conn->query("
 
             <div class="dossier-grid">
               <div><span class="dossier-label">Login</span><span id="dossierLogin">—</span></div>
-              <div><span class="dossier-label">Idade</span><span id="dossierIdade">—</span></div>
+              <div><span class="dossier-label">Data de nascimento</span><span id="dossierDataNascimento">—</span></div>
               <div><span class="dossier-label">Turma</span><span id="dossierTurma">—</span></div>
-              <div><span class="dossier-label">Nº em turma</span><span id="dossierNumero">—</span></div>
+              
               <div><span class="dossier-label">UID</span><span id="dossierUid">—</span></div>
               <div><span class="dossier-label">Presença</span><span id="dossierPresenca">—</span></div>
               <div><span class="dossier-label">Cartão</span><span id="dossierBlocked">—</span></div>
@@ -456,6 +465,8 @@ if ($res = $conn->query("
           </div>
         </div>
 
+
+          
         <!-- TESTS -->
         <div class="subtab-content" id="subtab-alunos-tests">
           <div class="admin-card">
@@ -539,38 +550,52 @@ if ($res = $conn->query("
         </div>
       </div>
 
-      <div class="admin-tab-content" id="tab-suporte">
-        <div class="admin-card">
+    <div class="admin-tab-content" id="tab-suporte">
+      <div class="suporte-layout">
+        <div class="admin-card suporte-list-card">
           <div class="logs-header">
             <h2>Problemas de acesso</h2>
             <button class="secondary-btn" id="suporteRefresh">Atualizar</button>
           </div>
           <div id="suporteList"><p class="logs-empty">A carregar...</p></div>
-        </div>
+          </div>
 
-        <div class="admin-card" id="suporteDossier" style="display:none;">
-          <div class="dossier-header">
+        <div class="admin-card suporte-detail-card" id="suporteDossier" style="display:none;">
+          <div class="suporte-detail-top">
             <h2 id="suporteDossierTitle">Mensagem</h2>
-            <button class="secondary-btn" id="suporteDossierClose">Fechar</button>
+            
           </div>
 
-          <div class="dossier-grid">
-            <div><span class="dossier-label">Data</span><span id="suporteDossierData">—</span></div>
-            <div><span class="dossier-label">Email</span><span id="suporteDossierEmail">—</span></div>
-            <div><span class="dossier-label">Estado</span><span id="suporteDossierEstado">—</span></div>
+          <div class="suporte-meta-grid">
+            <div class="suporte-meta-box">
+              <span class="dossier-label">Data</span>
+              <span id="suporteDossierData">—</span>
+            </div>
+
+            <div class="suporte-meta-box">
+              <span class="dossier-label">Email</span>
+              <span id="suporteDossierEmail">—</span>
+            </div>
+
+            <div class="suporte-meta-box">
+              <span class="dossier-label">Estado</span>
+              <span id="suporteDossierEstado">—</span>
+            </div>
           </div>
 
-          <div style="margin-top:14px;">
+          <div class="suporte-message-section">
             <span class="dossier-label">Mensagem</span>
-            <div id="suporteDossierMensagem" style="white-space:pre-wrap; margin-top:6px; padding:10px; background:#f7f7f7; border-radius:6px;"></div>
+            <div id="suporteDossierMensagem" class="suporte-message-box"></div>
           </div>
 
-          <div class="dossier-actions">
+          <div class="suporte-actions">
+            <button class="secondary-btn" id="suporteDossierClose">Fechar</button>
             <button class="secondary-btn" id="suporteBtnRead">Marcar lido</button>
-            <button class="danger-btn" id="suporteBtnDelete">Eliminar</button>
+            <button class="secondary-btn" id="suporteBtnDelete">Eliminar</button>
           </div>
         </div>
       </div>
+    </div>
 
       <div class="admin-tab-content" id="tab-logs">
         <div class="admin-card">
@@ -598,7 +623,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=10"></script>
+<script src="/PAP/project/assets/app.js?v=11"></script>
 </body>
 
 </html>

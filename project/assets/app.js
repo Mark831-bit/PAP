@@ -597,34 +597,39 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderSuporte() {
-    if (!suporteList) return;
-    if (!suporteItems.length) {
-      suporteList.innerHTML = '<p class="logs-empty">Sem mensagens.</p>';
-      if (suporteDossier) suporteDossier.style.display = "none";
-      return;
-    }
-    suporteList.innerHTML = suporteItems.map((it) => {
-      const novo = Number(it.lido) === 1 ? "" : '<span class="badge-blocked">NOVO</span>';
-      return `
-        <div class="aluno-row" data-id="${it.id}" style="${Number(it.lido) === 1 ? "opacity:0.55;" : ""}">
-          <span class="scan-dot ${Number(it.lido) === 1 ? "present" : "absent"}"></span>
-          <div class="scan-info">
-            <div class="scan-name">${escapeHtml(it.email || "(sem email)")}</div>
-            <div class="scan-meta">${escapeHtml(it.criado_em || "")}</div>
-          </div>
-          ${novo}
-        </div>`;
-    }).join("");
+  if (!suporteList) return;
 
-    suporteList.querySelectorAll(".aluno-row").forEach(row => {
-      row.addEventListener("click", () => openSuporteDossier(Number(row.dataset.id)));
-    });
+  if (!suporteItems.length) {
+    suporteList.innerHTML = '<p class="logs-empty">Sem mensagens.</p>';
+    if (suporteDossier) suporteDossier.style.display = "none";
+    return;
+  }
+
+  suporteList.innerHTML = suporteItems.map((it) => {
+    const isRead = Number(it.lido) === 1;
+    return `
+      <div class="suporte-row ${isRead ? 'is-read' : ''}" data-id="${it.id}">
+        <span class="scan-dot ${isRead ? "present" : "absent"}"></span>
+        <div class="scan-info">
+          <div class="scan-name">${escapeHtml(it.email || "(sem email)")}</div>
+          <div class="scan-meta">${escapeHtml(it.criado_em || "")}</div>
+        </div>
+        ${isRead ? "" : '<span class="badge-new">NOVO</span>'}
+      </div>`;
+  }).join("");
+
+  suporteList.querySelectorAll(".suporte-row").forEach(row => {
+    row.addEventListener("click", () => openSuporteDossier(Number(row.dataset.id)));
+  });
   }
 
   function openSuporteDossier(id) {
     const it = suporteItems.find(x => Number(x.id) === id);
     if (!it || !suporteDossier) return;
     suporteCurrent = it;
+    document.querySelectorAll("#suporteList .suporte-row").forEach(row => {
+  row.classList.toggle("active", Number(row.dataset.id) === id);
+  });
 
     document.getElementById("suporteDossierData").textContent    = it.criado_em || "—";
     document.getElementById("suporteDossierEmail").textContent   = it.email || "(sem email)";
@@ -634,7 +639,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnRead = document.getElementById("suporteBtnRead");
     if (btnRead) btnRead.textContent = Number(it.lido) === 1 ? "Marcar não lido" : "Marcar lido";
 
-    suporteDossier.style.display = "flex";
+    suporteDossier.style.display = "block";
     suporteDossier.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

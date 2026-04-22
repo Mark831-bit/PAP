@@ -10,7 +10,7 @@ if (!isset($_SESSION['login']) || ($_SESSION['role'] ?? '') !== 'Aluno') {
 $login = $_SESSION['login'];
 
 /* 1. Данные ученика */
-$stmt = $conn->prepare("SELECT Nome, Turma, turma_num, turma_letra FROM alunos WHERE login = ? LIMIT 1");
+$stmt = $conn->prepare("SELECT Nome, CONCAT(turma_num, turma_letra) AS Turma, turma_num, turma_letra FROM alunos WHERE login = ? LIMIT 1");
 $stmt->bind_param("s", $login);
 $stmt->execute();
 $aluno = $stmt->get_result()->fetch_assoc();
@@ -76,7 +76,28 @@ $stmt->close();
             </div>
 
             <div class="topbar-right">
-                <h1>Aluno</h1>
+               
+                <div class="topbar-right">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+
+                    <div class="user-status" style="color: black;">
+                        Sessão iniciada como: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+                    </div>
+
+                    <div id="logoutBox">
+                        <a href="/PAP/api/logout.php">Logout</a>
+                    </div>
+
+                    <?php else: ?>
+
+                    <div class="auth-buttons">
+                        <button type="button" class="button" id="openLogin">Login</button>
+                        <button type="button" class="button" id="openRegister">Register</button>
+                    </div>
+
+                    <?php endif; ?>
+                
+                </div>
             </div>
         </div>
     </header>
