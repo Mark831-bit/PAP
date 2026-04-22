@@ -111,7 +111,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Professor - Os meus alunos</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=308">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=311">
 </head>
 <body class="page-professor">
 
@@ -126,7 +126,6 @@ while ($row = $resultAlunos->fetch_assoc()) {
         <div class="topbar-center">
             <a href="/PAP/project/public/index.php">Principal</a>
             <a href="/PAP/api/profile.php">Página pessoal</a>
-            <a href="/PAP/project/public/dashboard">Horário</a>
         </div>
 
         <div class="topbar-right">
@@ -462,6 +461,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=6"></script>
+<script src="/PAP/project/assets/app.js?v=10"></script>
 </body>
 </html>

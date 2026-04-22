@@ -71,7 +71,7 @@ if ($res = $conn->query("
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=310">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=311">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="page-admin">
@@ -87,7 +87,6 @@ if ($res = $conn->query("
       <div class="topbar-center">
         <a href="/PAP/project/public/index.php">Principal</a>
         <a href="/PAP/api/profile.php">Página pessoal</a>
-        <a href="/PAP/project/public/dashboard">Horário</a>
       </div>
 
       <div class="topbar-right">
@@ -105,6 +104,7 @@ if ($res = $conn->query("
         <button class="admin-tab" data-tab="alunos">Alunos</button>
         <button class="admin-tab" data-tab="professores">Professores</button>
         <button class="admin-tab" data-tab="noticias">Notícias</button>
+        <button class="admin-tab" data-tab="suporte">Suporte</button>
         <button class="admin-tab" data-tab="logs">Logs</button>
       </div>
 
@@ -539,6 +539,39 @@ if ($res = $conn->query("
         </div>
       </div>
 
+      <div class="admin-tab-content" id="tab-suporte">
+        <div class="admin-card">
+          <div class="logs-header">
+            <h2>Problemas de acesso</h2>
+            <button class="secondary-btn" id="suporteRefresh">Atualizar</button>
+          </div>
+          <div id="suporteList"><p class="logs-empty">A carregar...</p></div>
+        </div>
+
+        <div class="admin-card" id="suporteDossier" style="display:none;">
+          <div class="dossier-header">
+            <h2 id="suporteDossierTitle">Mensagem</h2>
+            <button class="secondary-btn" id="suporteDossierClose">Fechar</button>
+          </div>
+
+          <div class="dossier-grid">
+            <div><span class="dossier-label">Data</span><span id="suporteDossierData">—</span></div>
+            <div><span class="dossier-label">Email</span><span id="suporteDossierEmail">—</span></div>
+            <div><span class="dossier-label">Estado</span><span id="suporteDossierEstado">—</span></div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <span class="dossier-label">Mensagem</span>
+            <div id="suporteDossierMensagem" style="white-space:pre-wrap; margin-top:6px; padding:10px; background:#f7f7f7; border-radius:6px;"></div>
+          </div>
+
+          <div class="dossier-actions">
+            <button class="secondary-btn" id="suporteBtnRead">Marcar lido</button>
+            <button class="danger-btn" id="suporteBtnDelete">Eliminar</button>
+          </div>
+        </div>
+      </div>
+
       <div class="admin-tab-content" id="tab-logs">
         <div class="admin-card">
           <div class="logs-header">
@@ -565,7 +598,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=310"></script>
+<script src="/PAP/project/assets/app.js?v=10"></script>
 </body>
 
 </html>

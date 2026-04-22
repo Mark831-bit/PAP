@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/lib/logger.php';
+require_once __DIR__ . '/lib/validators.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -25,6 +26,14 @@ try {
         exit;
     }
 
+    if (!filter_var($login, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Email inválido (deve conter "@")'
+        ]);
+        exit;
+    }
+
     if (!is_numeric($idade) || (int)$idade <= 0) {
         echo json_encode([
             'ok' => false,
@@ -41,6 +50,14 @@ try {
         exit;
     }
 
+    if (!is_valid_turma($turmaNum, $turmaLetra)) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Turma inválida'
+        ]);
+        exit;
+    }
+
     /* Проверка: логин уже существует? */
     $stmt = $pdo->prepare("SELECT Login FROM login WHERE Login = ? LIMIT 1");
     $stmt->execute([$login]);
@@ -49,7 +66,7 @@ try {
     if ($existingUser) {
         echo json_encode([
             'ok' => false,
-            'error' => 'Esse login já existe'
+            'error' => 'Esse email já está registado'
         ]);
         exit;
     }

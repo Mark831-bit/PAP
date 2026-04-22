@@ -58,7 +58,7 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Aluno</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=310">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=311">
 </head>
 
 <body class="page-aluno">
@@ -73,7 +73,6 @@ $stmt->close();
             <div class="topbar-center">
                 <a href="/PAP/project/public/index.php">Principal</a>
                 <a href="/PAP/api/profile.php">Página pessoal</a>
-                <a href="/PAP/project/public/dashboard">Horário</a>
             </div>
 
             <div class="topbar-right">
@@ -183,6 +182,6 @@ $stmt->close();
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="/PAP/project/assets/app.js?v=6"></script>
+    <script src="/PAP/project/assets/app.js?v=10"></script>
 </body>
 </html>

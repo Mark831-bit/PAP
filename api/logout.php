@@ -1,24 +1,7 @@
-// <?php
-/* session_start();
-
-$_SESSION = [];
-
-session_destroy();
-
-
-require_once __DIR__.'/lib/logger.php';
-
-log_event("INFO","user logout",[
-  "user"=>$_SESSION['login'] ?? null
-]);
-
-header("Location: /PAP/project/public/index.php");
-exit;
- */
-
+<?php
 session_start();
 
-require_once __DIR__.'/lib/logger.php';
+require_once __DIR__ . '/lib/logger.php';
 
 log_event("INFO", "user logout", [
     "user" => $_SESSION['login'] ?? null

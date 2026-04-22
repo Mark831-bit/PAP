@@ -18,7 +18,8 @@ if ($res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>PAP - Main</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=5">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=318">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body class="page-index">
@@ -27,24 +28,37 @@ if ($res) {
     <div class="topbar-inner">
 
       <div class="topbar-left">
-        <a href="/PAP/project/public/index.php">
+        <a href="/PAP/project/public/index.php" class="logo-hover">
           <img class="logo" src="../assets/aemtg.jpg" alt="Logo">
+          <div class="hover-text">Website da escola</div>
+        </a>
+        
+        <a href="https://classroom.google.com/" >
+          <img class="logo" src="../assets/classroom.jpg" class="mini-logo" alt="Classroom">
+        </a>
+
+         <a href="https://aepombal.unicard.pt">
+          <img class="logo" src="../assets/sige.png" class="mini-logo" alt="SIGE">
+        </a>
+
+         <a href="https://inovar.aemtg.pt/inovaralunos/Inicial.wgx">
+          <img class="logo" src="../assets/inovar.png" class="mini-logo" alt="Inovar">
         </a>
       </div>
+          
 
       <div class="topbar-center">
         <?php if (isset($_SESSION['user_id'])): ?>
           <a href="/PAP/project/public/index.php">Principal</a>
-          <a href="/PAP/api/profile.php">Pagina pessoal</a>
-          <a href="/PAP/project/public/admin.php">Horario</a>
+          <a href="/PAP/api/profile.php">Página pessoal</a>
         <?php endif; ?>
       </div>
 
       <div class="topbar-right">
         <?php if (isset($_SESSION['user_id'])): ?>
 
-          <div class="user-status" style="color: green;">
-            Вы вошли как: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+          <div class="user-status" style="color: black;">
+            Sessão iniciada como: <?= htmlspecialchars($_SESSION['login']) ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
           </div>
 
           <div id="logoutBox">
@@ -54,8 +68,8 @@ if ($res) {
         <?php else: ?>
 
           <div class="auth-buttons">
-            <button type="button" id="openLogin">Login</button>
-            <button type="button" id="openRegister">Register</button>
+            <button type="button" class="button" id="openLogin">Login</button>
+            <button type="button" class="button" id="openRegister">Register</button>
           </div>
 
         <?php endif; ?>
@@ -74,7 +88,21 @@ if ($res) {
           <input type="text" name="login" placeholder="Login" required>
           <input type="password" name="password" placeholder="Password" required>
           <button type="submit">Entrar</button>
-          <div id="loginFormStatus">Вы не вошли в систему</div>
+          <div id="loginFormStatus">Sessão não iniciada</div>
+          <a href="#" id="openProblem">Problemas com acesso? Contacte o administrador</a>
+        </form>
+      </div>
+    </div>
+
+    <div id="problemModal" class="auth-modal hidden">
+      <div class="auth-box">
+        <button class="close-modal" type="button" data-close="problemModal">×</button>
+        <h2>Contactar administrador</h2>
+        <form id="problemForm">
+          <input type="email" class = "email" name="email" placeholder="O seu email (opcional)">
+          <textarea name="mensagem" class = "email" placeholder="Descreva o problema..." rows="5" maxlength="2000" required></textarea>
+          <button type="submit">Enviar</button>
+          <div id="problemStatus"></div>
         </form>
       </div>
     </div>
@@ -82,13 +110,13 @@ if ($res) {
     <div id="registerModal" class="auth-modal hidden">
       <div class="auth-box">
         <button class="close-modal" type="button" data-close="registerModal">×</button>
-        <h2>Register</h2>
+        <h2>Criar conta</h2>
 
         <form id="registerForm">
-          <input type="text" name="login" placeholder="Login" required>
+          <input type="email" name="login" placeholder="Email" required>
           <input type="password" name="password" placeholder="Password" required>
           <input type="text" name="nome" placeholder="Nome" required>
-          <input type="number" name="idade" placeholder="Idade" min="1" required>
+          <input type="number" name="idade" placeholder="Data de Nascimento" min="1" required>
         <div style="display: flex; gap: 10px;">
           
           <select name="turma_num" required>
@@ -106,7 +134,7 @@ if ($res) {
           </select>
 
         </div>
-          <input type="number" name="numero_turma" placeholder="Número em turma" min="1" required>
+          
           <button type="submit">Criar conta</button>
           <div id="registerStatus"></div>
       </form>
@@ -117,11 +145,9 @@ if ($res) {
   <main class="page-content">
     <h1 class="main_hello">Bem-vindo à plataforma RFID escolar</h1>
     <br>
-    <p class="main_text">É um prazer tê-lo aqui. A nossa plataforma foi criada para tornar a vida escolar
-  mais simples e organizada.</p>
-  
-    <p>Através deste sistema, pode acompanhar a sua presença, aceder ao seu perfil e
-  utilizar diferentes funcionalidades de forma rápida e segura.
+    <p class="main_text">Esta plataforma foi desenvolvida com o objetivo de simplificar o acesso à informação escolar e automatizar o registo de presenças através da tecnologia RFID.
+O sistema permite identificar alunos e professores por meio do cartão escolar, registando automaticamente entradas e saídas, e disponibilizando essa informação em tempo real.
+Num único ambiente, os utilizadores podem consultar presenças, avaliações, horários e outras funcionalidades essenciais de forma rápida, organizada e segura.
 </p>
     <br>
     <?php if (count($noticias) > 0): ?>
@@ -146,22 +172,25 @@ if ($res) {
       <?php endif; ?>
     </section>
     <?php endif; ?>
-    <p>Esperamos que tenha uma excelente experiência!</p>
+    <p>Funcionalidades principais:</p>
+    <p>• Registo automático de presenças com RFID  </p>
+    <p>• Consulta de avaliações e progresso académico  </p>
+    <p>• Acesso ao horário escolar</p>
+    <p>• Gestão de utilizadores e cartões (admin)</p>
+    <p>Uma solução simples, eficiente e integrada para o dia a dia escolar.</p>
   </main>
   <footer class="site-footer">
     <div class="footer-top-line"></div>
 
     <div class="footer-content">
-      <p>
-        <a href="https://classroom.google.com/?pli=1">Classroom</a> | <a href="https://inovar.aemtg.pt/inovaralunos/Inicial.wgx">Inovar</a> | <a href="https://aepombal.unicard.pt">SIGE</a>
-      </p>
+      <p>© 2026 PAP RFID School System</p>
       <p class="footer-projects">
-        Os nossos projetos: <strong>PAP RFID School System</strong>
+         Marko Nikolaienko
       </p>
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=4"></script>
+  <script src="/PAP/project/assets/app.js?v=10"></script>
 </body>
 </html>
 

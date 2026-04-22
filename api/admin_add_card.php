@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/lib/logger.php';
+require_once __DIR__ . '/lib/validators.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -41,6 +42,14 @@ try {
         echo json_encode([
             'ok' => false,
             'error' => 'Role inválida'
+        ]);
+        exit;
+    }
+
+    if (!is_valid_turma($turmaNum, $turmaLetra)) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Turma inválida'
         ]);
         exit;
     }

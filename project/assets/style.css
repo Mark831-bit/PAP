@@ -10,6 +10,9 @@
    7. Responsive
    ========================================================= */
 
+
+/*.auth-buttons button*/
+
 /* =========================================================
    1. BASE / RESET
    ========================================================= */
@@ -19,9 +22,23 @@
 
 html,
 body {
+  font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
 }
+
+h1 {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+
 
 body.page-index,
 body.page-aluno,
@@ -71,6 +88,7 @@ main {
 }
 
 .topbar-left {
+  gap:40px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -154,8 +172,10 @@ main {
   border: 0;
   cursor: pointer;
   font-weight: 600;
-  background: #0b1b3a;
+  background: #1E3A8A;
   color: #fff;
+  border-radius: 12px;
+    font-weight: 500;
 }
 
 .auth-buttons button:hover {
@@ -1367,6 +1387,7 @@ main {
 
 .footer-content {
   display: flex;
+  justify-content: space-between; /* ← раскидывает влево/вправо */
   align-items: center;
   max-width: 1100px;
   margin: 0 auto;
@@ -1815,4 +1836,117 @@ body.page-index > main {
   font-size: 13px;
   font-style: italic;
   margin-top: 2px;
+}
+
+.logo-hover {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.logo-hover .logo {
+  display: block;
+  max-height: 60px;
+  width: auto;
+  border-radius: 10px;
+}
+
+.logo-hover .hover-text {
+  position: absolute;
+  left: 50%;
+  bottom: -42px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
+
+.logo-hover:hover .hover-text {
+  opacity: 1;
+}
+
+.mini-logo {
+  height: 10px; 
+  width: auto;
+  object-fit: contain;
+}
+
+.problem-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #4b1ea7;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.problem-link:hover {
+  text-decoration: underline;
+  color: #35157c;
+}
+
+#problemForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#problemForm input,
+#problemForm textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #f9fafb;
+  padding: 12px 14px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+#problemForm textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+#problemForm input:focus,
+#problemForm textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+#problemForm button {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  background: #0b1b3a;
+  color: #fff;
+}
+
+#problemForm button:hover {
+  filter: brightness(1.08);
+}
+
+#problemStatus {
+  min-height: 20px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.problem-note {
+  margin: -4px 0 4px;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.45;
 }

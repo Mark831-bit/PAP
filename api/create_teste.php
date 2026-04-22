@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/lib/logger.php';
+require_once __DIR__ . '/lib/validators.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -26,7 +27,7 @@ if ($titulo === '' || $dataTeste === '' || $turmaNum === '' || $turmaLetra === '
     exit;
 }
 
-if (!in_array($turmaNum, ['10', '11', '12'], true) || !in_array($turmaLetra, ['A', 'B', 'C'], true)) {
+if (!is_valid_turma($turmaNum, $turmaLetra)) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => 'invalid turma']);
     exit;

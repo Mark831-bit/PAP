@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/lib/logger.php';
+require_once __DIR__ . '/lib/validators.php';
 
 if (!isset($_SESSION['login']) || ($_SESSION['role'] ?? '') !== 'admin') {
     http_response_code(403);
@@ -90,6 +91,21 @@ if ($action === 'update') {
         echo json_encode([
             'success' => false,
             'message' => 'ID, tipo ou login em falta.'
+        ]);
+        exit;
+    }
+
+    if ($turmaNum !== '' && !is_valid_turma_num($turmaNum)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'turma_num inválido.'
+        ]);
+        exit;
+    }
+    if ($turmaLetra !== '' && !is_valid_turma_letra($turmaLetra)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'turma_letra inválida.'
         ]);
         exit;
     }

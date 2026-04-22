@@ -7,16 +7,26 @@ document.addEventListener("DOMContentLoaded", function () {
   // ── MODALS ────────────────────────────────────────────────
   const loginModal    = document.getElementById("loginModal");
   const registerModal = document.getElementById("registerModal");
+  const problemModal  = document.getElementById("problemModal");
   const openLogin     = document.getElementById("openLogin");
   const openRegister  = document.getElementById("openRegister");
+  const openProblem   = document.getElementById("openProblem");
   const loginForm     = document.getElementById("loginForm");
   const registerForm  = document.getElementById("registerForm");
+  const problemForm   = document.getElementById("problemForm");
 
   if (openLogin && loginModal) {
     openLogin.addEventListener("click", () => loginModal.classList.remove("hidden"));
   }
   if (openRegister && registerModal) {
     openRegister.addEventListener("click", () => registerModal.classList.remove("hidden"));
+  }
+  if (openProblem && problemModal) {
+    openProblem.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (loginModal) loginModal.classList.add("hidden");
+      problemModal.classList.remove("hidden");
+    });
   }
 
   document.querySelectorAll(".close-modal").forEach((btn) => {
@@ -26,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  [loginModal, registerModal].forEach((modal) => {
+  [loginModal, registerModal, problemModal].forEach((modal) => {
     if (!modal) return;
     modal.addEventListener("click", (e) => {
       if (e.target === modal) modal.classList.add("hidden");
@@ -49,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
           statusBox.style.color = "red";
         }
       } catch (err) {
-        if (statusBox) { statusBox.textContent = "Ошибка запроса"; statusBox.style.color = "red"; }
+        if (statusBox) { statusBox.textContent = "Erro de rede."; statusBox.style.color = "red"; }
         console.error(err);
       }
     });
@@ -71,7 +81,34 @@ document.addEventListener("DOMContentLoaded", function () {
           statusBox.style.color = "red";
         }
       } catch (err) {
-        if (statusBox) { statusBox.textContent = "Ошибка запроса"; statusBox.style.color = "red"; }
+        if (statusBox) { statusBox.textContent = "Erro de rede."; statusBox.style.color = "red"; }
+        console.error(err);
+      }
+    });
+  }
+
+  if (problemForm) {
+    problemForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData  = new FormData(this);
+      const statusBox = document.getElementById("problemStatus");
+      if (statusBox) { statusBox.textContent = "A enviar..."; statusBox.style.color = "#6b7280"; }
+      try {
+        const res  = await fetch("/PAP/api/access_problem.php", { method: "POST", headers: CSRF_HEADERS, body: formData });
+        const data = await res.json();
+        if (data.ok) {
+          problemForm.reset();
+          if (statusBox) { statusBox.textContent = "Mensagem enviada. Obrigado!"; statusBox.style.color = "green"; }
+          setTimeout(() => {
+            if (problemModal) problemModal.classList.add("hidden");
+            if (statusBox) statusBox.textContent = "";
+          }, 1500);
+        } else if (statusBox) {
+          statusBox.textContent = data.error || "Erro ao enviar.";
+          statusBox.style.color = "red";
+        }
+      } catch (err) {
+        if (statusBox) { statusBox.textContent = "Erro de rede."; statusBox.style.color = "red"; }
         console.error(err);
       }
     });
@@ -100,8 +137,8 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="update-left">
           <div class="update-dot ${dotClass}"></div>
           <div>
-            <div class="update-name">${user.nome || ""}</div>
-            <div class="update-role">${role}</div>
+            <div class="update-name">${escapeHtml(user.nome || "")}</div>
+            <div class="update-role">${escapeHtml(role)}</div>
           </div>
         </div>`;
       item.addEventListener("click", () => onSelect(user));
@@ -178,6 +215,30 @@ document.addEventListener("DOMContentLoaded", function () {
     addScanBtn.addEventListener("click", () => startScan(addUid, addScanBtn, addScanStatus));
   }
 
+  const addCardForm   = document.getElementById("addCardForm");
+  const addCardStatus = document.getElementById("addCardStatus");
+  if (addCardForm) {
+    addCardForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (addCardStatus) { addCardStatus.textContent = "A guardar..."; addCardStatus.style.color = "#6b7280"; }
+
+      const fd = new FormData(addCardForm);
+      try {
+        const res  = await fetch("/PAP/api/admin_add_card.php", { method: "POST", headers: CSRF_HEADERS, body: fd });
+        const data = await res.json();
+        if (data.ok) {
+          if (addCardStatus) { addCardStatus.textContent = "Utilizador criado."; addCardStatus.style.color = "#10b981"; }
+          addCardForm.reset();
+        } else if (addCardStatus) {
+          addCardStatus.textContent = data.error || "Erro ao criar.";
+          addCardStatus.style.color = "#ef4444";
+        }
+      } catch {
+        if (addCardStatus) { addCardStatus.textContent = "Erro de rede."; addCardStatus.style.color = "#ef4444"; }
+      }
+    });
+  }
+
   const updateScanBtn    = document.getElementById("updateScanBtn");
   const updateScanStatus = document.getElementById("updateScanStatus");
   // updateUid wired up after updateForm block — see below
@@ -195,6 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (tab.dataset.tab === "charts") initChart();
       if (tab.dataset.tab === "alunos") loadAlunos();
       if (tab.dataset.tab === "noticias") loadNoticias();
+      if (tab.dataset.tab === "suporte") loadSuporte();
     });
   });
 
@@ -498,12 +560,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const ctx = e.ctx ? JSON.stringify(e.ctx) : "";
 
       item.innerHTML = `
-        <span class="log-time">${e.time || ""}</span>
-        <span class="log-level ${e.level || ""}">${e.level || ""}</span>
+        <span class="log-time">${escapeHtml(e.time || "")}</span>
+        <span class="log-level ${escapeHtml(e.level || "")}">${escapeHtml(e.level || "")}</span>
         <div class="log-body">
-          <span class="log-msg">${e.msg || ""}</span>
-          <span class="log-meta">${e.ip || ""}${e.uri ? " · " + e.uri : ""}</span>
-          ${ctx ? `<span class="log-ctx">${ctx}</span>` : ""}
+          <span class="log-msg">${escapeHtml(e.msg || "")}</span>
+          <span class="log-meta">${escapeHtml(e.ip || "")}${e.uri ? " &middot; " + escapeHtml(e.uri) : ""}</span>
+          ${ctx ? `<span class="log-ctx">${escapeHtml(ctx)}</span>` : ""}
         </div>`;
       logsList.appendChild(item);
     });
@@ -512,6 +574,108 @@ document.addEventListener("DOMContentLoaded", function () {
   if (logsSearch) logsSearch.addEventListener("input", renderLogs);
   if (logsLevel)  logsLevel.addEventListener("change", renderLogs);
   if (logsRefresh) logsRefresh.addEventListener("click", loadLogs);
+
+  // ── SUPORTE (access problems) ─────────────────────────────
+  const suporteList    = document.getElementById("suporteList");
+  const suporteRefresh = document.getElementById("suporteRefresh");
+  const suporteDossier = document.getElementById("suporteDossier");
+  let suporteItems    = [];
+  let suporteCurrent  = null;
+
+  async function loadSuporte() {
+    if (!suporteList) return;
+    suporteList.innerHTML = '<p class="logs-empty">A carregar...</p>';
+    try {
+      const res  = await fetch("/PAP/api/admin_access_problems.php?action=list");
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      suporteItems = data.items || [];
+      renderSuporte();
+    } catch {
+      suporteList.innerHTML = '<p class="logs-empty">Erro ao carregar.</p>';
+    }
+  }
+
+  function renderSuporte() {
+    if (!suporteList) return;
+    if (!suporteItems.length) {
+      suporteList.innerHTML = '<p class="logs-empty">Sem mensagens.</p>';
+      if (suporteDossier) suporteDossier.style.display = "none";
+      return;
+    }
+    suporteList.innerHTML = suporteItems.map((it) => {
+      const novo = Number(it.lido) === 1 ? "" : '<span class="badge-blocked">NOVO</span>';
+      return `
+        <div class="aluno-row" data-id="${it.id}" style="${Number(it.lido) === 1 ? "opacity:0.55;" : ""}">
+          <span class="scan-dot ${Number(it.lido) === 1 ? "present" : "absent"}"></span>
+          <div class="scan-info">
+            <div class="scan-name">${escapeHtml(it.email || "(sem email)")}</div>
+            <div class="scan-meta">${escapeHtml(it.criado_em || "")}</div>
+          </div>
+          ${novo}
+        </div>`;
+    }).join("");
+
+    suporteList.querySelectorAll(".aluno-row").forEach(row => {
+      row.addEventListener("click", () => openSuporteDossier(Number(row.dataset.id)));
+    });
+  }
+
+  function openSuporteDossier(id) {
+    const it = suporteItems.find(x => Number(x.id) === id);
+    if (!it || !suporteDossier) return;
+    suporteCurrent = it;
+
+    document.getElementById("suporteDossierData").textContent    = it.criado_em || "—";
+    document.getElementById("suporteDossierEmail").textContent   = it.email || "(sem email)";
+    document.getElementById("suporteDossierEstado").textContent  = Number(it.lido) === 1 ? "Lido" : "Novo";
+    document.getElementById("suporteDossierMensagem").textContent = it.mensagem || "";
+
+    const btnRead = document.getElementById("suporteBtnRead");
+    if (btnRead) btnRead.textContent = Number(it.lido) === 1 ? "Marcar não lido" : "Marcar lido";
+
+    suporteDossier.style.display = "flex";
+    suporteDossier.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  const suporteDossierClose = document.getElementById("suporteDossierClose");
+  if (suporteDossierClose) suporteDossierClose.addEventListener("click", () => {
+    if (suporteDossier) suporteDossier.style.display = "none";
+    suporteCurrent = null;
+  });
+
+  async function suporteAction(action) {
+    if (!suporteCurrent) return;
+    const fd = new FormData();
+    fd.set("id", suporteCurrent.id);
+    try {
+      const res  = await fetch("/PAP/api/admin_access_problems.php?action=" + action, {
+        method: "POST", headers: CSRF_HEADERS, body: fd
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (action === "delete") {
+          if (suporteDossier) suporteDossier.style.display = "none";
+          suporteCurrent = null;
+        }
+        await loadSuporte();
+      }
+    } catch {}
+  }
+
+  const suporteBtnRead   = document.getElementById("suporteBtnRead");
+  const suporteBtnDelete = document.getElementById("suporteBtnDelete");
+  if (suporteBtnRead) suporteBtnRead.addEventListener("click", () => {
+    if (!suporteCurrent) return;
+    suporteAction(Number(suporteCurrent.lido) === 1 ? "mark_unread" : "mark_read");
+  });
+  if (suporteBtnDelete) suporteBtnDelete.addEventListener("click", () => {
+    if (!suporteCurrent) return;
+    if (!confirm("Eliminar esta mensagem?")) return;
+    suporteAction("delete");
+  });
+
+  if (suporteRefresh) suporteRefresh.addEventListener("click", loadSuporte);
 
   // ── ATUALIZAR block ───────────────────────────────────────
   const updateSearch  = document.getElementById("update-search");
@@ -1291,3 +1455,5 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCarousel();
     startAutoSlide();
   }
+
+  

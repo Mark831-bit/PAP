@@ -85,7 +85,7 @@ session_set_cookie_params([
 ### M1 — XSS potencial via dados de teste
 **Ficheiros:** `project/public/Aluno.php:104-113`, `project/public/Professor.php` (lista de alunos), separador *Testes* em `admin.php`.
 **Problema:** O código usa `htmlspecialchars()` correctamente na exibição. O risco está na *API* de listagem (`admin_testes.php`): se retornar JSON directo para o cliente e o cliente inserir via `innerHTML` sem escapar, qualquer título malicioso (`<img src=x onerror=...>`) é executado. Verificar todos os pontos de inserção no `app.js`.
-**Correcção proposta:** Usar `textContent` em vez de `innerHTML` em todos os loops que inserem dados vindos da BD. Alternativamente, escapar no lado servidor antes de serializar.
+**Correcção:** Aplicado `escapeHtml()` em `project/assets/app.js` nos dois pontos identificados — lista de utilizadores (`initUpdates`, linhas 99-106) e lista de *logs* (`initLogs`, linhas 500-507). *(Corrigido 2026-04-20.)*
 
 ### M2 — Validação incompleta no `admin_add_card.php`
 **Ficheiro:** `api/admin_add_card.php:28-42`
@@ -95,7 +95,7 @@ session_set_cookie_params([
 ### M3 — Validação de `turma` inconsistente em `create_teste.php`
 **Ficheiro:** `api/create_teste.php:27-31`
 **Problema:** `$turmaNum` validado por `in_array`, mas comparação é feita com *strings* `'10','11','12'` enquanto em outros ficheiros comparamos com inteiros. Risco de aceitar `'10 '` (com espaço — já é coberto por `trim`, mas cada novo *endpoint* reinventa a roda).
-**Correcção proposta:** Centralizar em `api/lib/validators.php` uma função `is_valid_turma($num, $letra)`.
+**Correcção:** Criado `api/lib/validators.php` com `is_valid_turma_num()`, `is_valid_turma_letra()`, `is_valid_turma()`. Propagado para `create_teste.php`, `sumarios.php`, `register.php` (que nem validava), `admin_add_card.php`, `admin_update_card.php`. *(Corrigido 2026-04-20.)*
 
 ### M4 — Ausência de *logging* de acções administrativas
 **Ficheiros:** `api/admin_add_card.php`, `api/admin_update_card.php`, `api/admin_alunos.php`.
@@ -109,8 +109,8 @@ session_set_cookie_params([
 
 ### M6 — Código comentado em `api/logout.php`
 **Ficheiro:** `api/logout.php:1-17` (aprox.)
-**Problema:** Código antigo deixado comentado reduz legibilidade e aumenta carga de manutenção. Não é *security* em si, mas confundiu-me durante a auditoria.
-**Correcção proposta:** Remover linhas comentadas.
+**Problema:** Código antigo deixado comentado reduz legibilidade e aumenta carga de manutenção. Não é *security* em si, mas confundiu-me durante a auditoria. **Bónus encontrado durante a limpeza:** a linha 1 continha `// <?php` (antes do *tag* PHP real), o que imprimia `// ` em *plaintext* para o cliente antes do `header('Location: ...')` — só não partia o *redirect* graças ao *output buffering* do WAMP.
+**Correcção:** Reescrito `api/logout.php` — removidas linhas comentadas e a linha `// <?php` defeituosa; mantida a lógica activa (destruir sessão + *cookie* + *redirect*). *(Corrigido 2026-04-20.)*
 
 ---
 
@@ -119,11 +119,11 @@ session_set_cookie_params([
 ### L1 — `header('Content-Type: application/json')` duplicado em `register.php`
 **Ficheiro:** `api/register.php:5-9`
 **Problema:** Cabeçalho definido duas vezes. Não tem impacto de segurança, mas evidencia que o código não passou por revisão.
-**Correcção proposta:** Remover a duplicação.
+**Correcção:** Verificado em 2026-04-20 — o ficheiro já só contém uma chamada a `header('Content-Type: ...')`. Duplicação tinha sido removida em *commit* anterior. *(Corrigido — estado confirmado 2026-04-20.)*
 
 ### L2 — Mensagens de erro mistas em PT/RU/EN
 **Problema:** O relatório fala em localização para PT+RU, mas o código tem mensagens em russo (`"Ошибка запроса"`), português (`"Erro..."`) e inglês (`"Login failed"`). Isto é mais UX do que *security*, mas dificulta o logging consistente.
-**Correcção proposta:** Centralizar mensagens numa constante ou num ficheiro `lang/*.json` (está previsto para a fase de i18n).
+**Correcção:** Traduzidas as *strings* expostas ao utilizador — `project/public/index.php` (`Sessão iniciada como:`, `Sessão não iniciada`, `Página pessoal`) e `project/assets/app.js` (`Erro de rede.` em vez de `Ошибка запроса`). Comentários internos do código deixados em russo (*churn* grande, impacto zero no UX). *(Corrigido 2026-04-20.)*
 
 ---
 
@@ -133,13 +133,16 @@ session_set_cookie_params([
 |------------|-------|------------|
 | Critical   | 4     | 4          |
 | High       | 4     | 3          |
-| Medium     | 6     | 1 (parcial)|
-| Low        | 2     | 0          |
+| Medium     | 6     | 4 (M1, M3, M4 parcial, M6) |
+| Low        | 2     | 2          |
 
-Correcções aplicadas em 2026-04-18: C1, C2, C3, C4, H1, H2, H3, e *logging* parcial de acções administrativas (M4). Adiadas: H4 (*rate limit*), M1 (XSS em `innerHTML`), M2, M3, M5 (MySQL user), M6, L1, L2.
+**Correcções aplicadas em 2026-04-18:** C1, C2, C3, C4, H1, H2, H3, e *logging* parcial de acções administrativas (M4).
+
+**Correcções aplicadas em 2026-04-20 (revisão nocturna):** M1 (`escapeHtml` aplicado nos `innerHTML` do `app.js`), M3 (`api/lib/validators.php` criado e propagado), M6 (limpeza de `logout.php` + bug do `// <?php`), L1 (confirmada ausência de duplicado), L2 (*strings* PT nos ficheiros voltados ao utilizador).
+
+**Adiadas:** H4 (*rate limit* em `push.php` — requer tabela nova, decisão arquitectural), M2 (limites de comprimento em `admin_add_card.php` — defensivo, não explorável), M5 (utilizador MySQL dedicado — tarefa de administração do WAMP, fora do *scope* do código PHP).
 
 Próximos passos sugeridos ao administrador do sistema:
 1. Criar utilizador MySQL dedicado (M5).
-2. Revisar todos os `innerHTML` em `app.js` (M1).
-3. Implementar *rate limit* no `push.php` (H4) — requer decisão sobre estrutura de dados (tabela nova ou ficheiro).
-4. Limpar código comentado em `logout.php` (M6).
+2. Implementar *rate limit* no `push.php` (H4) — requer decisão sobre estrutura de dados (tabela nova ou ficheiro).
+3. Adicionar limites de comprimento em campos `admin_add_card.php` (M2).
