@@ -1,0 +1,9 @@
+{"time":"2026-04-20 18:44:33","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-04-20 18:44:33","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}
+{"time":"2026-04-20 18:44:44","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"a12345"}}
+{"time":"2026-04-20 18:44:51","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"b12345"}}
+{"time":"2026-04-20 18:44:51","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"b12345","role":"Professor"}}
+{"time":"2026-04-20 20:22:36","level":"INFO","ip":"::1","uri":"\/PAP\/api\/notas.php","msg":"nota created","ctx":{"prof":"b12345","aluno":"a12345","materia":"matematica","valor":16}}
+{"time":"2026-04-20 20:22:43","level":"INFO","ip":"::1","uri":"\/PAP\/api\/logout.php","msg":"user logout","ctx":{"user":"b12345"}}
+{"time":"2026-04-20 20:22:51","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login attempt","ctx":{"login":"a12345"}}
+{"time":"2026-04-20 20:22:51","level":"INFO","ip":"::1","uri":"\/PAP\/api\/auth.php","msg":"login success","ctx":{"login":"a12345","role":"Aluno"}}

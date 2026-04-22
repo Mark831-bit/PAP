@@ -94,13 +94,12 @@ try {
 
     if ($role === 'Aluno') {
         $stmtAluno = $pdo->prepare("
-            INSERT INTO alunos (`Nome`, `data_nascimento`, `Turma`, `turma_num`, `turma_letra`, `Presença`, `login`)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO alunos (`Nome`, `data_nascimento`, `turma_num`, `turma_letra`, `Presença`, `login`)
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
         $stmtAluno->execute([
             $nome,
             $dataNascimento,
-            $turma,
             (int)$turmaNum,
             strtoupper($turmaLetra),
             0,

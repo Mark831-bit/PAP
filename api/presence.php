@@ -20,7 +20,7 @@ if ($turma === '') {
 $stmt = $conn->prepare("
     SELECT ID AS id, `Presença` AS presenca
     FROM alunos
-    WHERE Turma = ?
+    WHERE CONCAT(turma_num, turma_letra) = ?
 ");
 $stmt->bind_param("s", $turma);
 $stmt->execute();

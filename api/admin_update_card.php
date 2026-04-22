@@ -28,7 +28,7 @@ if ($action === 'list') {
             a.`ID` AS id,
             a.`Nome` AS nome,
             a.`data_nascimento` AS data_nascimento,
-            a.`Turma` AS turma,
+            CONCAT(a.`turma_num`, a.`turma_letra`) AS turma,
             a.`turma_num` AS turma_num,
             a.`turma_letra` AS turma_letra,
             a.`login` AS login,
@@ -129,7 +129,7 @@ if ($action === 'update') {
     if ($tipo === 'aluno') {
         $stmt = $conn->prepare("
             UPDATE alunos
-            SET `Nome` = ?, `data_nascimento` = ?, `Turma` = ?, `turma_num` = ?, `turma_letra` = ?
+            SET `Nome` = ?, `data_nascimento` = ?, `turma_num` = ?, `turma_letra` = ?
             WHERE `ID` = ?
         ");
 
@@ -144,7 +144,7 @@ if ($action === 'update') {
         $turmaNumInt = ($turmaNum === '') ? 0 : (int)$turmaNum;
         $idInt       = (int)$id;
 
-        $stmt->bind_param("sssisi", $nome, $dataNascimento, $turma, $turmaNumInt, $turmaLetra, $idInt);
+        $stmt->bind_param("ssisi", $nome, $dataNascimento, $turmaNumInt, $turmaLetra, $idInt);
 
         if (!$stmt->execute()) {
             echo json_encode([

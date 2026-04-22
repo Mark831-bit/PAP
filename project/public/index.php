@@ -191,6 +191,22 @@ Num único ambiente, os utilizadores podem consultar presenças, avaliações, h
     </div>
   </footer>
   <script src="/PAP/project/assets/app.js?v=10"></script>
+  <?php if (!isset($_SESSION['user_id'])): ?>
+  <script>
+  (function () {
+    async function poll() {
+      try {
+        const res = await fetch('/PAP/api/card_login_poll.php', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (data.ok && !data.already_logged) {
+          location.reload();
+        }
+      } catch (e) { /* тихо */ }
+    }
+    setInterval(poll, 1500);
+  })();
+  </script>
+  <?php endif; ?>
 </body>
 </html>
 

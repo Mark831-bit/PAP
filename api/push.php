@@ -162,6 +162,15 @@ try {
 
         $mysqli->close();
 
+        // Kiosk auto-login: публикуем matched UID для поллинга из браузера
+        $pendingLoginFile = __DIR__ . '/../logs/pending_login.json';
+        file_put_contents($pendingLoginFile, json_encode([
+            'uid'        => $uid,
+            'login'      => $login,
+            'role'       => $role,
+            'created_at' => time(),
+        ]), LOCK_EX);
+
         log_event("INFO", "uid matched", [
             "uid" => $uid,
             "login" => $login,

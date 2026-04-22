@@ -2115,3 +2115,219 @@ body.page-index > main {
 }
 
 
+/* ============ Alunos admin redesign ============ */
+.alunos-list-card {
+  padding: 22px;
+}
+
+.alunos-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.alunos-list-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.alunos-list-header input {
+  width: 240px;
+  max-width: 100%;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+}
+
+.alunos-list-header input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.aluno-dossier-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-height: 430px;
+}
+
+.aluno-dossier-top {
+  margin-bottom: 18px;
+}
+
+.aluno-dossier-top h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #111827;
+}
+
+.aluno-dossier-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.aluno-dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: start;
+  flex: 1;
+}
+
+.aluno-info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 78px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.aluno-info-box span:last-child {
+  color: #111827;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.aluno-rfid-box {
+  grid-column: span 2;
+  min-height: 170px;
+  padding: 16px 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.rfid-help-text {
+  margin-top: 10px;
+  color: #4b5563;
+  line-height: 1.6;
+  max-width: 460px;
+}
+
+.aluno-dossier-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.aluno-dossier-actions .secondary-btn,
+.aluno-dossier-actions .danger-btn {
+  min-width: 130px;
+}
+
+@media (max-width: 1000px) {
+  .aluno-dossier-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .aluno-rfid-box {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .alunos-list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .alunos-list-header input {
+    width: 100%;
+  }
+
+  .aluno-dossier-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .aluno-rfid-box {
+    grid-column: span 1;
+    min-height: 120px;
+  }
+
+  .aluno-dossier-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  }
+}
+
+.aluno-dossier-actions .secondary-btn {
+  min-width: 140px;
+  height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #1f2937;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.aluno-dossier-actions .secondary-btn:hover {
+  filter: brightness(1.08);
+}
+
+.alunos-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.alunos-filters select,
+.alunos-filters input {
+  height: 42px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.alunos-filters select {
+  min-width: 100px;
+}
+
+.alunos-filters input {
+  width: 220px;
+}
+
+.alunos-filters select:focus,
+.alunos-filters input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+@media (max-width: 720px) {
+  .alunos-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .alunos-filters input,
+  .alunos-filters select {
+    width: 100%;
+  }
+}

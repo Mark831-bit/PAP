@@ -33,7 +33,7 @@ if ($action === 'list') {
                    n.data, n.professor_login, n.observacao, n.criado_em,
                    a.Nome AS aluno_nome,
                    '' AS aluno_numero,
-                   a.Turma AS aluno_turma
+                   CONCAT(a.turma_num, a.turma_letra) AS aluno_turma
             FROM notas n
             LEFT JOIN alunos a ON a.login = n.login_aluno
             WHERE n.professor_login = ?
@@ -77,7 +77,7 @@ if ($action === 'alunos_da_turma') {
     $stmt = $conn->prepare("
         SELECT login, Nome AS nome
         FROM alunos
-        WHERE Turma = ?
+        WHERE CONCAT(turma_num, turma_letra) = ?
         ORDER BY Nome ASC
     ");
     $stmt->bind_param("s", $p['turma']);
@@ -138,7 +138,7 @@ if ($action === 'create') {
         exit;
     }
 
-    $stmt = $conn->prepare("SELECT 1 FROM alunos WHERE login = ? AND Turma = ? LIMIT 1");
+    $stmt = $conn->prepare("SELECT 1 FROM alunos WHERE login = ? AND CONCAT(turma_num, turma_letra) = ? LIMIT 1");
     $stmt->bind_param("ss", $loginAluno, $p['turma']);
     $stmt->execute();
     $exists = (bool)$stmt->get_result()->fetch_row();

@@ -71,7 +71,7 @@ if ($res = $conn->query("
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=312">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=318">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="page-admin">
@@ -121,7 +121,7 @@ if ($res = $conn->query("
 
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="charts">Charts</button>
-        <button class="admin-tab" data-tab="cards">Cards</button>
+        <button class="admin-tab" data-tab="cards">Utilizadores</button>
         <button class="admin-tab" data-tab="alunos">Alunos</button>
         <button class="admin-tab" data-tab="professores">Professores</button>
         <button class="admin-tab" data-tab="noticias">Notícias</button>
@@ -358,112 +358,110 @@ if ($res = $conn->query("
         </form>
       </div>
 
-        <!-- Encontrar -->
-        <div class="admin-card">
-          <h2>Encontrar</h2>
+        
 
-          <div class="search-bar">
-            <input type="text" id="find-search" placeholder="Procurar pessoa...">
-          </div>
 
-          <div id="find-results"></div>
 
-          <form id="find-form" style="display:none;">
-            <input type="hidden" id="find-id">
-            <input type="hidden" id="find-type">
+      <!-- ALUNOS -->
+      <div class="admin-tab-content" id="tab-alunos">
+        <div class="subtabs">
+          <button class="subtab active" data-subtab="alunos-list">List</button>
+          <button class="subtab" data-subtab="alunos-tests">Tests</button>
+        </div>
 
-            <div class="form-row">
-              <label for="find-nome">Nome</label>
-              <input type="text" id="find-nome" readonly>
-            </div>
+        <div class="subtab-content active" id="subtab-alunos-list">
+          <div class="admin-card alunos-list-card">
+            
+            <div class="alunos-list-header">
+              <h2>Lista de alunos</h2>
 
-            <div class="form-row">
-              <label for="find-login">Login</label>
-              <input type="text" id="find-login" readonly>
-            </div>
+              <div class="alunos-filters">
+                <input type="text" id="alunosSearch" placeholder="Pesquisar...">
 
-            <div class="form-row">
-              <label for="find-password">Password</label>
-              <input type="text" id="find-password" value="********" readonly>
-            </div>
-
-            <div class="form-row">
-              <label for="find-data-nascimento">Data de nascimento</label>
-              <input type="text" id="find-data-nascimento" readonly>
-            </div>
-
-            <div class="form-row turma-row">
-              <div>
-                <label for="findTurmaNum">Turma</label>
-                <select id="findTurmaNum" disabled>
+                <select id="alunosFilterNum">
                   <option value="">Ano</option>
                   <option value="10">10</option>
                   <option value="11">11</option>
                   <option value="12">12</option>
                 </select>
-              </div>
 
-              <div>
-                <label for="findTurmaLetra">&nbsp;</label>
-                <select id="findTurmaLetra" disabled>
+                <select id="alunosFilterLetra">
                   <option value="">Letra</option>
                   <option value="A">A</option>
                   <option value="B">B</option>
                   <option value="C">C</option>
                 </select>
               </div>
-        </div>
-
-
-          <div class="form-row">
-            <label for="findUid">UID</label>
-            <input type="text" id="findUid" readonly>
-          </div>
-        </form>
-      </div>
-
-      </div>
-
-      <!-- ALUNOS -->
-      <div class="admin-tab-content" id="tab-alunos">
-
-        <div class="subtabs">
-          <button class="subtab active" data-subtab="alunos-list">List</button>
-          <button class="subtab" data-subtab="alunos-tests">Tests</button>
-        </div>
-
-        <!-- LIST -->
-        <div class="subtab-content active" id="subtab-alunos-list">
-          <div class="admin-card">
-            <div class="logs-header">
-              <h2>Alunos</h2>
-              <input type="text" id="alunosSearch" placeholder="Pesquisar..." class="logs-filters-input">
             </div>
-            <div id="alunos-list"><p class="logs-empty">A carregar...</p></div>
+            <div id="alunos-list"></div>
           </div>
 
-          <div class="admin-card" id="alunoDossier" style="display:none;">
-            <div class="dossier-header">
-              <h2 id="dossierNome">—</h2>
+          <div class="admin-card aluno-dossier-card" id="alunoDossier" style="display:none;">
+            <div class="aluno-dossier-top">
+              <div>
+                <h2>Conta do aluno</h2>
+                <div class="aluno-dossier-name" id="dossierNome">—</div>
+              </div>
+            </div>
+
+            <div class="aluno-dossier-grid">
+              <div class="aluno-info-box">
+                <span class="dossier-label">Login</span>
+                <span id="dossierLogin">—</span>
+              </div>
+
+              <div class="aluno-info-box">
+                <span class="dossier-label">Turma</span>
+                <span id="dossierTurma">—</span>
+              </div>
+
+              <div class="aluno-info-box">
+                <span class="dossier-label">Cartão</span>
+                <span id="dossierBlocked">—</span>
+              </div>
+
+              <div class="aluno-info-box">
+                <span class="dossier-label">Idade</span>
+                <span id="dossierIdade">—</span>
+              </div>
+
+              <div class="aluno-info-box">
+                <span class="dossier-label">Nº em turma</span>
+                <span id="dossierNumero">—</span>
+              </div>
+
+              <div class="aluno-info-box">
+                <span class="dossier-label">UID</span>
+                <span id="dossierUid">—</span>
+              </div>
+
+              <div class="aluno-info-box">
+                <span class="dossier-label">Presença</span>
+                <span id="dossierPresenca">—</span>
+              </div>
+
+              <div class="aluno-rfid-box">
+                <div class="dossier-label">Cartão RFID</div>
+                <div class="rfid-help-text">
+                  Clique num botão para bloquear o cartão ou eliminar o aluno.
+                </div>
+              </div>
+            </div>
+
+            <div class="aluno-dossier-actions">
+              <button class="secondary-btn" id="btnBlockCard">Bloquear cartão</button>
+              <button class="secondary-btn" id="btnDeleteAluno">Eliminar aluno</button>
               <button class="secondary-btn" id="dossierClose">Fechar</button>
             </div>
-
-            <div class="dossier-grid">
-              <div><span class="dossier-label">Login</span><span id="dossierLogin">—</span></div>
-              <div><span class="dossier-label">Data de nascimento</span><span id="dossierDataNascimento">—</span></div>
-              <div><span class="dossier-label">Turma</span><span id="dossierTurma">—</span></div>
-              
-              <div><span class="dossier-label">UID</span><span id="dossierUid">—</span></div>
-              <div><span class="dossier-label">Presença</span><span id="dossierPresenca">—</span></div>
-              <div><span class="dossier-label">Cartão</span><span id="dossierBlocked">—</span></div>
-            </div>
-
-            <div class="dossier-actions">
-              <button class="secondary-btn" id="btnBlockCard">Bloquear cartão</button>
-              <button class="danger-btn" id="btnDeleteAluno">Eliminar aluno</button>
-            </div>
           </div>
         </div>
+
+        <div class="subtab-content" id="subtab-alunos-tests">
+          <div class="admin-card">
+            <div id="testes-list"></div>
+          </div>
+        </div>
+      </div>
 
 
           
@@ -506,9 +504,73 @@ if ($res = $conn->query("
           </div>
         </div>
       </div>
-
+                <!-- professores -->
       <div class="admin-tab-content" id="tab-professores">
-        <div class="admin-card"><h2>Professores</h2><p>Em desenvolvimento...</p></div>
+        <div class="admin-card professores-list-card">
+          <div class="alunos-list-header">
+            <h2>Lista de professores</h2>
+
+            <div class="alunos-filters">
+              <input type="text" id="professoresSearch" placeholder="Pesquisar...">
+            </div>
+          </div>
+
+          <div id="professores-list"></div>
+        </div>
+
+        <div class="admin-card professor-dossier-card" id="professorDossier" style="display:none;">
+          <div class="aluno-dossier-top">
+            <div>
+              <h2>Conta do professor</h2>
+              <div class="aluno-dossier-name" id="professorNome">—</div>
+            </div>
+          </div>
+
+          <div class="aluno-dossier-grid">
+            <div class="aluno-info-box">
+              <span class="dossier-label">Login</span>
+              <span id="professorLogin">—</span>
+            </div>
+
+            <div class="aluno-info-box">
+              <span class="dossier-label">Turma</span>
+              <span id="professorTurma">—</span>
+            </div>
+
+            <div class="aluno-info-box">
+              <span class="dossier-label">Gabinete</span>
+              <span id="professorGabinete">—</span>
+            </div>
+
+            <div class="aluno-info-box">
+              <span class="dossier-label">Cargo</span>
+              <span id="professorCargo">—</span>
+            </div>
+
+            <div class="aluno-info-box">
+              <span class="dossier-label">Matéria</span>
+              <span id="professorMateria">—</span>
+            </div>
+
+            <div class="aluno-info-box">
+              <span class="dossier-label">Horário</span>
+              <span id="professorHorario">—</span>
+            </div>
+
+            <div class="aluno-rfid-box">
+              <div class="dossier-label">Informação</div>
+              <div class="rfid-help-text">
+                Aqui poderá consultar os dados do professor e futuramente editar ou atualizar informações.
+              </div>
+            </div>
+          </div>
+
+          <div class="aluno-dossier-actions">
+             <button class="secondary-btn" id="btnBlockProfessor">Bloquear conta</button>
+              <button class="secondary-btn" id="btnDeleteProfessor">Eliminar professor</button>
+              <button class="secondary-btn" id="professorClose">Fechar</button>
+          </div>
+        </div>
       </div>
 
       <div class="admin-tab-content" id="tab-noticias">
