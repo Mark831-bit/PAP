@@ -309,7 +309,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <p class="empty-state">A carregar...</p>
             </div>
         </div>
-
+        <br>
         <div class="admin-card">
             <h2>Sumários</h2>
             <form id="sumarioForm" class="agenda-form">
@@ -351,7 +351,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <p class="empty-state">A carregar...</p>
             </div>
         </div>
-
+                            <br>
         <div class="admin-card">
             <h2>A minha agenda</h2>
             <form id="agendaForm" class="agenda-form">
@@ -373,7 +373,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <p class="empty-state">A carregar...</p>
             </div>
         </div>
-
+                            <br>
         <div class="students-list">
             <?php if (count($alunos) > 0): ?>
                 <?php foreach ($alunos as $aluno): ?>
@@ -478,6 +478,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=10"></script>
+<script src="/PAP/project/assets/app.js?v=12"></script>
 </body>
 </html>

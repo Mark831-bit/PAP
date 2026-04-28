@@ -1404,4 +1404,164 @@ if (btnDeleteProfessor) {
     updateCarousel();
     startAutoSlide();
   }
+
+  // ── ALUNO PAGE: notas + sumarios + agenda ────────────────
+  if (document.body.classList.contains("page-aluno")) {
+    const notasBox     = document.getElementById("notasAluno");
+    const notasChartEl = document.getElementById("notasChart");
+    const notasWrap    = document.getElementById("notasChartWrap");
+
+    async function loadNotasAluno() {
+      if (!notasBox) return;
+      notasBox.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/notas.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+
+        const notas = data.notas || [];
+        if (notas.length === 0) {
+          notasBox.innerHTML = '<p class="empty-state">Ainda não há notas.</p>';
+          return;
+        }
+
+        notasBox.innerHTML = notas.map(n => `
+          <div class="nota-row">
+            <div class="nota-left">
+              <div class="nota-materia">${escapeHtml(n.materia || "—")}</div>
+              <div class="nota-meta">${escapeHtml(n.tipo || "")} • ${escapeHtml(n.data || "")} ${n.professor_nome ? "• " + escapeHtml(n.professor_nome) : ""}</div>
+              ${n.observacao ? `<div class="nota-obs">${escapeHtml(n.observacao)}</div>` : ""}
+            </div>
+            <div class="nota-valor">${escapeHtml(String(n.valor))}</div>
+          </div>
+        `).join("");
+
+        // Chart
+        if (notasChartEl && notasWrap && typeof Chart !== "undefined") {
+          notasWrap.style.display = "block";
+          const labels = notas.map(n => `${n.materia || ""} ${n.data || ""}`);
+          const values = notas.map(n => Number(n.valor));
+          new Chart(notasChartEl, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [{
+                label: "Notas",
+                data: values,
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59,130,246,0.15)",
+                tension: 0.3,
+              }],
+            },
+            options: {
+              responsive: true,
+              scales: { y: { min: 0, max: 20 } },
+            },
+          });
+        }
+      } catch {
+        notasBox.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    const sumariosListAluno = document.getElementById("sumariosList");
+    async function loadSumariosAluno() {
+      if (!sumariosListAluno) return;
+      sumariosListAluno.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/sumarios.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        const sums = data.sumarios || [];
+        if (sums.length === 0) {
+          sumariosListAluno.innerHTML = '<p class="empty-state">Ainda não há sumários.</p>';
+          return;
+        }
+        sumariosListAluno.innerHTML = sums.map(s => `
+          <div class="sumario-card">
+            <div class="sumario-head">${escapeHtml(s.data || "")} • ${escapeHtml(s.materia || "")}</div>
+            <div class="sumario-body">${escapeHtml(s.descricao || "")}</div>
+          </div>
+        `).join("");
+      } catch {
+        sumariosListAluno.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    const agendaListAluno = document.getElementById("agendaList");
+    const agendaFormAluno = document.getElementById("agendaForm");
+    const agStatus        = document.getElementById("agStatus");
+
+    async function loadAgendaAluno() {
+      if (!agendaListAluno) return;
+      agendaListAluno.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/agenda.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        const tarefas = data.tarefas || [];
+        if (tarefas.length === 0) {
+          agendaListAluno.innerHTML = '<p class="empty-state">Sem tarefas.</p>';
+          return;
+        }
+        agendaListAluno.innerHTML = tarefas.map(t => `
+          <div class="agenda-row ${Number(t.concluido) === 1 ? "done" : ""}">
+            <label class="agenda-check">
+              <input type="checkbox" data-id="${t.id}" ${Number(t.concluido) === 1 ? "checked" : ""}>
+              <span>${escapeHtml(t.titulo || "")}</span>
+            </label>
+            ${t.data ? `<span class="agenda-date">${escapeHtml(t.data)}</span>` : ""}
+            <button class="agenda-del" data-id="${t.id}" type="button">×</button>
+          </div>
+        `).join("");
+
+        agendaListAluno.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener("change", async () => {
+            const fd = new FormData();
+            fd.append("id", cb.dataset.id);
+            fd.append("concluido", cb.checked ? "1" : "0");
+            await fetch("/PAP/api/agenda.php?action=toggle", { method: "POST", headers: CSRF_HEADERS, body: fd });
+            loadAgendaAluno();
+          });
+        });
+
+        agendaListAluno.querySelectorAll(".agenda-del").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const fd = new FormData();
+            fd.append("id", btn.dataset.id);
+            await fetch("/PAP/api/agenda.php?action=delete", { method: "POST", headers: CSRF_HEADERS, body: fd });
+            loadAgendaAluno();
+          });
+        });
+      } catch {
+        agendaListAluno.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    if (agendaFormAluno) {
+      agendaFormAluno.addEventListener("submit", async e => {
+        e.preventDefault();
+        const fd = new FormData(agendaFormAluno);
+        if (agStatus) { agStatus.textContent = "A guardar..."; agStatus.style.color = "#6b7280"; }
+        try {
+          const res  = await fetch("/PAP/api/agenda.php?action=create", { method: "POST", headers: CSRF_HEADERS, body: fd });
+          const data = await res.json();
+          if (data.ok) {
+            agendaFormAluno.reset();
+            if (agStatus) { agStatus.textContent = "Adicionado."; agStatus.style.color = "#10b981"; }
+            loadAgendaAluno();
+          } else if (agStatus) {
+            agStatus.textContent = data.error || "Erro.";
+            agStatus.style.color = "#ef4444";
+          }
+        } catch {
+          if (agStatus) { agStatus.textContent = "Erro de rede."; agStatus.style.color = "#ef4444"; }
+        }
+      });
+    }
+
+    loadNotasAluno();
+    loadSumariosAluno();
+    loadAgendaAluno();
+  }
 });

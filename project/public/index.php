@@ -145,10 +145,10 @@ if ($res) {
   <main class="page-content">
     <h1 class="main_hello">Bem-vindo à plataforma RFID escolar</h1>
     <br>
-    <p class="main_text">Esta plataforma foi desenvolvida com o objetivo de simplificar o acesso à informação escolar e automatizar o registo de presenças através da tecnologia RFID.
-O sistema permite identificar alunos e professores por meio do cartão escolar, registando automaticamente entradas e saídas, e disponibilizando essa informação em tempo real.
-Num único ambiente, os utilizadores podem consultar presenças, avaliações, horários e outras funcionalidades essenciais de forma rápida, organizada e segura.
-</p>
+    <p class="main_text">Esta plataforma foi desenvolvida com o objetivo de simplificar o acesso à informação escolar e automatizar o registo de presenças através da tecnologia RFID.</p>
+    <p>O sistema permite identificar alunos e professores por meio do cartão escolar, registando automaticamente entradas e saídas, e disponibilizando essa informação em tempo real.</p>
+    <p>Num único ambiente, os utilizadores podem consultar presenças, avaliações, horários e outras funcionalidades essenciais de forma rápida, organizada e segura.</p>
+
     <br>
     <?php if (count($noticias) > 0): ?>
     <section class="carousel-container" aria-label="News carousel">
@@ -190,7 +190,7 @@ Num único ambiente, os utilizadores podem consultar presenças, avaliações, h
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=10"></script>
+  <script src="/PAP/project/assets/app.js?v=11"></script>
   <?php if (!isset($_SESSION['user_id'])): ?>
   <script>
   (function () {

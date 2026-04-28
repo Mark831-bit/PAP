@@ -140,8 +140,9 @@ $stmt->close();
                     <p class="empty-state">Não tens testes marcados.</p>
                 <?php endif; ?>
             </div>
-
+                    <br>    
             <?php if (count($testesPassados) > 0): ?>
+                
                 <div class="admin-card">
                     <h2>Testes passados</h2>
                     <div class="testes-list">
@@ -162,6 +163,9 @@ $stmt->close();
                     </div>
                 </div>
             <?php endif; ?>
+
+            <br>
+
             <div class="admin-card">
                 <h2>As minhas notas</h2>
                 <div id="notasChartWrap" style="display:none; margin-bottom: 18px;">
@@ -171,14 +175,14 @@ $stmt->close();
                     <p class="empty-state">A carregar...</p>
                 </div>
             </div>
-
+                    <br>
             <div class="admin-card">
                 <h2>Sumários da minha turma</h2>
                 <div id="sumariosList" class="sumarios-list">
                     <p class="empty-state">A carregar...</p>
                 </div>
             </div>
-
+            <br>
             <div class="admin-card">
                 <h2>A minha agenda</h2>
                 <form id="agendaForm" class="agenda-form">
@@ -203,6 +207,6 @@ $stmt->close();
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="/PAP/project/assets/app.js?v=10"></script>
+    <script src="/PAP/project/assets/app.js?v=12"></script>
 </body>
 </html>

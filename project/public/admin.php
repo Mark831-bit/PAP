@@ -357,8 +357,8 @@ if ($res = $conn->query("
           <div id="updateCardStatus"></div>
         </form>
       </div>
+    </div>
 
-        
 
 
 
@@ -456,15 +456,6 @@ if ($res = $conn->query("
           </div>
         </div>
 
-        <div class="subtab-content" id="subtab-alunos-tests">
-          <div class="admin-card">
-            <div id="testes-list"></div>
-          </div>
-        </div>
-      </div>
-
-
-          
         <!-- TESTS -->
         <div class="subtab-content" id="subtab-alunos-tests">
           <div class="admin-card">
@@ -490,7 +481,6 @@ if ($res = $conn->query("
             <div id="testes-list"><p class="logs-empty">A carregar...</p></div>
           </div>
         </div>
-
       </div>
 
       <!-- MODAL CONFIRM -->
@@ -685,7 +675,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=11"></script>
+<script src="/PAP/project/assets/app.js?v=12"></script>
 </body>
 
 </html>

@@ -1,0 +1,23 @@
+# Segredos (não versionar)
+config/secrets.php
+
+# Logs gerados em runtime
+logs/*.log
+logs/scan_session.json
+
+# IDE / SO
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Documentos temporários / de trabalho
+*.docx
+relatorio_v2.md
+test_relatorio
+
+# Imagens soltas de trabalho
+image1.png
+image2.png
+image3.png
