@@ -26,6 +26,10 @@ try {
     $turmaNum = trim($_POST['turma_num'] ?? '');
     $turmaLetra = trim($_POST['turma_letra'] ?? '');
     $uid = trim($_POST['uid'] ?? '');
+    $cargo    = trim($_POST['cargo']    ?? '');
+    $gabinete = trim($_POST['gabinete'] ?? '');
+    $horario  = trim($_POST['horario']  ?? '');
+    $materia  = trim($_POST['materia']  ?? '');
 
     $turma = $turmaNum . $turmaLetra;
 
@@ -112,11 +116,11 @@ try {
         ");
         $stmtProfessor->execute([
             $nome,
-            '',
-            '',
-            1,
-            '',
-            '',
+            $cargo,
+            $gabinete,
+            0,
+            $horario,
+            $materia,
             $turma,
             (int)$turmaNum,
             strtoupper($turmaLetra),

@@ -28,7 +28,7 @@ if ($res = $conn->query("SELECT COUNT(*) AS n FROM professores WHERE `Presença`
     $statProfPresent = (int)($res->fetch_assoc()['n'] ?? 0);
 }
 
-/* График: последние 7 дней, уникальные вошедшие */
+
 $chartLabels = [];
 $chartValues = [];
 
@@ -51,7 +51,6 @@ for ($i = 6; $i >= 0; $i--) {
     $chartValues[] = $count;
 }
 
-/* Последние 10 сканов */
 $lastScans = [];
 if ($res = $conn->query("
     SELECT nome, person_type, data, hora, presenca
@@ -71,7 +70,7 @@ if ($res = $conn->query("
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=318">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="page-admin">
@@ -152,7 +151,14 @@ if ($res = $conn->query("
         </div>
 
         <div class="admin-card">
-          <h2>Presenças — últimos 7 dias</h2>
+          <div class="chart-header">
+            <h2>Presenças</h2>
+            <div class="week-nav">
+              <button type="button" class="week-nav-btn" id="weekPrev" aria-label="Semana anterior">‹</button>
+              <span class="week-range" id="weekRange">—</span>
+              <button type="button" class="week-nav-btn" id="weekNext" aria-label="Próxima semana" disabled>›</button>
+            </div>
+          </div>
           <div class="chart-wrap">
             <canvas id="chartPresencas"></canvas>
           </div>
@@ -193,10 +199,10 @@ if ($res = $conn->query("
         };
       </script>
 
-      <!-- CARDS -->
+      
       <div class="admin-tab-content" id="tab-cards">
 
-        <!-- Adicionar -->
+        
         <div class="admin-card">
           <h2>Adicionar</h2>
 
@@ -229,9 +235,29 @@ if ($res = $conn->query("
               <input type="password" id="addPassword" name="password" placeholder="Password">
             </div>
 
-            <div class="form-row">
+            <div class="form-row" data-aluno-only>
               <label for="addDataNascimento">Data de nascimento</label>
               <input type="date" id="addDataNascimento" name="data_nascimento">
+            </div>
+
+            <div class="form-row" data-professor-only style="display:none;">
+              <label for="addCargo">Cargo / Posição</label>
+              <input type="text" id="addCargo" name="cargo" placeholder="Ex.: Diretor de turma, Professor">
+            </div>
+
+            <div class="form-row" data-professor-only style="display:none;">
+              <label for="addGabinete">Gabinete</label>
+              <input type="text" id="addGabinete" name="gabinete" placeholder="Ex.: Sala 12, Bloco A">
+            </div>
+
+            <div class="form-row" data-professor-only style="display:none;">
+              <label for="addHorario">Horário</label>
+              <input type="text" id="addHorario" name="horario" placeholder="Ex.: 2ª–6ª 08h–17h">
+            </div>
+
+            <div class="form-row" data-professor-only style="display:none;">
+              <label for="addMateria">Matéria ensinada</label>
+              <input type="text" id="addMateria" name="materia" placeholder="Ex.: Matemática, Português">
             </div>
 
             <div class="form-row turma-row">
@@ -279,7 +305,7 @@ if ($res = $conn->query("
           </form>
         </div>
 
-        <!-- Atualizar -->
+        
       <div class="admin-card">
         <h2>Atualizar</h2>
 
@@ -362,7 +388,7 @@ if ($res = $conn->query("
 
 
 
-      <!-- ALUNOS -->
+     
       <div class="admin-tab-content" id="tab-alunos">
         <div class="subtabs">
           <button class="subtab active" data-subtab="alunos-list">List</button>
@@ -421,13 +447,8 @@ if ($res = $conn->query("
               </div>
 
               <div class="aluno-info-box">
-                <span class="dossier-label">Idade</span>
+                <span class="dossier-label">Data de nascimento</span>
                 <span id="dossierIdade">—</span>
-              </div>
-
-              <div class="aluno-info-box">
-                <span class="dossier-label">Nº em turma</span>
-                <span id="dossierNumero">—</span>
               </div>
 
               <div class="aluno-info-box">
@@ -675,7 +696,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=12"></script>
+<script src="/PAP/project/assets/app.js?v=16"></script>
 </body>
 
 </html>

@@ -110,7 +110,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Professor - Os meus alunos</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=311">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
 </head>
 <body class="page-professor">
 
@@ -164,8 +164,8 @@ while ($row = $resultAlunos->fetch_assoc()) {
             </div>
         </div>
 
-         <div class="test-box">
-            <h2>Назначить тест</h2>
+         <div class="admin-card">
+            <h2>Marcar teste</h2>
 
             <form id="testeForm">
                 <div class="form-row turma-row">
@@ -191,17 +191,17 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 </div>
 
                 <div class="form-row">
-                    <label for="testTitle">Название</label>
+                    <label for="testTitle">Nome</label>
                     <input
                         type="text"
                         id="testTitle"
                         name="titulo"
-                        placeholder="Тест / контрольная работа"
+                        placeholder="Nome do teste"
                     >
                 </div>
 
                 <div class="form-row">
-                    <label for="testDate">Дата</label>
+                    <label for="testDate">Data</label>
                     <input
                         type="date"
                         id="testDate"
@@ -210,17 +210,17 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 </div>
 
                 <div class="form-row">
-                    <label for="testDescription">Описание</label>
+                    <label for="testDescription">Descrição</label>
                     <textarea
                         id="testDescription"
                         name="descricao"
                         rows="4"
-                        placeholder="Опиши тему, материалы, инструкции..."
+                        placeholder="Descreve a tema, materias..."
                     ></textarea>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit">Назначить</button>
+                    <button type="submit">Marcar</button>
                     <div id="testeStatus"></div>
                 </div>
             </form>
@@ -478,6 +478,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=12"></script>
+<script src="/PAP/project/assets/app.js?v=16"></script>
 </body>
 </html>

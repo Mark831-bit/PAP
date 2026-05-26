@@ -763,6 +763,56 @@ main {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
 }
 
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.chart-header h2 { margin: 0; }
+
+.week-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 4px 6px;
+}
+.week-nav-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #ffffff;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  color: #0b1b3a;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  transition: background .15s, transform .15s;
+}
+.week-nav-btn:hover:not(:disabled) {
+  background: #0b1b3a;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+.week-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.week-range {
+  min-width: 120px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0b1b3a;
+  letter-spacing: 0.3px;
+}
+
 .chart-wrap {
   position: relative;
   width: 100%;
@@ -1441,79 +1491,85 @@ body.page-index > main {
 .agenda-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.agenda-item {
+.agenda-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
-  background: #fff;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  transition: background .15s;
+  border-left: 4px solid #3b82f6;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: transform .15s, box-shadow .15s, background .15s;
 }
 
-.agenda-item:hover {
+.agenda-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+.agenda-row.done {
   background: #f9fafb;
+  border-left-color: #10b981;
+}
+
+.agenda-row.done .agenda-check span {
+  text-decoration: line-through;
+  color: #9ca3af;
 }
 
 .agenda-check {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 1;
   cursor: pointer;
   margin: 0;
+  font-weight: 500;
+  color: #111827;
+  font-size: 15px;
 }
 
 .agenda-check input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   accent-color: #10b981;
 }
 
-.agenda-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.agenda-title {
-  font-weight: 500;
-  color: #111827;
-}
-
 .agenda-date {
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+  background: #eef2ff;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.agenda-row.done .agenda-date {
   color: #6b7280;
+  background: #f3f4f6;
 }
 
-.agenda-item.done .agenda-title {
-  text-decoration: line-through;
-  color: #9ca3af;
-}
-
-.agenda-item.done .agenda-date {
-  color: #b5b9c1;
-}
-
-.agenda-delete {
+.agenda-del {
   background: transparent;
   border: none;
   color: #ef4444;
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  padding: 2px 10px;
-  border-radius: 6px;
+  padding: 4px 12px;
+  border-radius: 8px;
   transition: background .15s;
 }
 
-.agenda-delete:hover {
+.agenda-del:hover {
   background: #fee2e2;
 }
 
@@ -1521,15 +1577,34 @@ body.page-index > main {
 .sumarios-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   margin-top: 12px;
 }
 
-.sumario-item {
-  background: #fff;
+.sumario-card {
+  position: relative;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 12px;
+  padding: 16px 18px 16px 22px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: transform .15s, box-shadow .15s;
+  overflow: hidden;
+}
+
+.sumario-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #3b82f6, #6366f1);
+}
+
+.sumario-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
 }
 
 .sumario-head {
@@ -1537,8 +1612,14 @@ body.page-index > main {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-bottom: 6px;
-  font-size: 14px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e5e7eb;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
 }
 
 .sumario-date {
@@ -1547,12 +1628,15 @@ body.page-index > main {
 }
 
 .sumario-turma {
-  background: #e0e7ff;
+  display: inline-flex;
+  align-items: center;
+  background: #eef2ff;
   color: #3730a3;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .sumario-materia {
@@ -1565,9 +1649,17 @@ body.page-index > main {
 }
 
 .sumario-body {
-  color: #374151;
+  color: #1f2937;
   white-space: pre-wrap;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.sumario-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
 }
 
 .sumario-delete {
@@ -1697,48 +1789,86 @@ body.page-index > main {
 .notas-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .nota-row {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 14px;
-  background: #fff;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-left: 4px solid #94a3b8;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: transform .15s, box-shadow .15s;
 }
 
-.nota-info {
+.nota-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+/* Colorir a borda esquerda em função da nota (vermelho / laranja / verde) */
+.nota-row.nota-bad   { border-left-color: #ef4444; }
+.nota-row.nota-mid   { border-left-color: #f59e0b; }
+.nota-row.nota-good  { border-left-color: #10b981; }
+
+.nota-left {
   flex: 1;
   min-width: 0;
-}
-
-.nota-head {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.nota-meta-small {
-  color: #6b7280;
-  font-size: 13px;
+.nota-materia {
+  font-weight: 600;
+  font-size: 15px;
+  color: #111827;
+  letter-spacing: -0.1px;
 }
 
 .nota-meta {
-  color: #4b5563;
-  font-size: 14px;
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
 }
 
 .nota-obs {
-  color: #6b7280;
   font-size: 13px;
-  margin-top: 4px;
+  color: #4b5563;
   font-style: italic;
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: #f9fafb;
+  border-left: 2px solid #e5e7eb;
+  border-radius: 0 6px 6px 0;
 }
+
+.nota-valor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 18px;
+  background: #eef2ff;
+  color: #3730a3;
+  flex-shrink: 0;
+}
+
+.nota-row.nota-bad  .nota-valor { background: #fee2e2; color: #b91c1c; }
+.nota-row.nota-mid  .nota-valor { background: #fef3c7; color: #92400e; }
+.nota-row.nota-good .nota-valor { background: #d1fae5; color: #065f46; }
 
 .nota-badge {
   display: inline-flex;
@@ -1752,9 +1882,9 @@ body.page-index > main {
   color: #fff;
 }
 
-.nota-good { background: #10b981; }
+.nota-good { background: #01ffaa; }
 .nota-mid  { background: #f59e0b; }
-.nota-bad  { background: #ef4444; }
+.nota-bad  { background: #b63939; }
 
 /* Aluno view */
 .notas-aluno {

@@ -2,43 +2,36 @@
 #include <MFRC522.h>
 #include <WiFiS3.h>
 #include <ArduinoHttpClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 #define RST_PIN 9
 #define SS_PIN  10
 
-// Wi-Fi
-const char* WIFI_SSID = "Mk"; // ☭?
-const char* WIFI_PASS = "Satsumaaaa";
-
-// WAMP server IP (ноутбук)
-const char* SERVER_IP   = "10.105.70.14";
-const int   SERVER_PORT = 80;
-
-
-const char* SERVER_PATH = "/PAP/api/push.php";
-
-// API
-const String API_KEY = "pds_arduino_2026";
-
-// RFID
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-// HTTP
+const char* WIFI_SSID = "Mk";
+const char* WIFI_PASS = "Satsumaaaa";
+
+const char* SERVER_IP = "10.223.252.14";
+const int SERVER_PORT = 80;
+const char* SERVER_PATH = "/PAP/api/push.php";
+
+const String API_KEY = "pds_arduino_2026";
+
 WiFiClient wifi;
 HttpClient client(wifi, SERVER_IP, SERVER_PORT);
 
 String DEVICE_ID;
-
-// антиспам
 String lastUid = "";
 unsigned long lastUidSentMs = 0;
 const unsigned long UID_COOLDOWN_MS = 10000;
 
-// -------- helpers --------
 bool connectWiFi(unsigned long timeoutMs = 15000) {
-  Serial.print("Connecting WiFi: ");
-  Serial.println(WIFI_SSID);
-
+  lcd.clear();
+  lcd.print("WiFi...");
+  
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   unsigned long t0 = millis();
@@ -48,13 +41,19 @@ bool connectWiFi(unsigned long timeoutMs = 15000) {
   }
 
   if (WiFi.status() == WL_CONNECTED) {
+    delay(500);
     Serial.println("\nWiFi connected!");
     Serial.print("Arduino IP: ");
-    delay(500);
     Serial.println(WiFi.localIP());
+
+    lcd.clear();
+    lcd.print("WiFi OK");
+    delay(1000);
     return true;
   }
 
+  lcd.clear();
+  lcd.print("WiFi ERROR");
   Serial.println("\nWiFi connect TIMEOUT");
   return false;
 }
@@ -69,7 +68,6 @@ String getMacAsDeviceId() {
 }
 
 String uidToHexString() {
-  // UID в HEX без пробелов: 08116D8C
   String s;
   s.reserve(mfrc522.uid.size * 2);
 
@@ -82,9 +80,38 @@ String uidToHexString() {
   return s;
 }
 
+void showResultOnLcd(int statusCode, String response) {
+  lcd.clear();
+
+  if (statusCode == 200) {
+    lcd.setCursor(0, 0);
+    lcd.print("Access OK");
+
+    lcd.setCursor(0, 1);
+    lcd.print("User found");
+  } 
+  else if (statusCode == 403) {
+    lcd.setCursor(0, 0);
+    lcd.print("CARD BLOCKED");
+  } 
+  else if (statusCode == 404) {
+    lcd.setCursor(0, 0);
+    lcd.print("CARD NOT FOUND");
+  } 
+  else if (statusCode < 0) {
+    lcd.setCursor(0, 0);
+    lcd.print("SERVER ERROR");
+  } 
+  else {
+    lcd.setCursor(0, 0);
+    lcd.print("HTTP ERROR:");
+    lcd.setCursor(0, 1);
+    lcd.print(statusCode);
+  }
+}
+
 bool postUid(const String& uidHex) {
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi lost, reconnect...");
     connectWiFi();
     return false;
   }
@@ -105,30 +132,37 @@ bool postUid(const String& uidHex) {
   Serial.print("Response: ");
   Serial.println(response);
 
-  client.stop(); // важно закрывать соединение
+  showResultOnLcd(statusCode, response);
+
+  client.stop();
 
   return (statusCode >= 200 && statusCode < 300);
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(10000);
+
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.print("Starting...");
 
   SPI.begin();
   mfrc522.PCD_Init();
-  
 
   connectWiFi();
   DEVICE_ID = getMacAsDeviceId();
 
-  Serial.print("Device ID (MAC): ");
-  Serial.println(DEVICE_ID);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("RFID ready");
+  lcd.setCursor(0, 1);
+  lcd.print("Scan card");
 
   Serial.println("RFID ready. Поднесите карту...");
 }
 
 void loop() {
-  // ждём карту
   if (!mfrc522.PICC_IsNewCardPresent()) return;
   if (!mfrc522.PICC_ReadCardSerial()) return;
 
@@ -137,7 +171,6 @@ void loop() {
   Serial.print("UID: ");
   Serial.println(uidHex);
 
-  // антиспам на 10 секунд для одинакового UID
   unsigned long now = millis();
   if (uidHex == lastUid && (now - lastUidSentMs) < UID_COOLDOWN_MS) {
     Serial.println("Same UID recently sent - pass.");
@@ -146,13 +179,20 @@ void loop() {
     return;
   }
 
-  // отправка
+  lcd.clear();
+  lcd.print("Sending...");
+
   if (postUid(uidHex)) {
     lastUid = uidHex;
     lastUidSentMs = now;
   }
 
-  // корректно завершаем чтение
+  delay(2000);
+  lcd.clear();
+  lcd.print("RFID ready");
+  lcd.setCursor(0, 1);
+  lcd.print("Scan card");
+
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
 }

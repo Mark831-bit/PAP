@@ -275,6 +275,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const addCardStatus = document.getElementById("addCardStatus");
 
   if (addCardForm) {
+    // ── Toggle Aluno-only / Professor-only fields by selected role ──
+    function syncAddCardRole() {
+      const role = addCardForm.querySelector('input[name="role"]:checked')?.value || "Aluno";
+      const isProf = role === "Professor";
+      addCardForm.querySelectorAll("[data-aluno-only]").forEach(el => el.style.display = isProf ? "none" : "");
+      addCardForm.querySelectorAll("[data-professor-only]").forEach(el => el.style.display = isProf ? "" : "none");
+    }
+    addCardForm.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener("change", syncAddCardRole));
+    syncAddCardRole();
+
     addCardForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -436,7 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <span class="scan-dot ${Number(a.presenca) === 1 ? "present" : "absent"}"></span>
         <div class="scan-info">
           <div class="scan-name">${escapeHtml(a.nome || "—")}</div>
-          <div class="scan-meta">Turma ${escapeHtml(a.turma || "")} • Nº ${escapeHtml(String(a.numero_turma || ""))} • ${escapeHtml(a.login || "")}</div>
+          <div class="scan-meta">Turma ${escapeHtml(a.turma || "")} • ${escapeHtml(a.login || "")}</div>
         </div>
         ${Number(a.blocked) === 1 ? '<span class="badge-blocked">Bloqueado</span>' : ""}
       </div>
@@ -465,7 +475,6 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("dossierLogin").textContent = a.login || "—";
       document.getElementById("dossierIdade").textContent = a.data_nascimento || "—";
       document.getElementById("dossierTurma").textContent = a.turma || "—";
-      document.getElementById("dossierNumero").textContent = a.numero_turma || "—";
       document.getElementById("dossierUid").textContent = a.uid || "—";
       document.getElementById("dossierPresenca").textContent = Number(a.presenca) === 1 ? "Presente" : "Falta";
       document.getElementById("dossierBlocked").textContent = Number(a.blocked) === 1 ? "Bloqueado" : "Ativo";
@@ -788,21 +797,32 @@ if (btnDeleteProfessor) {
   if (testesFilterNum) testesFilterNum.addEventListener("change", loadTestes);
   if (testesFilterLet) testesFilterLet.addEventListener("change", loadTestes);
 
-  // ── CHARTS block ──────────────────────────────────────────
+  // ── CHARTS block (presenças com navegação semanal) ────────
   let chartInstance = null;
+  let weekOffset    = 0;
 
-  function initChart() {
+  const weekPrev  = document.getElementById("weekPrev");
+  const weekNext  = document.getElementById("weekNext");
+  const weekRange = document.getElementById("weekRange");
+
+  function renderChart(labels, values) {
     const canvas = document.getElementById("chartPresencas");
-    if (!canvas || !window.Chart || !window.__chartData) return;
-    if (chartInstance) return;
+    if (!canvas || !window.Chart) return;
+
+    if (chartInstance) {
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = values;
+      chartInstance.update();
+      return;
+    }
 
     chartInstance = new Chart(canvas, {
       type: "bar",
       data: {
-        labels: window.__chartData.labels,
+        labels,
         datasets: [{
           label: "Presentes",
-          data: window.__chartData.values,
+          data: values,
           backgroundColor: "#3b82f6",
           borderRadius: 6,
         }],
@@ -811,11 +831,45 @@ if (btnDeleteProfessor) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { precision: 0 } },
-        },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
     });
+  }
+
+  async function loadWeek() {
+    if (weekRange) weekRange.textContent = "A carregar...";
+    try {
+      const res  = await fetch("/PAP/api/admin_charts.php?week_offset=" + weekOffset);
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+
+      renderChart(data.labels, data.values);
+      if (weekRange) weekRange.textContent = data.range;
+      if (weekPrev) weekPrev.disabled = !data.can_prev;
+      if (weekNext) weekNext.disabled = !data.can_next;
+    } catch {
+      if (weekRange) weekRange.textContent = "Erro";
+    }
+  }
+
+  if (weekPrev) {
+    weekPrev.addEventListener("click", () => {
+      weekOffset -= 1;
+      loadWeek();
+    });
+  }
+  if (weekNext) {
+    weekNext.addEventListener("click", () => {
+      weekOffset += 1;
+      if (weekOffset > 0) weekOffset = 0;
+      loadWeek();
+    });
+  }
+
+  function initChart() {
+    if (!document.getElementById("chartPresencas")) return;
+    if (chartInstance) return;
+    loadWeek();
   }
 
   initChart();
@@ -1048,7 +1102,6 @@ if (btnDeleteProfessor) {
       if (updateNome) updateNome.value = user.nome ?? "";
       if (updateLogin) updateLogin.value = user.login ?? "";
       if (updateIdade) updateIdade.value = user.idade ?? "";
-      if (updateNumero) updateNumero.value = user.numero_turma ?? "";
       if (updateUid) updateUid.value = user.uid ?? "";
       if (updatePassword) updatePassword.value = "";
 
@@ -1060,10 +1113,7 @@ if (btnDeleteProfessor) {
 
       const isProfessor = user.tipo === "professor";
       const idadeRow = updateIdade?.closest(".form-row");
-      const numeroRow = updateNumero?.closest(".form-row");
-
       if (idadeRow) idadeRow.style.display = isProfessor ? "none" : "";
-      if (numeroRow) numeroRow.style.display = isProfessor ? "none" : "";
     }
 
     updateSearch.addEventListener("input", () => {
@@ -1091,7 +1141,6 @@ if (btnDeleteProfessor) {
         turma,
         turma_num: tNum,
         turma_letra: tLetra,
-        numero_turma: updateNumero?.value ?? "",
         uid: updateUid?.value ?? "",
         password: updatePassword?.value ?? "",
       };
@@ -1141,7 +1190,6 @@ if (btnDeleteProfessor) {
     const findIdade = document.getElementById("find-idade");
     const findTurmaNum = document.getElementById("findTurmaNum");
     const findTurmaLetra = document.getElementById("findTurmaLetra");
-    const findNumero = document.getElementById("findNumeroTurma");
     const findUid = document.getElementById("findUid");
 
     let findUsers = [];
@@ -1159,7 +1207,6 @@ if (btnDeleteProfessor) {
       if (findNome) findNome.value = user.nome ?? "";
       if (findLogin) findLogin.value = user.login ?? "";
       if (findIdade) findIdade.value = user.idade ?? "";
-      if (findNumero) findNumero.value = user.numero_turma ?? "";
       if (findUid) findUid.value = user.uid ?? "";
 
       const { num, letra } = splitTurma(user.turma);
@@ -1170,10 +1217,7 @@ if (btnDeleteProfessor) {
 
       const isProfessor = user.tipo === "professor";
       const idadeRow = findIdade?.closest(".form-row");
-      const numeroRow = findNumero?.closest(".form-row");
-
       if (idadeRow) idadeRow.style.display = isProfessor ? "none" : "";
-      if (numeroRow) numeroRow.style.display = isProfessor ? "none" : "";
     }
 
     findSearch.addEventListener("input", () => {
@@ -1426,7 +1470,7 @@ if (btnDeleteProfessor) {
         }
 
         notasBox.innerHTML = notas.map(n => `
-          <div class="nota-row">
+          <div class="nota-row ${Number(n.valor) < 10 ? 'nota-bad' : Number(n.valor) < 14 ? 'nota-mid' : 'nota-good'}">
             <div class="nota-left">
               <div class="nota-materia">${escapeHtml(n.materia || "—")}</div>
               <div class="nota-meta">${escapeHtml(n.tipo || "")} • ${escapeHtml(n.data || "")} ${n.professor_nome ? "• " + escapeHtml(n.professor_nome) : ""}</div>
@@ -1563,5 +1607,202 @@ if (btnDeleteProfessor) {
     loadNotasAluno();
     loadSumariosAluno();
     loadAgendaAluno();
+  }
+
+  // ── PROFESSOR PAGE: notas + sumarios + agenda ────────────
+  if (document.body.classList.contains("page-professor")) {
+    const notaForm     = document.getElementById("notaForm");
+    const notaAlunoSel = document.getElementById("notaAluno");
+    const notaStatus   = document.getElementById("notaStatus");
+    const notasList    = document.getElementById("notasList");
+
+    async function loadAlunosDaTurma() {
+      if (!notaAlunoSel) return;
+      try {
+        const res  = await fetch("/PAP/api/notas.php?action=alunos_da_turma");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        const alunos = data.alunos || [];
+        notaAlunoSel.innerHTML = '<option value="">Selecionar aluno...</option>' +
+          alunos.map(a => `<option value="${escapeHtml(a.login)}">${escapeHtml(a.nome)}</option>`).join("");
+      } catch {
+        notaAlunoSel.innerHTML = '<option value="">Erro ao carregar</option>';
+      }
+    }
+
+    async function loadNotasProf() {
+      if (!notasList) return;
+      notasList.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/notas.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        const notas = data.notas || [];
+        if (notas.length === 0) {
+          notasList.innerHTML = '<p class="empty-state">Ainda não lançou notas.</p>';
+          return;
+        }
+        notasList.innerHTML = notas.map(n => `
+          <div class="nota-row ${Number(n.valor) < 10 ? 'nota-bad' : Number(n.valor) < 14 ? 'nota-mid' : 'nota-good'}">
+            <div class="nota-left">
+              <div class="nota-materia">${escapeHtml(n.aluno_nome || n.login_aluno || "—")} • ${escapeHtml(n.materia || "")}</div>
+              <div class="nota-meta">${escapeHtml(n.tipo || "")} • ${escapeHtml(n.data || "")}${n.aluno_turma ? " • Turma " + escapeHtml(n.aluno_turma) : ""}</div>
+              ${n.observacao ? `<div class="nota-obs">${escapeHtml(n.observacao)}</div>` : ""}
+            </div>
+            <div class="nota-valor">${escapeHtml(String(n.valor))}</div>
+          </div>
+        `).join("");
+      } catch {
+        notasList.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    if (notaForm) {
+      notaForm.addEventListener("submit", async e => {
+        e.preventDefault();
+        const fd = new FormData(notaForm);
+        if (notaStatus) { notaStatus.textContent = "A guardar..."; notaStatus.style.color = "#6b7280"; }
+        try {
+          const res  = await fetch("/PAP/api/notas.php?action=create", { method: "POST", headers: CSRF_HEADERS, body: fd });
+          const data = await res.json();
+          if (data.ok) {
+            notaForm.reset();
+            if (notaStatus) { notaStatus.textContent = "Nota lançada."; notaStatus.style.color = "#10b981"; }
+            loadNotasProf();
+          } else if (notaStatus) {
+            notaStatus.textContent = data.error || "Erro.";
+            notaStatus.style.color = "#ef4444";
+          }
+        } catch {
+          if (notaStatus) { notaStatus.textContent = "Erro de rede."; notaStatus.style.color = "#ef4444"; }
+        }
+      });
+    }
+
+    const sumarioForm    = document.getElementById("sumarioForm");
+    const sumStatus      = document.getElementById("sumStatus");
+    const sumariosListEl = document.getElementById("sumariosList");
+
+    async function loadSumariosProf() {
+      if (!sumariosListEl) return;
+      sumariosListEl.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/sumarios.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        const sums = data.sumarios || [];
+        if (sums.length === 0) {
+          sumariosListEl.innerHTML = '<p class="empty-state">Ainda não há sumários.</p>';
+          return;
+        }
+        sumariosListEl.innerHTML = sums.map(s => `
+          <div class="sumario-card">
+            <div class="sumario-head">${escapeHtml(s.data || "")} • Turma ${escapeHtml(String(s.turma_num || "") + (s.turma_letra || ""))}</div>
+            <div class="sumario-body">${escapeHtml(s.descricao || "")}</div>
+          </div>
+        `).join("");
+      } catch {
+        sumariosListEl.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    if (sumarioForm) {
+      sumarioForm.addEventListener("submit", async e => {
+        e.preventDefault();
+        const fd = new FormData(sumarioForm);
+        if (sumStatus) { sumStatus.textContent = "A guardar..."; sumStatus.style.color = "#6b7280"; }
+        try {
+          const res  = await fetch("/PAP/api/sumarios.php?action=create", { method: "POST", headers: CSRF_HEADERS, body: fd });
+          const data = await res.json();
+          if (data.ok) {
+            sumarioForm.reset();
+            if (sumStatus) { sumStatus.textContent = "Sumário criado."; sumStatus.style.color = "#10b981"; }
+            loadSumariosProf();
+          } else if (sumStatus) {
+            sumStatus.textContent = data.error || "Erro.";
+            sumStatus.style.color = "#ef4444";
+          }
+        } catch {
+          if (sumStatus) { sumStatus.textContent = "Erro de rede."; sumStatus.style.color = "#ef4444"; }
+        }
+      });
+    }
+
+    const agendaFormProf = document.getElementById("agendaForm");
+    const agStatusProf   = document.getElementById("agStatus");
+    const agendaListProf = document.getElementById("agendaList");
+
+    async function loadAgendaProf() {
+      if (!agendaListProf) return;
+      agendaListProf.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/agenda.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        const tarefas = data.tarefas || [];
+        if (tarefas.length === 0) {
+          agendaListProf.innerHTML = '<p class="empty-state">Sem tarefas.</p>';
+          return;
+        }
+        agendaListProf.innerHTML = tarefas.map(t => `
+          <div class="agenda-row ${Number(t.concluido) === 1 ? "done" : ""}">
+            <label class="agenda-check">
+              <input type="checkbox" data-id="${t.id}" ${Number(t.concluido) === 1 ? "checked" : ""}>
+              <span>${escapeHtml(t.titulo || "")}</span>
+            </label>
+            ${t.data ? `<span class="agenda-date">${escapeHtml(t.data)}</span>` : ""}
+            <button class="agenda-del" data-id="${t.id}" type="button">×</button>
+          </div>
+        `).join("");
+
+        agendaListProf.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener("change", async () => {
+            const fd = new FormData();
+            fd.append("id", cb.dataset.id);
+            fd.append("concluido", cb.checked ? "1" : "0");
+            await fetch("/PAP/api/agenda.php?action=toggle", { method: "POST", headers: CSRF_HEADERS, body: fd });
+            loadAgendaProf();
+          });
+        });
+
+        agendaListProf.querySelectorAll(".agenda-del").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const fd = new FormData();
+            fd.append("id", btn.dataset.id);
+            await fetch("/PAP/api/agenda.php?action=delete", { method: "POST", headers: CSRF_HEADERS, body: fd });
+            loadAgendaProf();
+          });
+        });
+      } catch {
+        agendaListProf.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    if (agendaFormProf) {
+      agendaFormProf.addEventListener("submit", async e => {
+        e.preventDefault();
+        const fd = new FormData(agendaFormProf);
+        if (agStatusProf) { agStatusProf.textContent = "A guardar..."; agStatusProf.style.color = "#6b7280"; }
+        try {
+          const res  = await fetch("/PAP/api/agenda.php?action=create", { method: "POST", headers: CSRF_HEADERS, body: fd });
+          const data = await res.json();
+          if (data.ok) {
+            agendaFormProf.reset();
+            if (agStatusProf) { agStatusProf.textContent = "Adicionado."; agStatusProf.style.color = "#10b981"; }
+            loadAgendaProf();
+          } else if (agStatusProf) {
+            agStatusProf.textContent = data.error || "Erro.";
+            agStatusProf.style.color = "#ef4444";
+          }
+        } catch {
+          if (agStatusProf) { agStatusProf.textContent = "Erro de rede."; agStatusProf.style.color = "#ef4444"; }
+        }
+      });
+    }
+
+    loadAlunosDaTurma();
+    loadNotasProf();
+    loadSumariosProf();
+    loadAgendaProf();
   }
 });

@@ -18,7 +18,7 @@ if ($res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>PAP - Main</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=318">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
@@ -116,7 +116,7 @@ if ($res) {
           <input type="email" name="login" placeholder="Email" required>
           <input type="password" name="password" placeholder="Password" required>
           <input type="text" name="nome" placeholder="Nome" required>
-          <input type="number" name="idade" placeholder="Data de Nascimento" min="1" required>
+          <input type="date" name="data_nascimento" required>
         <div style="display: flex; gap: 10px;">
           
           <select name="turma_num" required>
@@ -190,7 +190,7 @@ if ($res) {
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=11"></script>
+  <script src="/PAP/project/assets/app.js?v=16"></script>
   <?php if (!isset($_SESSION['user_id'])): ?>
   <script>
   (function () {
