@@ -18,7 +18,7 @@ if ($res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>PAP - Main</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=323">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
@@ -33,16 +33,19 @@ if ($res) {
           <div class="hover-text">Website da escola</div>
         </a>
         
-        <a href="https://classroom.google.com/" >
+        <a href="https://classroom.google.com/" class="logo-hover">
           <img class="logo" src="../assets/classroom.jpg" class="mini-logo" alt="Classroom">
+          <div class="hover-text">Classroom</div>
         </a>
 
-         <a href="https://aepombal.unicard.pt">
+         <a href="https://aepombal.unicard.pt" class="logo-hover">
           <img class="logo" src="../assets/sige.png" class="mini-logo" alt="SIGE">
+          <div class="hover-text">SIGE</div>
         </a>
 
-         <a href="https://inovar.aemtg.pt/inovaralunos/Inicial.wgx">
+         <a href="https://inovar.aemtg.pt/inovaralunos/Inicial.wgx" class="logo-hover">
           <img class="logo" src="../assets/inovar.png" class="mini-logo" alt="Inovar">
+          <div class="hover-text">Inovar</div>
         </a>
       </div>
           
@@ -68,8 +71,8 @@ if ($res) {
         <?php else: ?>
 
           <div class="auth-buttons">
-            <button type="button" class="button" id="openLogin">Login</button>
-            <button type="button" class="button" id="openRegister">Register</button>
+            <button type="button" class="button" id="openLogin">Entrar</button>
+            <button type="button" class="button" id="openRegister">Registar</button>
           </div>
 
         <?php endif; ?>
@@ -148,7 +151,11 @@ if ($res) {
     <p class="main_text">Esta plataforma foi desenvolvida com o objetivo de simplificar o acesso à informação escolar e automatizar o registo de presenças através da tecnologia RFID.</p>
     <p>O sistema permite identificar alunos e professores por meio do cartão escolar, registando automaticamente entradas e saídas, e disponibilizando essa informação em tempo real.</p>
     <p>Num único ambiente, os utilizadores podem consultar presenças, avaliações, horários e outras funcionalidades essenciais de forma rápida, organizada e segura.</p>
-
+    <p>“Como funciona?”:</p>
+    <p>O aluno aproxima o cartão RFID.</p>
+    <p>O Arduino envia o UID para o servidor.</p>
+    <p>A presença é registada automaticamente.</p>
+    
     <br>
     <?php if (count($noticias) > 0): ?>
     <section class="carousel-container" aria-label="News carousel">
@@ -183,14 +190,14 @@ if ($res) {
     <div class="footer-top-line"></div>
 
     <div class="footer-content">
-      <p>© 2026 PAP RFID School System</p>
+      <p>Sistema Escolar RFID — PAP 2026</p>
       <p class="footer-projects">
          Marko Nikolaienko
       </p>
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=16"></script>
+  <script src="/PAP/project/assets/app.js?v=17"></script>
   <?php if (!isset($_SESSION['user_id'])): ?>
   <script>
   (function () {

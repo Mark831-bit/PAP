@@ -1609,8 +1609,19 @@ if (btnDeleteProfessor) {
     loadAgendaAluno();
   }
 
-  // ── PROFESSOR PAGE: notas + sumarios + agenda ────────────
+  // ── PROFESSOR PAGE: tabs + notas + sumarios + agenda ─────
   if (document.body.classList.contains("page-professor")) {
+    // Tab switcher (reuses .admin-tab / .admin-tab-content from CSS)
+    document.querySelectorAll(".admin-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".admin-tab-content").forEach(c => c.classList.remove("active"));
+        tab.classList.add("active");
+        const content = document.getElementById("tab-" + tab.dataset.tab);
+        if (content) content.classList.add("active");
+      });
+    });
+
     const notaForm     = document.getElementById("notaForm");
     const notaAlunoSel = document.getElementById("notaAluno");
     const notaStatus   = document.getElementById("notaStatus");

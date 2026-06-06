@@ -102,6 +102,44 @@ $alunos = [];
 while ($row = $resultAlunos->fetch_assoc()) {
     $alunos[] = $row;
 }
+
+/* 5. Estatísticas de presença para a tab Presenças */
+$presentesAgora = 0;
+foreach ($alunos as $a) {
+    if ((int)$a['presenca'] === 1) $presentesAgora++;
+}
+$totalAlunos = count($alunos);
+
+$presencaRows = [];
+$stmtStats = $conn->prepare("
+    SELECT
+        a.Nome AS nome,
+        a.login,
+        a.`Presença` AS presenca_atual,
+        (
+            SELECT COUNT(DISTINCT p.data)
+            FROM presencas p
+            WHERE p.login = a.login
+              AND p.data >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+              AND p.presenca = 1
+        ) AS dias_semana,
+        (
+            SELECT MAX(p.data)
+            FROM presencas p
+            WHERE p.login = a.login
+        ) AS ultima_data
+    FROM alunos a
+    WHERE CONCAT(a.turma_num, a.turma_letra) = ?
+    ORDER BY a.Nome ASC
+");
+if ($stmtStats) {
+    $stmtStats->bind_param("s", $filtroTurma);
+    $stmtStats->execute();
+    $rs = $stmtStats->get_result();
+    while ($r = $rs->fetch_assoc()) $presencaRows[] = $r;
+    $stmtStats->close();
+}
+$mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -110,7 +148,7 @@ while ($row = $resultAlunos->fetch_assoc()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Professor - Os meus alunos</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=323">
 </head>
 <body class="page-professor">
 
@@ -153,7 +191,8 @@ while ($row = $resultAlunos->fetch_assoc()) {
 </header>
 
 <main class="page-content">
-    <section class="students-panel">
+    <section class="admin-panel">
+
         <div class="students-panel-header">
             <div>
                 <h2>Os meus alunos</h2>
@@ -164,10 +203,138 @@ while ($row = $resultAlunos->fetch_assoc()) {
             </div>
         </div>
 
-         <div class="admin-card">
-            <h2>Marcar teste</h2>
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="prof-alunos">Os meus alunos</button>
+            <button class="admin-tab" data-tab="prof-presencas">Presenças</button>
+            <button class="admin-tab" data-tab="prof-avaliacoes">Avaliações</button>
+            <button class="admin-tab" data-tab="prof-sumarios">Sumários</button>
+            <button class="admin-tab" data-tab="prof-agenda">Agenda</button>
+        </div>
 
-            <form id="testeForm">
+        <!-- ─── TAB 1: OS MEUS ALUNOS ─── -->
+        <div class="admin-tab-content active" id="tab-prof-alunos">
+
+            <form class="students-filters" method="GET">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="turmaSelect">Turma</label>
+                        <select id="turmaSelect" name="turma" onchange="this.form.submit()">
+                            <?php foreach ($turmas as $turmaItem): ?>
+                                <option value="<?= htmlspecialchars($turmaItem) ?>"
+                                    <?= ($turmaItem === $filtroTurma) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($turmaItem) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Presença</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="presenca" value="" <?= ($filtroPresenca === '') ? 'checked' : '' ?> onchange="this.form.submit()">
+                                <span>Todos</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="presenca" value="1" <?= ($filtroPresenca === '1') ? 'checked' : '' ?> onchange="this.form.submit()">
+                                <span>Presente</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="presenca" value="0" <?= ($filtroPresenca === '0') ? 'checked' : '' ?> onchange="this.form.submit()">
+                                <span>Falta</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="students-list">
+                <?php if (count($alunos) > 0): ?>
+                    <?php foreach ($alunos as $aluno): ?>
+                        <div class="student-card" data-aluno-id="<?= (int)$aluno['ID'] ?>">
+                            <div class="student-left">
+                                <span class="status-dot <?= ((int)$aluno['presenca'] === 1) ? 'present' : 'absent' ?>"></span>
+                                <div class="student-info">
+                                    <div class="student-name"><?= htmlspecialchars($aluno['nome']) ?></div>
+                                    <div class="student-meta">
+                                        <?php if (!empty($aluno['idade'])): ?>Idade <?= htmlspecialchars($aluno['idade']) ?> • <?php endif; ?>
+                                        Turma <?= htmlspecialchars($aluno['turma']) ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="student-right <?= ((int)$aluno['presenca'] === 1) ? 'present-text' : 'absent-text' ?>">
+                                <?= ((int)$aluno['presenca'] === 1) ? 'Presente' : 'Falta' ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="empty-state">Sem alunos nesta turma.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- ─── TAB 2: PRESENÇAS ─── -->
+        <div class="admin-tab-content" id="tab-prof-presencas">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Alunos turma</div>
+                    <div class="stat-value"><?= $totalAlunos ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Presentes agora</div>
+                    <div class="stat-value"><?= $presentesAgora ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ausentes agora</div>
+                    <div class="stat-value"><?= $totalAlunos - $presentesAgora ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Média presença</div>
+                    <div class="stat-value"><?= $mediaPresenca ?>%</div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h2>Resumo dos últimos 7 dias</h2>
+                <?php if (count($presencaRows) > 0): ?>
+                    <div class="presenca-table">
+                        <div class="presenca-row presenca-head">
+                            <span>Aluno</span>
+                            <span>Estado</span>
+                            <span>Dias presente (7d)</span>
+                            <span>Última marcação</span>
+                        </div>
+                        <?php foreach ($presencaRows as $r): ?>
+                            <div class="presenca-row">
+                                <span class="presenca-nome"><?= htmlspecialchars($r['nome']) ?></span>
+                                <span>
+                                    <span class="presenca-pill <?= ((int)$r['presenca_atual'] === 1) ? 'pill-on' : 'pill-off' ?>">
+                                        <?= ((int)$r['presenca_atual'] === 1) ? 'Presente' : 'Falta' ?>
+                                    </span>
+                                </span>
+                                <span class="presenca-bar-wrap">
+                                    <span class="presenca-bar">
+                                        <span class="presenca-bar-fill" style="width: <?= ((int)$r['dias_semana']) * 100 / 7 ?>%"></span>
+                                    </span>
+                                    <span class="presenca-bar-text"><?= (int)$r['dias_semana'] ?>/7</span>
+                                </span>
+                                <span class="presenca-last"><?= $r['ultima_data'] ? htmlspecialchars(date('d/m/Y', strtotime($r['ultima_data']))) : '—' ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p class="empty-state">Sem dados.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- ─── TAB 3: AVALIAÇÕES (Marcar teste + Lançar nota) ─── -->
+        <div class="admin-tab-content" id="tab-prof-avaliacoes">
+
+            <div class="admin-card">
+                <h2>Marcar teste</h2>
+
+                <form id="testeForm">
                 <div class="form-row turma-row">
                     <div>
                         <label for="testeTurmaNum">Turma</label>
@@ -226,44 +393,6 @@ while ($row = $resultAlunos->fetch_assoc()) {
             </form>
         </div>
 
-        <form class="students-filters" method="GET">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="turmaSelect">Turma</label>
-                    <select id="turmaSelect" name="turma" onchange="this.form.submit()">
-                        <?php foreach ($turmas as $turmaItem): ?>
-                            <option value="<?= htmlspecialchars($turmaItem) ?>"
-                                <?= ($turmaItem === $filtroTurma) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($turmaItem) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Presença</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="presenca" value="" <?= ($filtroPresenca === '') ? 'checked' : '' ?> onchange="this.form.submit()">
-                            <span>Todos</span>
-                        </label>
-
-                        <label class="radio-option">
-                            <input type="radio" name="presenca" value="1" <?= ($filtroPresenca === '1') ? 'checked' : '' ?> onchange="this.form.submit()">
-                            <span>Presente</span>
-                        </label>
-
-                        <label class="radio-option">
-                            <input type="radio" name="presenca" value="0" <?= ($filtroPresenca === '0') ? 'checked' : '' ?> onchange="this.form.submit()">
-                            <span>Falta</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </form>
-
-       
-
         <div class="admin-card">
             <h2>Lançar nota</h2>
             <form id="notaForm" class="agenda-form">
@@ -309,7 +438,10 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <p class="empty-state">A carregar...</p>
             </div>
         </div>
-        <br>
+        </div><!-- /tab-prof-avaliacoes -->
+
+        <!-- ─── TAB 4: SUMÁRIOS ─── -->
+        <div class="admin-tab-content" id="tab-prof-sumarios">
         <div class="admin-card">
             <h2>Sumários</h2>
             <form id="sumarioForm" class="agenda-form">
@@ -351,7 +483,10 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <p class="empty-state">A carregar...</p>
             </div>
         </div>
-                            <br>
+        </div><!-- /tab-prof-sumarios -->
+
+        <!-- ─── TAB 5: AGENDA ─── -->
+        <div class="admin-tab-content" id="tab-prof-agenda">
         <div class="admin-card">
             <h2>A minha agenda</h2>
             <form id="agendaForm" class="agenda-form">
@@ -373,37 +508,8 @@ while ($row = $resultAlunos->fetch_assoc()) {
                 <p class="empty-state">A carregar...</p>
             </div>
         </div>
-                            <br>
-        <div class="students-list">
-            <?php if (count($alunos) > 0): ?>
-                <?php foreach ($alunos as $aluno): ?>
-                    <div class="student-card" data-aluno-id="<?= (int)$aluno['ID'] ?>">
-                        <div class="student-left">
-                            <span class="status-dot <?= ((int)$aluno['presenca'] === 1) ? 'present' : 'absent' ?>"></span>
+        </div><!-- /tab-prof-agenda -->
 
-                            <div class="student-info">
-                                <div class="student-name">
-                                    <?= htmlspecialchars($aluno['nome']) ?>
-                                </div>
-
-                                <div class="student-meta">
-                                    <?php if (!empty($aluno['idade'])): ?>Idade <?= htmlspecialchars($aluno['idade']) ?> • <?php endif; ?>
-                                    Turma <?= htmlspecialchars($aluno['turma']) ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="student-right <?= ((int)$aluno['presenca'] === 1) ? 'present-text' : 'absent-text' ?>">
-                            <?= ((int)$aluno['presenca'] === 1) ? 'Presente' : 'Falta' ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="empty-state">
-                    Não há alunos associados a esta turma.
-                </div>
-            <?php endif; ?>
-        </div>
     </section>
 </main>
 
@@ -478,6 +584,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=16"></script>
+<script src="/PAP/project/assets/app.js?v=17"></script>
 </body>
 </html>

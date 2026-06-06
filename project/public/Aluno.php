@@ -58,7 +58,7 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Aluno</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=323">
 </head>
 
 <body class="page-aluno">
@@ -207,6 +207,6 @@ $stmt->close();
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="/PAP/project/assets/app.js?v=16"></script>
+    <script src="/PAP/project/assets/app.js?v=17"></script>
 </body>
 </html>

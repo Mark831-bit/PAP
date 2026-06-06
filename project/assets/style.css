@@ -2461,3 +2461,93 @@ body.page-index > main {
     width: 100%;
   }
 }
+/* ============ Professor — Presenças table ============ */
+.presenca-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.presenca-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 2fr 1.2fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.presenca-row.presenca-head {
+  background: #f3f4f6;
+  border: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #6b7280;
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
+.presenca-nome {
+  font-weight: 600;
+  color: #111827;
+}
+
+.presenca-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.presenca-pill.pill-on  { background: #d1fae5; color: #065f46; }
+.presenca-pill.pill-off { background: #fee2e2; color: #b91c1c; }
+
+.presenca-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.presenca-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.presenca-bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  border-radius: 999px;
+  transition: width .3s;
+}
+.presenca-bar-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  min-width: 32px;
+  text-align: right;
+}
+
+.presenca-last { color: #6b7280; font-size: 13px; }
+
+@media (max-width: 720px) {
+  .presenca-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "nome estado"
+      "bar bar"
+      "last last";
+  }
+  .presenca-row.presenca-head { display: none; }
+  .presenca-nome { grid-area: nome; }
+  .presenca-pill { grid-area: estado; justify-self: end; }
+  .presenca-bar-wrap { grid-area: bar; }
+  .presenca-last { grid-area: last; }
+}

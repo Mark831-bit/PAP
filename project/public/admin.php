@@ -70,7 +70,7 @@ if ($res = $conn->query("
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=322">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=323">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="page-admin">
@@ -696,7 +696,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=16"></script>
+<script src="/PAP/project/assets/app.js?v=17"></script>
 </body>
 
 </html>
