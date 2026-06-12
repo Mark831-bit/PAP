@@ -1,17 +1,28 @@
 <?php
+require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
-header('Content-Type: application/json');
+require_once __DIR__ . '/lib/logger.php';
 
-$action = $_GET['action'] ?? '';
+header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'forbidden']);
+    exit;
+}
+
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 if ($action === 'list') {
     $stmt = $pdo->query("
-        SELECT 
-            Nome AS nome,
-            login,
-            `Matéria ensinada` AS materia
-        FROM professores
-        ORDER BY Nome ASC
+        SELECT
+            p.Nome AS nome,
+            p.login,
+            p.`Matéria ensinada` AS materia,
+            l.blocked AS blocked
+        FROM professores p
+        LEFT JOIN login l ON l.Login = p.login
+        ORDER BY p.Nome ASC
     ");
 
     echo json_encode([
@@ -26,15 +37,17 @@ if ($action === 'get') {
 
     $stmt = $pdo->prepare("
         SELECT
-            Nome AS nome,
-            login,
-            turma,
-            `Gabinete` AS gabinete,
-            `Cargo (posição)` AS cargo,
-            `Matéria ensinada` AS materia,
-            Horario AS horario
-        FROM professores
-        WHERE login = ?
+            p.Nome AS nome,
+            p.login,
+            p.turma,
+            p.`Gabinete` AS gabinete,
+            p.`Cargo (posição)` AS cargo,
+            p.`Matéria ensinada` AS materia,
+            p.Horario AS horario,
+            l.blocked AS blocked
+        FROM professores p
+        LEFT JOIN login l ON l.Login = p.login
+        WHERE p.login = ?
         LIMIT 1
     ");
     $stmt->execute([$login]);
@@ -47,27 +60,50 @@ if ($action === 'get') {
     exit;
 }
 
-echo json_encode(["ok" => false]);
-
 if ($action === 'toggle_block') {
+    csrf_check();
     $login = $_POST['login'] ?? '';
+    if ($login === '') {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'login required']);
+        exit;
+    }
 
-    $stmt = $pdo->prepare("UPDATE professores SET blocked = IFNULL(blocked,0) ^ 1 WHERE login = ?");
-    $ok = $stmt->execute([$login]);
+    $stmt = $pdo->prepare("UPDATE login SET blocked = 1 - blocked WHERE Login = ?");
+    $stmt->execute([$login]);
 
-    echo json_encode(["ok" => $ok]);
+    $q = $pdo->prepare("SELECT blocked FROM login WHERE Login = ?");
+    $q->execute([$login]);
+    $r = $q->fetch();
+
+    log_event("INFO", "professor block toggled", ["login" => $login, "blocked" => (int)($r['blocked'] ?? 0)]);
+    echo json_encode(['ok' => true, 'blocked' => (int)($r['blocked'] ?? 0)]);
     exit;
 }
 
 if ($action === 'delete') {
+    csrf_check();
     $login = $_POST['login'] ?? '';
+    if ($login === '') {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'login required']);
+        exit;
+    }
 
-    $stmt1 = $pdo->prepare("DELETE FROM professores WHERE login = ?");
-    $stmt2 = $pdo->prepare("DELETE FROM login WHERE Login = ?");
-
-    $ok1 = $stmt1->execute([$login]);
-    $ok2 = $stmt2->execute([$login]);
-
-    echo json_encode(["ok" => ($ok1 && $ok2)]);
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("DELETE FROM professores WHERE login = ?")->execute([$login]);
+        $pdo->prepare("DELETE FROM login WHERE Login = ?")->execute([$login]);
+        $pdo->commit();
+        log_event("INFO", "professor deleted", ["login" => $login]);
+        echo json_encode(['ok' => true]);
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        log_event("ERROR", "professor delete failed", ["login" => $login, "err" => $e->getMessage()]);
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => 'db error']);
+    }
     exit;
 }
+
+echo json_encode(["ok" => false, "error" => "unknown action"]);

@@ -7,8 +7,8 @@ if (!isset($_SESSION['login']) || ($_SESSION['role'] ?? '') !== 'Aluno') {
     exit;
 }
 
-if (($_SESSION['lang'] ?? 'pt') === 'en') {
-    header("Location: /PAP/project/public/Aluno_EN.php");
+if (($_SESSION['lang'] ?? 'pt') === 'pt') {
+    header("Location: /PAP/project/public/Aluno.php");
     exit;
 }
 
@@ -20,7 +20,7 @@ $stmt->execute();
 $aluno = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-if (!$aluno) die("Aluno não encontrado.");
+if (!$aluno) die("Student not found.");
 
 $alunoNome       = $aluno['Nome'];
 $alunoTurma      = $aluno['Turma'];
@@ -49,12 +49,12 @@ while ($row = $res->fetch_assoc()) {
 $stmt->close();
 ?>
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
-    <title>Aluno</title>
+    <title>Student</title>
     <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
 </head>
 
@@ -67,25 +67,25 @@ $stmt->close();
             </a>
         </div>
         <div class="topbar-center">
-            <a href="/PAP/project/public/index.php">Principal</a>
-            <a href="/PAP/api/profile.php">Página pessoal</a>
+            <a href="/PAP/project/public/index.php">Home</a>
+            <a href="/PAP/api/profile.php">Personal page</a>
         </div>
         <div class="topbar-right">
             <div class="user-status" style="color:black;">
-                Sessão iniciada como: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+                Logged in as: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
             </div>
             <div id="logoutBox">
-                <a href="/PAP/api/logout.php">Terminar sessão</a>
+                <a href="/PAP/api/logout.php">Log out</a>
             </div>
         </div>
     </div>
 </header>
 
 <div class="lang-switcher">
-    <a href="/PAP/api/set_lang.php?lang=pt&to=/PAP/project/public/Aluno.php" class="lang-btn lang-active" title="Português">
+    <a href="/PAP/api/set_lang.php?lang=pt&to=/PAP/project/public/Aluno.php" class="lang-btn" title="Português">
         <img src="/PAP/project/assets/pt.png" alt="PT" class="lang-flag">
     </a>
-    <a href="/PAP/api/set_lang.php?lang=en&to=/PAP/project/public/Aluno_EN.php" class="lang-btn" title="English">
+    <a href="/PAP/api/set_lang.php?lang=en&to=/PAP/project/public/Aluno_EN.php" class="lang-btn lang-active" title="English">
         <img src="/PAP/project/assets/britan.png" alt="EN" class="lang-flag">
     </a>
 </div>
@@ -96,23 +96,23 @@ $stmt->close();
         <div class="students-panel-header">
             <div>
                 <h2><?= htmlspecialchars($alunoNome) ?></h2>
-                <p>Turma <?= htmlspecialchars($alunoTurma) ?></p>
+                <p>Class <?= htmlspecialchars($alunoTurma) ?></p>
             </div>
         </div>
 
         <div class="admin-tabs">
-            <button class="admin-tab active" data-tab="aluno-testes">Testes</button>
-            <button class="admin-tab" data-tab="aluno-notas">Notas</button>
-            <button class="admin-tab" data-tab="aluno-sumarios">Sumários</button>
+            <button class="admin-tab active" data-tab="aluno-testes">Tests</button>
+            <button class="admin-tab" data-tab="aluno-notas">Grades</button>
+            <button class="admin-tab" data-tab="aluno-sumarios">Summaries</button>
             <button class="admin-tab" data-tab="aluno-agenda">Agenda</button>
-            <button class="admin-tab" data-tab="aluno-horario">Horário</button>
-            <button class="admin-tab" data-tab="aluno-documentos">Documentos</button>
+            <button class="admin-tab" data-tab="aluno-horario">Schedule</button>
+            <button class="admin-tab" data-tab="aluno-documentos">Documents</button>
         </div>
 
         <!-- ─── TAB 1: TESTES ─── -->
         <div class="admin-tab-content active" id="tab-aluno-testes">
             <div class="admin-card">
-                <h2>Próximos testes</h2>
+                <h2>Upcoming tests</h2>
                 <?php if (count($testesFuturos) > 0): ?>
                     <div class="testes-list">
                         <?php foreach ($testesFuturos as $t): ?>
@@ -132,13 +132,13 @@ $stmt->close();
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p class="empty-state">Não tens testes marcados.</p>
+                    <p class="empty-state">You have no scheduled tests.</p>
                 <?php endif; ?>
             </div>
 
             <?php if (count($testesPassados) > 0): ?>
             <div class="admin-card">
-                <h2>Testes passados</h2>
+                <h2>Past tests</h2>
                 <div class="testes-list">
                     <?php foreach (array_reverse($testesPassados) as $t): ?>
                         <div class="teste-card teste-past">
@@ -160,12 +160,12 @@ $stmt->close();
         <!-- ─── TAB 2: NOTAS ─── -->
         <div class="admin-tab-content" id="tab-aluno-notas">
             <div class="admin-card">
-                <h2>As minhas notas</h2>
+                <h2>My grades</h2>
                 <div id="notasChartWrap" style="display:none; margin-bottom:18px;">
                     <canvas id="notasChart" height="100"></canvas>
                 </div>
                 <div id="notasAluno" class="notas-aluno">
-                    <p class="empty-state">A carregar...</p>
+                    <p class="empty-state">Loading...</p>
                 </div>
             </div>
         </div>
@@ -173,9 +173,9 @@ $stmt->close();
         <!-- ─── TAB 3: SUMÁRIOS ─── -->
         <div class="admin-tab-content" id="tab-aluno-sumarios">
             <div class="admin-card">
-                <h2>Sumários da minha turma</h2>
+                <h2>My class summaries</h2>
                 <div id="sumariosList" class="sumarios-list">
-                    <p class="empty-state">A carregar...</p>
+                    <p class="empty-state">Loading...</p>
                 </div>
             </div>
         </div>
@@ -183,23 +183,23 @@ $stmt->close();
         <!-- ─── TAB 4: AGENDA ─── -->
         <div class="admin-tab-content" id="tab-aluno-agenda">
             <div class="admin-card">
-                <h2>A minha agenda</h2>
+                <h2>My agenda</h2>
                 <form id="agendaForm" class="agenda-form">
                     <div class="form-row">
-                        <label for="agTitulo">Título</label>
-                        <input type="text" id="agTitulo" name="titulo" maxlength="200" required placeholder="O que preciso de fazer">
+                        <label for="agTitulo">Title</label>
+                        <input type="text" id="agTitulo" name="titulo" maxlength="200" required placeholder="What I need to do">
                     </div>
                     <div class="form-row">
-                        <label for="agData">Data (opcional)</label>
+                        <label for="agData">Date (optional)</label>
                         <input type="date" id="agData" name="data">
                     </div>
                     <div class="form-actions">
-                        <button type="submit">Adicionar</button>
+                        <button type="submit">Add</button>
                         <div id="agStatus"></div>
                     </div>
                 </form>
                 <div id="agendaList" class="agenda-list">
-                    <p class="empty-state">A carregar...</p>
+                    <p class="empty-state">Loading...</p>
                 </div>
             </div>
         </div>
@@ -207,9 +207,9 @@ $stmt->close();
         <!-- ─── TAB: HORÁRIO ─── -->
         <div class="admin-tab-content" id="tab-aluno-horario">
             <div class="admin-card">
-                <h2>O meu horário</h2>
+                <h2>My schedule</h2>
                 <div class="horario-grid" id="alunoHorarioGrid">
-                    <p class="empty-state">A carregar...</p>
+                    <p class="empty-state">Loading...</p>
                 </div>
             </div>
         </div>
@@ -217,18 +217,18 @@ $stmt->close();
         <!-- ─── TAB 5: DOCUMENTOS ─── -->
         <div class="admin-tab-content" id="tab-aluno-documentos">
             <div class="admin-card">
-                <h2>Os meus documentos</h2>
-                <p style="color:#6b7280;font-size:14px;margin:0 0 18px;">PDF, Word, Excel, PowerPoint, imagens — máx. 15 MB por ficheiro.</p>
+                <h2>My documents</h2>
+                <p style="color:#6b7280;font-size:14px;margin:0 0 18px;">PDF, Word, Excel, PowerPoint, images — max. 15 MB per file.</p>
 
                 <div class="doc-upload-area" id="docDropZone">
                     <input type="file" id="docFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.webp" style="display:none">
                     <div class="doc-upload-icon">📎</div>
-                    <p class="doc-upload-label">Arrasta ficheiros aqui ou <button type="button" class="doc-upload-btn" id="docPickBtn">escolhe ficheiro</button></p>
+                    <p class="doc-upload-label">Drag files here or <button type="button" class="doc-upload-btn" id="docPickBtn">choose a file</button></p>
                     <div id="docUploadStatus"></div>
                 </div>
 
                 <div id="docList" class="doc-list">
-                    <p class="empty-state">A carregar...</p>
+                    <p class="empty-state">Loading...</p>
                 </div>
             </div>
         </div>
@@ -283,20 +283,20 @@ $stmt->close();
 
     async function loadDocs() {
         if (!docList) return;
-        docList.innerHTML = '<p class="empty-state">A carregar...</p>';
+        docList.innerHTML = '<p class="empty-state">Loading...</p>';
         try {
             const res  = await fetch('/PAP/api/documentos.php?action=list');
             const data = await res.json();
             if (!data.ok) throw new Error();
             renderDocs(data.files);
         } catch {
-            docList.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+            docList.innerHTML = '<p class="empty-state">Error loading.</p>';
         }
     }
 
     function renderDocs(files) {
         if (!files.length) {
-            docList.innerHTML = '<p class="empty-state">Sem documentos carregados.</p>';
+            docList.innerHTML = '<p class="empty-state">No uploaded documents.</p>';
             return;
         }
         docList.innerHTML = files.map(f => `
@@ -306,7 +306,7 @@ $stmt->close();
                     <a class="doc-name" href="${escHtml(f.url)}" target="_blank" rel="noopener">${escHtml(f.name)}</a>
                     <span class="doc-meta">${formatSize(f.size)}</span>
                 </div>
-                <button class="doc-del-btn" type="button" title="Eliminar">🗑️</button>
+                <button class="doc-del-btn" type="button" title="Delete">🗑️</button>
             </div>
         `).join('');
 
@@ -314,7 +314,7 @@ $stmt->close();
             btn.addEventListener('click', async () => {
                 const row  = btn.closest('.doc-row');
                 const name = row.dataset.name;
-                if (!confirm('Eliminar "' + name + '"?')) return;
+                if (!confirm('Delete "' + name + '"?')) return;
                 const fd = new FormData();
                 fd.append('filename', name);
                 const res  = await fetch('/PAP/api/documentos.php?action=delete', {
@@ -324,13 +324,13 @@ $stmt->close();
                 });
                 const data = await res.json();
                 if (data.ok) loadDocs();
-                else alert('Erro ao eliminar.');
+                else alert('Error deleting.');
             });
         });
     }
 
     async function uploadFile(file) {
-        uploadStatus.textContent = 'A carregar "' + file.name + '"...';
+        uploadStatus.textContent = 'Uploading "' + file.name + '"...';
         uploadStatus.style.color = '#6b7280';
 
         const fd = new FormData();
@@ -343,16 +343,16 @@ $stmt->close();
             });
             const data = await res.json();
             if (data.ok) {
-                uploadStatus.textContent = '✓ Carregado com sucesso.';
+                uploadStatus.textContent = '✓ Uploaded successfully.';
                 uploadStatus.style.color = '#10b981';
                 loadDocs();
                 setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
             } else {
-                uploadStatus.textContent = '✗ ' + (data.error || 'Erro.');
+                uploadStatus.textContent = '✗ ' + (data.error || 'Error.');
                 uploadStatus.style.color = '#ef4444';
             }
         } catch {
-            uploadStatus.textContent = '✗ Erro de rede.';
+            uploadStatus.textContent = '✗ Network error.';
             uploadStatus.style.color = '#ef4444';
         }
     }

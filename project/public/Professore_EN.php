@@ -7,13 +7,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Professor') {
     exit;
 }
 
-if (($_SESSION['lang'] ?? 'pt') === 'en') {
-    header("Location: /PAP/project/public/Professore_EN.php");
+if (($_SESSION['lang'] ?? 'pt') === 'pt') {
+    header("Location: /PAP/project/public/Professor.php");
     exit;
 }
 
 if (!isset($_SESSION['login'])) {
-    die("Login do professor não encontrado na sessão.");
+    die("Teacher login not found in the session.");
 }
 
 $login = $_SESSION['login'];
@@ -27,7 +27,7 @@ $stmtProf = $conn->prepare("
 ");
 
 if (!$stmtProf) {
-    die("Erro na query do professor: " . $conn->error);
+    die("Error in teacher query: " . $conn->error);
 }
 
 $stmtProf->bind_param("s", $login);
@@ -36,11 +36,11 @@ $resultProf = $stmtProf->get_result();
 $professor = $resultProf->fetch_assoc();
 
 if (!$professor) {
-    die("Professor não encontrado.");
+    die("Teacher not found.");
 }
 
 if (empty($professor['turma'])) {
-    die("A turma do professor ainda não está definida.");
+    die("The teacher class has not been defined yet.");
 }
 
 $turma = $professor['turma'];
@@ -96,7 +96,7 @@ $sqlAlunos .= " ORDER BY `turma_num` ASC, `turma_letra` ASC, `Nome` ASC";
 $stmtAlunos = $conn->prepare($sqlAlunos);
 
 if (!$stmtAlunos) {
-    die("Erro na query dos alunos: " . $conn->error);
+    die("Error in student query: " . $conn->error);
 }
 
 $stmtAlunos->bind_param($types, ...$params);
@@ -147,12 +147,12 @@ if ($stmtStats) {
 $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100) : 0;
 ?>
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
-    <title>Professor - Os meus alunos</title>
+    <title>Teacher - My students</title>
     <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
 </head>
 <body class="page-professor">
@@ -166,8 +166,8 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
         </div>
 
         <div class="topbar-center">
-                <a href="/PAP/project/public/index.php">Principal</a>
-                <a href="/PAP/api/profile.php">Página pessoal</a>
+                <a href="/PAP/project/public/index.php">Home</a>
+                <a href="/PAP/api/profile.php">Personal page</a>
         </div>
 
         <div class="topbar-right">
@@ -175,11 +175,11 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                     <?php if (isset($_SESSION['user_id'])): ?>
 
                     <div class="user-status" style="color: black;">
-                        Sessão iniciada como: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
+                        Logged in as: <?= htmlspecialchars($_SESSION['nome'] ?? '') ?> (<?= htmlspecialchars($_SESSION['role']) ?>)
                     </div>
 
                     <div id="logoutBox">
-                        <a href="/PAP/api/logout.php">Terminar sessão</a>
+                        <a href="/PAP/api/logout.php">Log out</a>
                     </div>
 
                     <?php else: ?>
@@ -196,10 +196,10 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
 </header>
 
 <div class="lang-switcher">
-    <a href="/PAP/api/set_lang.php?lang=pt&to=/PAP/project/public/Professor.php" class="lang-btn lang-active" title="Português">
+    <a href="/PAP/api/set_lang.php?lang=pt&to=/PAP/project/public/Professor.php" class="lang-btn" title="Português">
         <img src="/PAP/project/assets/pt.png" alt="PT" class="lang-flag">
     </a>
-    <a href="/PAP/api/set_lang.php?lang=en&to=/PAP/project/public/Professore_EN.php" class="lang-btn" title="English">
+    <a href="/PAP/api/set_lang.php?lang=en&to=/PAP/project/public/Professore_EN.php" class="lang-btn lang-active" title="English">
         <img src="/PAP/project/assets/britan.png" alt="EN" class="lang-flag">
     </a>
 </div>
@@ -209,26 +209,21 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
 
         <div class="students-panel-header">
             <div>
-                <h2>Os meus alunos</h2>
-                <div class="presence-legend">
-                    <span><span class="legend-dot present"></span> Presente</span>
-                    <span><span class="legend-dot absent"></span> Falta</span>
-                </div>
+                <h2>My students</h2>
                 <p>
-                    Professor: <?= htmlspecialchars($professorNome) ?> |
-                    Turma: <?= htmlspecialchars($filtroTurma) ?>
+                    Teacher: <?= htmlspecialchars($professorNome) ?> |
+                    Class: <?= htmlspecialchars($filtroTurma) ?>
                 </p>
             </div>
         </div>
 
         <div class="admin-tabs">
-            <button class="admin-tab active" data-tab="prof-alunos">Os meus alunos</button>
-            <button class="admin-tab" data-tab="prof-presencas">Presenças</button>
-            <button class="admin-tab" data-tab="prof-avaliacoes">Avaliações</button>
-            <button class="admin-tab" data-tab="prof-sumarios">Sumários</button>
+            <button class="admin-tab active" data-tab="prof-alunos">My students</button>
+            <button class="admin-tab" data-tab="prof-presencas">Attendance</button>
+            <button class="admin-tab" data-tab="prof-avaliacoes">Assessments</button>
+            <button class="admin-tab" data-tab="prof-sumarios">Summaries</button>
             <button class="admin-tab" data-tab="prof-agenda">Agenda</button>
-            <button class="admin-tab" data-tab="prof-horario">Horário</button>
-            <button class="admin-tab" data-tab="prof-documentos">Documentos</button>
+            <button class="admin-tab" data-tab="prof-horario">Schedule</button>
         </div>
 
         <!-- ─── TAB 1: OS MEUS ALUNOS ─── -->
@@ -237,7 +232,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
             <form class="students-filters" method="GET">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label for="turmaSelect">Turma</label>
+                        <label for="turmaSelect">Class</label>
                         <select id="turmaSelect" name="turma" onchange="this.form.submit()">
                             <?php foreach ($turmas as $turmaItem): ?>
                                 <option value="<?= htmlspecialchars($turmaItem) ?>"
@@ -249,19 +244,19 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                     </div>
 
                     <div class="filter-group">
-                        <label>Presença</label>
+                        <label>Attendance</label>
                         <div class="radio-group">
                             <label class="radio-option">
                                 <input type="radio" name="presenca" value="" <?= ($filtroPresenca === '') ? 'checked' : '' ?> onchange="this.form.submit()">
-                                <span>Todos</span>
+                                <span>All</span>
                             </label>
                             <label class="radio-option">
                                 <input type="radio" name="presenca" value="1" <?= ($filtroPresenca === '1') ? 'checked' : '' ?> onchange="this.form.submit()">
-                                <span>Presente</span>
+                                <span>Present</span>
                             </label>
                             <label class="radio-option">
                                 <input type="radio" name="presenca" value="0" <?= ($filtroPresenca === '0') ? 'checked' : '' ?> onchange="this.form.submit()">
-                                <span>Falta</span>
+                                <span>Absent</span>
                             </label>
                         </div>
                     </div>
@@ -277,18 +272,18 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                                 <div class="student-info">
                                     <div class="student-name"><?= htmlspecialchars($aluno['nome']) ?></div>
                                     <div class="student-meta">
-                                        <?php if (!empty($aluno['idade'])): ?>Idade <?= htmlspecialchars($aluno['idade']) ?> • <?php endif; ?>
-                                        Turma <?= htmlspecialchars($aluno['turma']) ?>
+                                        <?php if (!empty($aluno['idade'])): ?>Age <?= htmlspecialchars($aluno['idade']) ?> • <?php endif; ?>
+                                        Class <?= htmlspecialchars($aluno['turma']) ?>
                                     </div>
                                 </div>
                             </div>
                             <div class="student-right <?= ((int)$aluno['presenca'] === 1) ? 'present-text' : 'absent-text' ?>">
-                                <?= ((int)$aluno['presenca'] === 1) ? 'Presente' : 'Falta' ?>
+                                <?= ((int)$aluno['presenca'] === 1) ? 'Present' : 'Absent' ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p class="empty-state">Sem alunos nesta turma.</p>
+                    <p class="empty-state">No students in this class.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -297,39 +292,39 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
         <div class="admin-tab-content" id="tab-prof-presencas">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Alunos da turma</div>
+                    <div class="stat-label">Students in class</div>
                     <div class="stat-value"><?= $totalAlunos ?></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Presentes agora</div>
+                    <div class="stat-label">Present now</div>
                     <div class="stat-value"><?= $presentesAgora ?></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Ausentes agora</div>
+                    <div class="stat-label">Absent now</div>
                     <div class="stat-value"><?= $totalAlunos - $presentesAgora ?></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Média presença</div>
+                    <div class="stat-label">Average attendance</div>
                     <div class="stat-value"><?= $mediaPresenca ?>%</div>
                 </div>
             </div>
 
             <div class="admin-card">
-                <h2>Resumo dos últimos 7 dias</h2>
+                <h2>Last 7 days summary</h2>
                 <?php if (count($presencaRows) > 0): ?>
                     <div class="presenca-table">
                         <div class="presenca-row presenca-head">
-                            <span>Aluno</span>
-                            <span>Estado</span>
-                            <span>Dias presente (7d)</span>
-                            <span>Última registo</span>
+                            <span>Student</span>
+                            <span>Status</span>
+                            <span>Days present (7d)</span>
+                            <span>Last record</span>
                         </div>
                         <?php foreach ($presencaRows as $r): ?>
                             <div class="presenca-row">
                                 <span class="presenca-nome"><?= htmlspecialchars($r['nome']) ?></span>
                                 <span>
                                     <span class="presenca-pill <?= ((int)$r['presenca_atual'] === 1) ? 'pill-on' : 'pill-off' ?>">
-                                        <?= ((int)$r['presenca_atual'] === 1) ? 'Presente' : 'Falta' ?>
+                                        <?= ((int)$r['presenca_atual'] === 1) ? 'Present' : 'Absent' ?>
                                     </span>
                                 </span>
                                 <span class="presenca-bar-wrap">
@@ -343,7 +338,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p class="empty-state">Sem dados.</p>
+                    <p class="empty-state">No data.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -352,14 +347,14 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
         <div class="admin-tab-content" id="tab-prof-avaliacoes">
 
             <div class="admin-card">
-                <h2>Marcar teste</h2>
+                <h2>Schedule test</h2>
 
                 <form id="testeForm">
                 <div class="form-row turma-row">
                     <div>
-                        <label for="testeTurmaNum">Turma</label>
+                        <label for="testeTurmaNum">Class</label>
                         <select id="testeTurmaNum" name="turma_num" required>
-                            <option value="">Ano</option>
+                            <option value="">Year</option>
                             <option value="10">10</option>
                             <option value="11">11</option>
                             <option value="12">12</option>
@@ -369,7 +364,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                     <div>
                         <label for="testeTurmaLetra">&nbsp;</label>
                         <select id="testeTurmaLetra" name="turma_letra" required>
-                            <option value="">Letra</option>
+                            <option value="">Letter</option>
                             <option value="A">A</option>
                             <option value="B">B</option>
                             <option value="C">C</option>
@@ -378,17 +373,17 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                 </div>
 
                 <div class="form-row">
-                    <label for="testTitle">Nome</label>
+                    <label for="testTitle">Name</label>
                     <input
                         type="text"
                         id="testTitle"
                         name="titulo"
-                        placeholder="Nome do teste"
+                        placeholder="Test name"
                     >
                 </div>
 
                 <div class="form-row">
-                    <label for="testDate">Data</label>
+                    <label for="testDate">Date</label>
                     <input
                         type="date"
                         id="testDate"
@@ -397,65 +392,65 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                 </div>
 
                 <div class="form-row">
-                    <label for="testDescription">Descrição</label>
+                    <label for="testDescription">Description</label>
                     <textarea
                         id="testDescription"
                         name="descricao"
                         rows="4"
-                        placeholder="Descreve a tema, materias..."
+                        placeholder="Describe the topic and subjects..."
                     ></textarea>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit">Marcar</button>
+                    <button type="submit">Schedule</button>
                     <div id="testeStatus"></div>
                 </div>
             </form>
         </div>
 
         <div class="admin-card">
-            <h2>Lançar nota</h2>
+            <h2>Enter grade</h2>
             <form id="notaForm" class="agenda-form">
                 <div class="form-row">
-                    <label for="notaAluno">Aluno</label>
+                    <label for="notaAluno">Student</label>
                     <select id="notaAluno" name="login_aluno" required>
-                        <option value="">A carregar alunos...</option>
+                        <option value="">Loading students...</option>
                     </select>
                 </div>
                 <div class="form-row turma-row">
                     <div>
-                        <label for="notaTipo">Tipo</label>
+                        <label for="notaTipo">Type</label>
                         <select id="notaTipo" name="tipo" required>
-                            <option value="">Tipo de avaliação</option>
-                            <option value="Teste">Teste</option>
-                            <option value="Trabalho">Trabalho</option>
+                            <option value="">Assessment type</option>
+                            <option value="Teste">Test</option>
+                            <option value="Trabalho">Assignment</option>
                             <option value="Oral">Oral</option>
-                            <option value="Participação">Participação</option>
-                            <option value="Projeto">Projeto</option>
+                            <option value="Participação">Participation</option>
+                            <option value="Projeto">Project</option>
                         </select>
                     </div>
                     <div>
-                        <label for="notaValor">Valor (0–20)</label>
+                        <label for="notaValor">Grade (0–20)</label>
                         <input type="number" id="notaValor" name="valor" min="0" max="20" step="0.1" required>
                     </div>
                 </div>
                 <div class="form-row">
-                    <label for="notaData">Data</label>
+                    <label for="notaData">Date</label>
                     <input type="date" id="notaData" name="data" required>
                 </div>
                 <div class="form-row">
-                    <label for="notaObservacao">Observação (opcional)</label>
+                    <label for="notaObservacao">Comment (optional)</label>
                     <textarea id="notaObservacao" name="observacao" rows="2"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="submit">Lançar nota</button>
+                    <button type="submit">Save grade</button>
                     <div id="notaStatus"></div>
                 </div>
             </form>
 
-            <h3 class="subsection-title">Notas lançadas</h3>
+            <h3 class="subsection-title">Entered grades</h3>
             <div id="notasList" class="notas-list">
-                <p class="empty-state">A carregar...</p>
+                <p class="empty-state">Loading...</p>
             </div>
         </div>
         </div><!-- /tab-prof-avaliacoes -->
@@ -463,13 +458,13 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
         <!-- ─── TAB 4: SUMÁRIOS ─── -->
         <div class="admin-tab-content" id="tab-prof-sumarios">
         <div class="admin-card">
-            <h2>Sumários</h2>
+            <h2>Summaries</h2>
             <form id="sumarioForm" class="agenda-form">
                 <div class="form-row turma-row">
                     <div>
-                        <label for="sumTurmaNum">Turma</label>
+                        <label for="sumTurmaNum">Class</label>
                         <select id="sumTurmaNum" name="turma_num" required>
-                            <option value="">Ano</option>
+                            <option value="">Year</option>
                             <option value="10">10</option>
                             <option value="11">11</option>
                             <option value="12">12</option>
@@ -478,7 +473,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                     <div>
                         <label for="sumTurmaLetra">&nbsp;</label>
                         <select id="sumTurmaLetra" name="turma_letra" required>
-                            <option value="">Letra</option>
+                            <option value="">Letter</option>
                             <option value="A">A</option>
                             <option value="B">B</option>
                             <option value="C">C</option>
@@ -486,21 +481,21 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
                     </div>
                 </div>
                 <div class="form-row">
-                    <label for="sumData">Data</label>
+                    <label for="sumData">Date</label>
                     <input type="date" id="sumData" name="data" required>
                 </div>
                 <div class="form-row">
-                    <label for="sumDescricao">Descrição (inclui justificações de faltas, se houver)</label>
-                    <textarea id="sumDescricao" name="descricao" rows="4" required placeholder="Tema da aula, matérias abordadas, justificações de faltas..."></textarea>
+                    <label for="sumDescricao">Description (includes absence justifications, if any)</label>
+                    <textarea id="sumDescricao" name="descricao" rows="4" required placeholder="Lesson topic, subjects covered, absence justifications..."></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="submit">Criar sumário</button>
+                    <button type="submit">Create summary</button>
                     <div id="sumStatus"></div>
                 </div>
             </form>
 
             <div id="sumariosList" class="sumarios-list">
-                <p class="empty-state">A carregar...</p>
+                <p class="empty-state">Loading...</p>
             </div>
         </div>
         </div><!-- /tab-prof-sumarios -->
@@ -508,24 +503,24 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
         <!-- ─── TAB 5: AGENDA ─── -->
         <div class="admin-tab-content" id="tab-prof-agenda">
         <div class="admin-card">
-            <h2>A minha agenda</h2>
+            <h2>My agenda</h2>
             <form id="agendaForm" class="agenda-form">
                 <div class="form-row">
-                    <label for="agTitulo">Título</label>
-                    <input type="text" id="agTitulo" name="titulo" maxlength="200" required placeholder="Introduza uma tarefa ou lembrete...">
+                    <label for="agTitulo">Title</label>
+                    <input type="text" id="agTitulo" name="titulo" maxlength="200" required placeholder="Enter a task or reminder...">
                 </div>
                 <div class="form-row">
-                    <label for="agData">Data (opcional)</label>
+                    <label for="agData">Date (optional)</label>
                     <input type="date" id="agData" name="data">
                 </div>
                 <div class="form-actions">
-                    <button type="submit">Adicionar</button>
+                    <button type="submit">Add</button>
                     <div id="agStatus"></div>
                 </div>
             </form>
 
             <div id="agendaList" class="agenda-list">
-                <p class="empty-state">A carregar...</p>
+                <p class="empty-state">Loading...</p>
             </div>
         </div>
         </div><!-- /tab-prof-agenda -->
@@ -533,29 +528,12 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
         <!-- ─── TAB: HORÁRIO ─── -->
         <div class="admin-tab-content" id="tab-prof-horario">
             <div class="admin-card">
-                <h2>O meu horário</h2>
+                <h2>My schedule</h2>
                 <div class="horario-grid" id="profHorarioGrid">
-                    <p class="empty-state">A carregar...</p>
+                    <p class="empty-state">Loading...</p>
                 </div>
             </div>
         </div>
-
-        <!-- ─── TAB 6: DOCUMENTOS ─── -->
-        <div class="admin-tab-content" id="tab-prof-documentos">
-            <div class="admin-card">
-                <h2>Os meus documentos</h2>
-                <p style="color:#6b7280;font-size:14px;margin:0 0 18px;">PDF, Word, Excel, PowerPoint, imagens — máx. 15 MB por ficheiro.</p>
-                <div class="doc-upload-area" id="docDropZoneP">
-                    <input type="file" id="docFileInputP" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.webp" style="display:none">
-                    <div class="doc-upload-icon">📎</div>
-                    <p class="doc-upload-label">Arrasta ficheiros aqui ou <button type="button" class="doc-upload-btn" id="docPickBtnP">escolhe ficheiro</button></p>
-                    <div id="docUploadStatusP"></div>
-                </div>
-                <div id="docListP" class="doc-list">
-                    <p class="empty-state">A carregar...</p>
-                </div>
-            </div>
-        </div><!-- /tab-prof-documentos -->
 
     </section>
 </main>
@@ -567,7 +545,7 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
     const status = document.getElementById("testeStatus");
     const fd     = new FormData(form);
 
-    status.textContent = "A enviar...";
+    status.textContent = "Sending...";
     status.style.color = "#6b7280";
 
     try {
@@ -580,15 +558,15 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
         const data = await res.json();
 
         if (data.ok) {
-            status.textContent = "Teste criado.";
+            status.textContent = "Test created.";
             status.style.color = "#10b981";
             form.reset();
         } else {
-            status.textContent = "Erro: " + (data.error || "desconhecido");
+            status.textContent = "Error: " + (data.error || "unknown");
             status.style.color = "#ef4444";
         }
     } catch (err) {
-        status.textContent = "Erro de rede";
+        status.textContent = "Network error";
         status.style.color = "#ef4444";
     }
 });
@@ -621,7 +599,7 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
                 if (right) {
                     right.classList.toggle('present-text', presente);
                     right.classList.toggle('absent-text', !presente);
-                    right.textContent = presente ? 'Presente' : 'Falta';
+                    right.textContent = presente ? 'Present' : 'Absent';
                 }
             });
         } catch (e) { /* silencioso */ }

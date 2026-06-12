@@ -127,11 +127,33 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast-notification";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add("toast-visible"));
+    setTimeout(() => {
+      t.classList.remove("toast-visible");
+      setTimeout(() => t.remove(), 400);
+    }, 4000);
+  }
+
   if (registerForm) {
     registerForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       const formData = new FormData(this);
       const statusBox = document.getElementById("registerStatus");
+
+      const pw  = document.getElementById("regPassword")?.value || "";
+      const pw2 = document.getElementById("regPasswordConfirm")?.value || "";
+      if (pw !== pw2) {
+        if (statusBox) {
+          statusBox.textContent = "As palavras-passe não coincidem.";
+          statusBox.style.color = "red";
+        }
+        return;
+      }
 
       try {
         const res = await fetch("/PAP/api/register.php", {
@@ -143,7 +165,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (data.ok) {
           if (registerModal) registerModal.classList.add("hidden");
-          location.reload();
+          showToast("Criado com sucesso, mas para funcionalidade completa, por favor contacte o administrador.");
+          setTimeout(() => location.reload(), 3500);
         } else if (statusBox) {
           statusBox.textContent = data.error || "Erro no registo";
           statusBox.style.color = "red";
@@ -340,6 +363,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (tab.dataset.tab === "alunos") loadAlunos();
       if (tab.dataset.tab === "professores") loadProfessores();
       if (tab.dataset.tab === "noticias") loadNoticias();
+      if (tab.dataset.tab === "horario") loadHorarioAdmin();
       if (tab.dataset.tab === "suporte") loadSuporte();
     });
   });
@@ -1396,6 +1420,191 @@ if (btnDeleteProfessor) {
     });
   }
 
+  // ── HORÁRIO (admin) ───────────────────────────────────────
+  const horarioGrid        = document.getElementById("horarioGrid");
+  const horarioTurmaSelect = document.getElementById("horarioTurmaSelect");
+  const horarioForm        = document.getElementById("horarioForm");
+  const horarioId          = document.getElementById("horarioId");
+  const horarioDia         = document.getElementById("horarioDia");
+  const horarioInicio      = document.getElementById("horarioInicio");
+  const horarioFim         = document.getElementById("horarioFim");
+  const horarioMateria     = document.getElementById("horarioMateria");
+  const horarioSala        = document.getElementById("horarioSala");
+  const horarioProf        = document.getElementById("horarioProf");
+  const horarioSubmit      = document.getElementById("horarioSubmit");
+  const horarioCancelEdit  = document.getElementById("horarioCancelEdit");
+  const horarioStatus      = document.getElementById("horarioStatus");
+  const horarioFormTitle   = document.getElementById("horarioFormTitle");
+
+  const HORARIO_DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+  let horarioAulasCache = [];
+  let horarioProfessoresLoaded = false;
+
+  async function loadHorarioProfessores() {
+    if (horarioProfessoresLoaded || !horarioProf) return;
+    try {
+      const res  = await fetch("/PAP/api/horario.php?action=professores");
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      horarioProf.innerHTML = '<option value="">—</option>' +
+        data.professores.map(p => `<option value="${escapeHtml(p.login)}">${escapeHtml(p.nome)}</option>`).join("");
+      horarioProfessoresLoaded = true;
+    } catch { /* mantém apenas a opção vazia */ }
+  }
+
+  function resetHorarioForm() {
+    if (!horarioForm) return;
+    horarioForm.reset();
+    if (horarioId) horarioId.value = "";
+    if (horarioSubmit) horarioSubmit.textContent = "Adicionar aula";
+    if (horarioCancelEdit) horarioCancelEdit.style.display = "none";
+    if (horarioFormTitle) horarioFormTitle.textContent = "Adicionar aula";
+    if (horarioStatus) horarioStatus.textContent = "";
+  }
+
+  function buildHorarioGridHTML(aulas, { metaFn, actionsFn } = {}) {
+    const jsDay  = new Date().getDay(); // 0=Dom..6=Sáb
+    const today  = (jsDay >= 1 && jsDay <= 5) ? jsDay : 0;
+    const nowStr = new Date().toTimeString().slice(0, 5);
+
+    return HORARIO_DIAS.map((nome, idx) => {
+      const dia      = idx + 1;
+      const isToday  = dia === today;
+      const aulasDia = aulas.filter(a => Number(a.dia_semana) === dia);
+
+      const cards = aulasDia.length === 0
+        ? '<div class="horario-empty-day">—</div>'
+        : aulasDia.map(a => {
+            const inicio  = String(a.hora_inicio).slice(0, 5);
+            const fim     = String(a.hora_fim).slice(0, 5);
+            const current = isToday && nowStr >= inicio && nowStr < fim;
+            const meta    = metaFn ? metaFn(a) : "";
+            const actions = actionsFn ? actionsFn(a) : "";
+            return `
+              <div class="horario-aula ${current ? "current" : ""}" data-id="${a.id}">
+                <div class="horario-aula-time">${inicio}–${fim}</div>
+                <div class="horario-aula-materia">${escapeHtml(a.materia)}</div>
+                <div class="horario-aula-meta">${meta}</div>
+                ${actions}
+              </div>`;
+          }).join("");
+
+      return `<div class="horario-day ${isToday ? "today" : ""}"><div class="horario-day-header">${nome}</div>${cards}</div>`;
+    }).join("");
+  }
+
+  function renderHorarioGridAdmin(aulas) {
+    if (!horarioGrid) return;
+    horarioGrid.innerHTML = buildHorarioGridHTML(aulas, {
+      metaFn: a => `${a.sala ? escapeHtml(a.sala) + " • " : ""}${a.professor_nome ? escapeHtml(a.professor_nome) : "—"}`,
+      actionsFn: () => `
+                <div class="horario-aula-actions">
+                  <button type="button" class="secondary-btn horario-edit">Editar</button>
+                  <button type="button" class="danger-btn horario-del">Eliminar</button>
+                </div>`,
+    });
+  }
+
+  async function loadHorarioAdmin() {
+    if (!horarioGrid || !horarioTurmaSelect) return;
+    loadHorarioProfessores();
+    horarioGrid.innerHTML = '<p class="logs-empty">A carregar...</p>';
+
+    const turma      = horarioTurmaSelect.value;
+    const turmaNum   = turma.slice(0, 2);
+    const turmaLetra = turma.slice(2);
+
+    try {
+      const res  = await fetch(`/PAP/api/horario.php?action=list&turma_num=${encodeURIComponent(turmaNum)}&turma_letra=${encodeURIComponent(turmaLetra)}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      horarioAulasCache = data.aulas || [];
+      renderHorarioGridAdmin(horarioAulasCache);
+    } catch {
+      horarioGrid.innerHTML = '<p class="logs-empty">Erro ao carregar.</p>';
+    }
+  }
+
+  if (horarioTurmaSelect) {
+    horarioTurmaSelect.addEventListener("change", () => {
+      resetHorarioForm();
+      loadHorarioAdmin();
+    });
+  }
+
+  if (horarioForm) {
+    horarioForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      if (horarioStatus) { horarioStatus.textContent = "A guardar..."; horarioStatus.style.color = "#6b7280"; }
+
+      const turma   = horarioTurmaSelect.value;
+      const fd      = new FormData(horarioForm);
+      fd.append("turma_num", turma.slice(0, 2));
+      fd.append("turma_letra", turma.slice(2));
+      const editing = horarioId && horarioId.value !== "";
+      fd.append("action", editing ? "update" : "create");
+
+      try {
+        const res  = await fetch("/PAP/api/horario.php", { method: "POST", headers: CSRF_HEADERS, body: fd });
+        const data = await res.json();
+        if (data.ok) {
+          if (horarioStatus) { horarioStatus.textContent = editing ? "Atualizada." : "Criada."; horarioStatus.style.color = "#10b981"; }
+          resetHorarioForm();
+          loadHorarioAdmin();
+        } else if (horarioStatus) {
+          horarioStatus.textContent = "Erro: " + (data.error || "desconhecido");
+          horarioStatus.style.color = "#ef4444";
+        }
+      } catch {
+        if (horarioStatus) { horarioStatus.textContent = "Erro de rede."; horarioStatus.style.color = "#ef4444"; }
+      }
+    });
+  }
+
+  if (horarioCancelEdit) horarioCancelEdit.addEventListener("click", resetHorarioForm);
+
+  if (horarioGrid) {
+    horarioGrid.addEventListener("click", e => {
+      const card = e.target.closest(".horario-aula");
+      if (!card) return;
+      const id   = card.dataset.id;
+      const aula = horarioAulasCache.find(a => String(a.id) === String(id));
+      if (!aula) return;
+
+      if (e.target.matches(".horario-edit")) {
+        loadHorarioProfessores().then(() => {
+          if (horarioProf) horarioProf.value = aula.professor_login || "";
+        });
+        if (horarioId) horarioId.value = aula.id;
+        if (horarioDia) horarioDia.value = aula.dia_semana;
+        if (horarioInicio) horarioInicio.value = String(aula.hora_inicio).slice(0, 5);
+        if (horarioFim) horarioFim.value = String(aula.hora_fim).slice(0, 5);
+        if (horarioMateria) horarioMateria.value = aula.materia;
+        if (horarioSala) horarioSala.value = aula.sala || "";
+        if (horarioSubmit) horarioSubmit.textContent = "Guardar alterações";
+        if (horarioCancelEdit) horarioCancelEdit.style.display = "";
+        if (horarioFormTitle) horarioFormTitle.textContent = "Editar aula";
+        horarioForm.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+
+      if (e.target.matches(".horario-del")) {
+        showConfirm(
+          "Eliminar aula",
+          "Tens a certeza? Esta ação é irreversível.",
+          async () => {
+            const fd = new FormData();
+            fd.append("action", "delete");
+            fd.append("id", id);
+            const res  = await fetch("/PAP/api/horario.php", { method: "POST", headers: CSRF_HEADERS, body: fd });
+            const data = await res.json();
+            if (data.ok) loadHorarioAdmin();
+          }
+        );
+      }
+    });
+  }
+
   // ── CAROUSEL ─────────────────────────────────────────────
   const carousel = document.getElementById("carousel");
   const prevBtn = document.querySelector(".carousel-container .prev");
@@ -1604,9 +1813,27 @@ if (btnDeleteProfessor) {
       });
     }
 
+    const alunoHorarioGrid = document.getElementById("alunoHorarioGrid");
+
+    async function loadHorarioAluno() {
+      if (!alunoHorarioGrid) return;
+      alunoHorarioGrid.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/horario.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        alunoHorarioGrid.innerHTML = buildHorarioGridHTML(data.aulas || [], {
+          metaFn: a => `${a.sala ? escapeHtml(a.sala) + " • " : ""}${a.professor_nome ? escapeHtml(a.professor_nome) : "—"}`,
+        });
+      } catch {
+        alunoHorarioGrid.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
     loadNotasAluno();
     loadSumariosAluno();
     loadAgendaAluno();
+    loadHorarioAluno();
   }
 
   // ── PROFESSOR PAGE: tabs + notas + sumarios + agenda ─────
@@ -1619,6 +1846,7 @@ if (btnDeleteProfessor) {
         tab.classList.add("active");
         const content = document.getElementById("tab-" + tab.dataset.tab);
         if (content) content.classList.add("active");
+        if (tab.dataset.tab === "prof-documentos") loadDocsProf();
       });
     });
 
@@ -1811,9 +2039,140 @@ if (btnDeleteProfessor) {
       });
     }
 
+    // ── DOCUMENTOS PROF ──────────────────────────────────
+    const dropZoneP     = document.getElementById("docDropZoneP");
+    const fileInputP    = document.getElementById("docFileInputP");
+    const pickBtnP      = document.getElementById("docPickBtnP");
+    const uploadStatusP = document.getElementById("docUploadStatusP");
+    const docListP      = document.getElementById("docListP");
+
+    function fileIconP(name) {
+      const ext = name.split(".").pop().toLowerCase();
+      if (["jpg","jpeg","png","gif","webp"].includes(ext)) return "🖼️";
+      if (ext === "pdf") return "📄";
+      if (["doc","docx"].includes(ext)) return "📝";
+      if (["xls","xlsx"].includes(ext)) return "📊";
+      if (["ppt","pptx"].includes(ext)) return "📑";
+      return "📎";
+    }
+
+    function formatSizeP(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / 1048576).toFixed(1) + " MB";
+    }
+
+    async function loadDocsProf() {
+      if (!docListP) return;
+      docListP.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/documentos_prof.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        renderDocsProf(data.files);
+      } catch {
+        docListP.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
+    function renderDocsProf(files) {
+      if (!files.length) {
+        docListP.innerHTML = '<p class="empty-state">Sem documentos carregados.</p>';
+        return;
+      }
+      docListP.innerHTML = files.map(f => `
+        <div class="doc-row" data-name="${escapeHtml(f.name)}">
+          <span class="doc-icon">${fileIconP(f.name)}</span>
+          <div class="doc-info">
+            <a class="doc-name" href="${escapeHtml(f.url)}" target="_blank" rel="noopener">${escapeHtml(f.name)}</a>
+            <span class="doc-meta">${formatSizeP(f.size)}</span>
+          </div>
+          <button class="doc-del-btn" type="button" title="Eliminar">🗑️</button>
+        </div>
+      `).join("");
+
+      docListP.querySelectorAll(".doc-del-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const row  = btn.closest(".doc-row");
+          const name = row.dataset.name;
+          if (!confirm('Eliminar "' + name + '"?')) return;
+          const fd = new FormData();
+          fd.append("filename", name);
+          const res  = await fetch("/PAP/api/documentos_prof.php?action=delete", {
+            method: "POST", headers: CSRF_HEADERS, body: fd,
+          });
+          const data = await res.json();
+          if (data.ok) loadDocsProf();
+          else alert("Erro ao eliminar.");
+        });
+      });
+    }
+
+    async function uploadFileProf(file) {
+      if (!uploadStatusP) return;
+      uploadStatusP.textContent = 'A carregar "' + file.name + '"...';
+      uploadStatusP.style.color = "#6b7280";
+      const fd = new FormData();
+      fd.append("file", file);
+      try {
+        const res  = await fetch("/PAP/api/documentos_prof.php?action=upload", {
+          method: "POST", headers: CSRF_HEADERS, body: fd,
+        });
+        const data = await res.json();
+        if (data.ok) {
+          uploadStatusP.textContent = "✓ Carregado com sucesso.";
+          uploadStatusP.style.color = "#10b981";
+          loadDocsProf();
+          setTimeout(() => { uploadStatusP.textContent = ""; }, 3000);
+        } else {
+          uploadStatusP.textContent = "✗ " + (data.error || "Erro.");
+          uploadStatusP.style.color = "#ef4444";
+        }
+      } catch {
+        uploadStatusP.textContent = "✗ Erro de rede.";
+        uploadStatusP.style.color = "#ef4444";
+      }
+    }
+
+    if (pickBtnP) pickBtnP.addEventListener("click", () => fileInputP.click());
+    if (fileInputP) {
+      fileInputP.addEventListener("change", () => {
+        if (fileInputP.files[0]) uploadFileProf(fileInputP.files[0]);
+        fileInputP.value = "";
+      });
+    }
+    if (dropZoneP) {
+      dropZoneP.addEventListener("dragover", e => { e.preventDefault(); dropZoneP.classList.add("doc-drag-over"); });
+      dropZoneP.addEventListener("dragleave", () => dropZoneP.classList.remove("doc-drag-over"));
+      dropZoneP.addEventListener("drop", e => {
+        e.preventDefault();
+        dropZoneP.classList.remove("doc-drag-over");
+        const file = e.dataTransfer.files[0];
+        if (file) uploadFileProf(file);
+      });
+    }
+
+    const profHorarioGrid = document.getElementById("profHorarioGrid");
+
+    async function loadHorarioProfessor() {
+      if (!profHorarioGrid) return;
+      profHorarioGrid.innerHTML = '<p class="empty-state">A carregar...</p>';
+      try {
+        const res  = await fetch("/PAP/api/horario.php?action=list");
+        const data = await res.json();
+        if (!data.ok) throw new Error();
+        profHorarioGrid.innerHTML = buildHorarioGridHTML(data.aulas || [], {
+          metaFn: a => `${escapeHtml(String(a.turma_num) + a.turma_letra)}${a.sala ? " • " + escapeHtml(a.sala) : ""}`,
+        });
+      } catch {
+        profHorarioGrid.innerHTML = '<p class="empty-state">Erro ao carregar.</p>';
+      }
+    }
+
     loadAlunosDaTurma();
     loadNotasProf();
     loadSumariosProf();
     loadAgendaProf();
+    loadHorarioProfessor();
   }
 });
