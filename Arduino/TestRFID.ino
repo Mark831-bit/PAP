@@ -11,10 +11,14 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
+const int redPin = 7;
+const int greenPin = 6;
+const int bluePin = 5;
+
 const char* WIFI_SSID = "Mk";
 const char* WIFI_PASS = "Satsumaaaa";
 
-const char* SERVER_IP = "10.223.252.14";
+const char* SERVER_IP = "10.32.214.14";
 const int SERVER_PORT = 80;
 const char* SERVER_PATH = "/PAP/api/push.php";
 
@@ -133,6 +137,7 @@ bool postUid(const String& uidHex) {
   Serial.println(response);
 
   showResultOnLcd(statusCode, response);
+  handleLedByStatus(statusCode);
 
   client.stop();
 
@@ -159,7 +164,43 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print("Scan card");
 
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+
   Serial.println("RFID ready. Поднесите карту...");
+}
+
+void setColor(int r, int g, int b) {
+  analogWrite(redPin, r);
+  analogWrite(greenPin, g);
+  analogWrite(bluePin, b);
+}
+
+void handleLedByStatus(int statusCode) {
+  if (statusCode == 200) {
+    setColor(0, 255, 0); 
+    delay(1000);
+    setColor(0, 0, 0);
+  }
+  else if (statusCode == 403) {
+    for (int i = 0; i < 2; i++) {
+      setColor(0, 0, 255); 
+      delay(300);
+      setColor(0, 0, 0);
+      delay(300);
+    }
+  }
+  else if (statusCode == 404) {
+    setColor(0, 0, 255); 
+    delay(1000);
+    setColor(0, 0, 0);
+  }
+  else if (statusCode == 500 || statusCode < 0) {
+    setColor(0, 0, 255); 
+    delay(1000);
+    setColor(0, 0, 0);
+  }
 }
 
 void loop() {

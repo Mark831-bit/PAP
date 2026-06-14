@@ -6,15 +6,22 @@ ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/lib/logger.php';
+require_once __DIR__ . '/lib/validators.php';
 require_once __DIR__ . '/../config/secrets.php';
 
-$key    = $_POST['key'] ?? '';
-$uidRaw = $_POST['uid'] ?? '';
+$key       = $_POST['key'] ?? '';
+$uidRaw    = $_POST['uid'] ?? '';
+$deviceRaw = $_POST['device_id'] ?? '';
 
 $uid = strtoupper(trim($uidRaw));
 $uid = preg_replace('/\s+/', '', $uid);
 
-log_event("INFO", "push request received", ["uid" => $uid]);
+$deviceId = strtoupper(trim($deviceRaw));
+if (!is_valid_mac($deviceId)) {
+    $deviceId = null;
+}
+
+log_event("INFO", "push request received", ["uid" => $uid, "device_id" => $deviceId]);
 
 // ── 1. Auth ──────────────────────────────────────────────
 if (!is_string($key) || !hash_equals(ARDUINO_API_KEY, $key)) {
@@ -137,10 +144,10 @@ try {
         $now = date('H:i:s');
 
         $qIns = $mysqli->prepare("
-            INSERT INTO presencas (login, nome, person_type, uid, data, hora, presenca)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO presencas (login, nome, person_type, uid, device_id, data, hora, presenca)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $qIns->bind_param("ssssssi", $login, $nome, $role, $uid, $today, $now, $newPresenca);
+        $qIns->bind_param("sssssssi", $login, $nome, $role, $uid, $deviceId, $today, $now, $newPresenca);
         $qIns->execute();
         $qIns->close();
 
