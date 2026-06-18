@@ -605,12 +605,20 @@ if ($res = $conn->query("
           <form id="noticiaForm" class="noticia-form">
             <input type="hidden" id="noticiaId" name="id" value="">
             <div class="form-row">
-              <label for="noticiaTitulo">Title</label>
+              <label for="noticiaTitulo">Title (Portuguese)</label>
               <input type="text" id="noticiaTitulo" name="titulo" maxlength="200" required>
             </div>
             <div class="form-row">
-              <label for="noticiaCorpo">Body</label>
+              <label for="noticiaCorpo">Body (Portuguese)</label>
               <textarea id="noticiaCorpo" name="corpo" rows="4" required></textarea>
+            </div>
+            <div class="form-row">
+              <label for="noticiaTituloEn">Title (English, optional)</label>
+              <input type="text" id="noticiaTituloEn" name="titulo_en" maxlength="200">
+            </div>
+            <div class="form-row">
+              <label for="noticiaCorpoEn">Body (English, optional)</label>
+              <textarea id="noticiaCorpoEn" name="corpo_en" rows="4"></textarea>
             </div>
             <div class="form-row">
               <label for="noticiaImagem">Image URL (optional)</label>
@@ -658,6 +666,14 @@ if ($res = $conn->query("
           <h2 id="horarioFormTitle">Add lesson</h2>
           <form id="horarioForm" class="horario-form">
             <input type="hidden" id="horarioId" name="id" value="">
+            <div class="form-row">
+              <label for="horarioFormTurma">Class</label>
+              <select id="horarioFormTurma" name="horario_form_turma" required>
+                <?php foreach ([10, 11, 12] as $hNum): foreach (['A', 'B', 'C'] as $hLetra): ?>
+                  <option value="<?= $hNum . $hLetra ?>"><?= $hNum . $hLetra ?></option>
+                <?php endforeach; endforeach; ?>
+              </select>
+            </div>
             <div class="form-row">
               <label for="horarioDia">Day of week</label>
               <select id="horarioDia" name="dia_semana" required>
@@ -772,7 +788,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=20"></script>
+<script src="/PAP/project/assets/app.js?v=23"></script>
 </body>
 
 </html>

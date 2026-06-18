@@ -153,7 +153,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Teacher - My students</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=336">
 </head>
 <body class="page-professor">
 
@@ -208,6 +208,12 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
     <section class="admin-panel">
 
         <div class="students-panel-header">
+            <div class="profile-avatar-wrap" id="avatarWrap" title="Click to change photo">
+                <img class="profile-avatar" id="profileAvatar" src="" alt="" style="display:none">
+                <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">👤</div>
+                <div class="profile-avatar-overlay">📷</div>
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+            </div>
             <div>
                 <h2>My students</h2>
                 <p>
@@ -224,6 +230,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
             <button class="admin-tab" data-tab="prof-sumarios">Summaries</button>
             <button class="admin-tab" data-tab="prof-agenda">Agenda</button>
             <button class="admin-tab" data-tab="prof-horario">Schedule</button>
+            <button class="admin-tab" data-tab="prof-documentos">Documents</button>
         </div>
 
         <!-- ─── TAB 1: OS MEUS ALUNOS ─── -->
@@ -535,6 +542,22 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
             </div>
         </div>
 
+        <div class="admin-tab-content" id="tab-prof-documentos">
+            <div class="admin-card">
+                <h2>My documents</h2>
+                <p style="color:#6b7280;font-size:14px;margin:0 0 18px;">PDF, Word, Excel, PowerPoint, images — max. 15 MB per file.</p>
+                <div class="doc-upload-area" id="docDropZoneP">
+                    <input type="file" id="docFileInputP" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.webp" style="display:none">
+                    <div class="doc-upload-icon">📎</div>
+                    <p class="doc-upload-label">Drag files here or <button type="button" class="doc-upload-btn" id="docPickBtnP">choose a file</button></p>
+                    <div id="docUploadStatusP"></div>
+                </div>
+                <div id="docListP" class="doc-list">
+                    <p class="empty-state">Loading...</p>
+                </div>
+            </div>
+        </div>
+
     </section>
 </main>
 
@@ -609,6 +632,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=20"></script>
+<script src="/PAP/project/assets/app.js?v=23"></script>
 </body>
 </html>

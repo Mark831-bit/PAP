@@ -153,7 +153,7 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Professor - Os meus alunos</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=336">
 </head>
 <body class="page-professor">
 
@@ -208,6 +208,12 @@ $mediaPresenca = $totalAlunos > 0 ? round(($presentesAgora / $totalAlunos) * 100
     <section class="admin-panel">
 
         <div class="students-panel-header">
+            <div class="profile-avatar-wrap" id="avatarWrap" title="Clique para alterar foto">
+                <img class="profile-avatar" id="profileAvatar" src="" alt="" style="display:none">
+                <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">👤</div>
+                <div class="profile-avatar-overlay">📷</div>
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+            </div>
             <div>
                 <h2>Os meus alunos</h2>
                 <div class="presence-legend">
@@ -631,6 +637,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=20"></script>
+<script src="/PAP/project/assets/app.js?v=23"></script>
 </body>
 </html>

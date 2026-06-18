@@ -3,6 +3,36 @@ document.addEventListener("DOMContentLoaded", function () {
   const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || "";
   const CSRF_HEADERS = { "X-CSRF-Token": CSRF };
 
+  // ── i18n (app.js is shared between PT and EN pages) ────────
+  const LANG = document.documentElement.lang === "en" ? "en" : "pt";
+
+  const MESSAGES = {
+    pwMismatch:     { pt: "As palavras-passe não coincidem.", en: "Passwords do not match." },
+    networkError:   { pt: "Erro de rede.",                    en: "Network error." },
+    accountCreated: { pt: "Conta criada com sucesso",         en: "Account created successfully" },
+    registerError:  { pt: "Erro no registo",                  en: "Registration error" },
+    loginError:     { pt: "Login falhou",                     en: "Login failed" },
+    sending:        { pt: "A enviar...",                      en: "Sending..." },
+    problemSent:    { pt: "Mensagem enviada. Obrigado!",      en: "Message sent. Thank you!" },
+    problemError:   { pt: "Erro ao enviar.",                  en: "Error sending message." },
+  };
+  function t(key) { return MESSAGES[key][LANG]; }
+
+  const SERVER_ERRORS = {
+    "login not found":                  "Login not found",
+    "wrong password":                   "Wrong password",
+    "Preencha todos os campos":         "Please fill in all fields",
+    'Email inválido (deve conter "@")': 'Invalid email (must contain "@")',
+    "Data de nascimento inválida":      "Invalid date of birth",
+    "Turma inválida":                   "Invalid class",
+    "Esse email já está registado":     "This email is already registered",
+    "Erro interno do servidor.":        "Internal server error.",
+  };
+  function tServer(msg) {
+    if (LANG === "en" && SERVER_ERRORS[msg]) return SERVER_ERRORS[msg];
+    return msg;
+  }
+
   // ── HELPERS ───────────────────────────────────────────────
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => (
@@ -114,12 +144,12 @@ document.addEventListener("DOMContentLoaded", function () {
           if (loginModal) loginModal.classList.add("hidden");
           location.reload();
         } else if (statusBox) {
-          statusBox.textContent = data.error || "Login failed";
+          statusBox.textContent = tServer(data.error) || t("loginError");
           statusBox.style.color = "red";
         }
       } catch (err) {
         if (statusBox) {
-          statusBox.textContent = "Erro de rede.";
+          statusBox.textContent = t("networkError");
           statusBox.style.color = "red";
         }
         console.error(err);
@@ -149,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const pw2 = document.getElementById("regPasswordConfirm")?.value || "";
       if (pw !== pw2) {
         if (statusBox) {
-          statusBox.textContent = "As palavras-passe não coincidem.";
+          statusBox.textContent = t("pwMismatch");
           statusBox.style.color = "red";
         }
         return;
@@ -165,15 +195,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (data.ok) {
           if (registerModal) registerModal.classList.add("hidden");
-          showToast("Criado com sucesso, mas para funcionalidade completa, por favor contacte o administrador.");
+          showToast(t("accountCreated"));
           setTimeout(() => location.reload(), 3500);
         } else if (statusBox) {
-          statusBox.textContent = data.error || "Erro no registo";
+          statusBox.textContent = tServer(data.error) || t("registerError");
           statusBox.style.color = "red";
         }
       } catch (err) {
         if (statusBox) {
-          statusBox.textContent = "Erro de rede.";
+          statusBox.textContent = t("networkError");
           statusBox.style.color = "red";
         }
         console.error(err);
@@ -188,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const statusBox = document.getElementById("problemStatus");
 
       if (statusBox) {
-        statusBox.textContent = "A enviar...";
+        statusBox.textContent = t("sending");
         statusBox.style.color = "#6b7280";
       }
 
@@ -203,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.ok) {
           problemForm.reset();
           if (statusBox) {
-            statusBox.textContent = "Mensagem enviada. Obrigado!";
+            statusBox.textContent = t("problemSent");
             statusBox.style.color = "green";
           }
           setTimeout(() => {
@@ -211,12 +241,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (statusBox) statusBox.textContent = "";
           }, 1500);
         } else if (statusBox) {
-          statusBox.textContent = data.error || "Erro ao enviar.";
+          statusBox.textContent = tServer(data.error) || t("problemError");
           statusBox.style.color = "red";
         }
       } catch (err) {
         if (statusBox) {
-          statusBox.textContent = "Erro de rede.";
+          statusBox.textContent = t("networkError");
           statusBox.style.color = "red";
         }
         console.error(err);
@@ -1262,6 +1292,8 @@ if (btnDeleteProfessor) {
   const noticiaId = document.getElementById("noticiaId");
   const noticiaTitulo = document.getElementById("noticiaTitulo");
   const noticiaCorpo = document.getElementById("noticiaCorpo");
+  const noticiaTituloEn = document.getElementById("noticiaTituloEn");
+  const noticiaCorpoEn = document.getElementById("noticiaCorpoEn");
   const noticiaImagem = document.getElementById("noticiaImagem");
   const noticiaAtivo = document.getElementById("noticiaAtivo");
   const noticiaSubmit = document.getElementById("noticiaSubmit");
@@ -1372,6 +1404,8 @@ if (btnDeleteProfessor) {
           if (noticiaId) noticiaId.value = n.id;
           if (noticiaTitulo) noticiaTitulo.value = n.titulo || "";
           if (noticiaCorpo) noticiaCorpo.value = n.corpo || "";
+          if (noticiaTituloEn) noticiaTituloEn.value = n.titulo_en || "";
+          if (noticiaCorpoEn) noticiaCorpoEn.value = n.corpo_en || "";
           if (noticiaImagem) noticiaImagem.value = n.imagem || "";
           if (noticiaAtivo) noticiaAtivo.checked = Number(n.ativo) === 1;
           if (noticiaSubmit) noticiaSubmit.textContent = "Guardar alterações";
@@ -1423,6 +1457,7 @@ if (btnDeleteProfessor) {
   // ── HORÁRIO (admin) ───────────────────────────────────────
   const horarioGrid        = document.getElementById("horarioGrid");
   const horarioTurmaSelect = document.getElementById("horarioTurmaSelect");
+  const horarioFormTurma   = document.getElementById("horarioFormTurma");
   const horarioForm        = document.getElementById("horarioForm");
   const horarioId          = document.getElementById("horarioId");
   const horarioDia         = document.getElementById("horarioDia");
@@ -1456,6 +1491,7 @@ if (btnDeleteProfessor) {
     if (!horarioForm) return;
     horarioForm.reset();
     if (horarioId) horarioId.value = "";
+    if (horarioFormTurma && horarioTurmaSelect) horarioFormTurma.value = horarioTurmaSelect.value;
     if (horarioSubmit) horarioSubmit.textContent = "Adicionar aula";
     if (horarioCancelEdit) horarioCancelEdit.style.display = "none";
     if (horarioFormTitle) horarioFormTitle.textContent = "Adicionar aula";
@@ -1527,6 +1563,9 @@ if (btnDeleteProfessor) {
 
   if (horarioTurmaSelect) {
     horarioTurmaSelect.addEventListener("change", () => {
+      if (horarioFormTurma && !(horarioId && horarioId.value)) {
+        horarioFormTurma.value = horarioTurmaSelect.value;
+      }
       resetHorarioForm();
       loadHorarioAdmin();
     });
@@ -1537,7 +1576,7 @@ if (btnDeleteProfessor) {
       e.preventDefault();
       if (horarioStatus) { horarioStatus.textContent = "A guardar..."; horarioStatus.style.color = "#6b7280"; }
 
-      const turma   = horarioTurmaSelect.value;
+      const turma   = (horarioFormTurma?.value || horarioTurmaSelect?.value || "10A");
       const fd      = new FormData(horarioForm);
       fd.append("turma_num", turma.slice(0, 2));
       fd.append("turma_letra", turma.slice(2));
@@ -1576,6 +1615,7 @@ if (btnDeleteProfessor) {
           if (horarioProf) horarioProf.value = aula.professor_login || "";
         });
         if (horarioId) horarioId.value = aula.id;
+        if (horarioFormTurma) horarioFormTurma.value = String(aula.turma_num) + aula.turma_letra;
         if (horarioDia) horarioDia.value = aula.dia_semana;
         if (horarioInicio) horarioInicio.value = String(aula.hora_inicio).slice(0, 5);
         if (horarioFim) horarioFim.value = String(aula.hora_fim).slice(0, 5);
@@ -2174,5 +2214,55 @@ if (btnDeleteProfessor) {
     loadSumariosProf();
     loadAgendaProf();
     loadHorarioProfessor();
+  }
+
+  // ── AVATAR (aluno + professor) ────────────────────────────────────────
+  const avatarWrap          = document.getElementById("avatarWrap");
+  const profileAvatar       = document.getElementById("profileAvatar");
+  const profilePlaceholder  = document.getElementById("profileAvatarPlaceholder");
+  const avatarInput         = document.getElementById("avatarInput");
+
+  async function loadAvatar() {
+    try {
+      const res  = await fetch("/PAP/api/foto.php?action=get");
+      const data = await res.json();
+      if (data.ok && data.url) {
+        profileAvatar.src = data.url;
+        profileAvatar.style.display = "";
+        if (profilePlaceholder) profilePlaceholder.style.display = "none";
+      }
+    } catch {}
+  }
+
+  if (avatarWrap) {
+    loadAvatar();
+    avatarWrap.addEventListener("click", () => avatarInput && avatarInput.click());
+    if (avatarInput) {
+      avatarInput.addEventListener("change", async () => {
+        const file = avatarInput.files[0];
+        if (!file) return;
+        avatarInput.value = "";
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("action", "upload");
+        try {
+          const res  = await fetch("/PAP/api/foto.php", {
+            method: "POST",
+            headers: CSRF_HEADERS,
+            body: fd,
+          });
+          const data = await res.json();
+          if (data.ok && data.url) {
+            profileAvatar.src = data.url + "?t=" + Date.now();
+            profileAvatar.style.display = "";
+            if (profilePlaceholder) profilePlaceholder.style.display = "none";
+          } else {
+            alert(data.error || "Erro ao carregar foto.");
+          }
+        } catch {
+          alert("Erro de rede.");
+        }
+      });
+    }
   }
 });

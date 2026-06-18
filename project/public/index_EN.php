@@ -13,7 +13,7 @@ if (($_SESSION['lang'] ?? 'pt') === 'pt') {
 }
 
 $noticias = [];
-$res = $conn->query("SELECT titulo, corpo, imagem FROM noticias WHERE ativo = 1 ORDER BY criado_em DESC, id DESC");
+$res = $conn->query("SELECT titulo, corpo, titulo_en, corpo_en, imagem FROM noticias WHERE ativo = 1 ORDER BY criado_em DESC, id DESC");
 if ($res) {
     while ($row = $res->fetch_assoc()) {
         $noticias[] = $row;
@@ -28,7 +28,7 @@ if ($res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>PAP - Main</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=332">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
@@ -103,14 +103,14 @@ if ($res) {
     <div id="loginModal" class="auth-modal hidden">
       <div class="auth-box">
         <button class="close-modal" type="button" data-close="loginModal">×</button>
-        <h2>Login</h2>
+        <h2>Log in</h2>
 
         <form id="loginForm">
-          <input type="text" name="login" placeholder="Login" required>
+          <input type="text" name="login" placeholder="Log in" required>
           <input type="password" name="password" placeholder="Password" required>
           <button type="submit">Log in</button>
-          <div id="loginFormStatus">Not logged in</div>
-          <a href="#" id="openProblem">Having access problems? Contact the administrator</a>
+          <div id="loginFormStatus">Please enter your login details</div>
+          <a href="#" id="openProblem">Need help signing in? Contact the administrator</a>
         </form>
       </div>
     </div>
@@ -131,7 +131,7 @@ if ($res) {
     <div id="registerModal" class="auth-modal hidden">
       <div class="auth-box">
         <button class="close-modal" type="button" data-close="registerModal">×</button>
-        <h2>Create student account</h2>
+        <h2>Create a student account</h2>
 
         <form id="registerForm">
           <input type="email" name="login" placeholder="Email" required>
@@ -156,6 +156,7 @@ if ($res) {
           </select>
 
         </div>
+        <p>For full functionality, please contact the administrator.</p>
           
           <button type="submit">Create account</button>
           <div id="registerStatus"></div>
@@ -169,10 +170,10 @@ if ($res) {
     <h2 class="main_subtitle">Welcome to the school RFID platform</h2>
     <br>
     <p class="main_text">This platform was developed to simplify access to school information and automate attendance registration using RFID technology.</p>
-    <p>The system identifies students and teachers through the school card, automatically records entries and exits, and makes this information available in real time.</p>
-    <p>In a single environment, users can check attendance, grades, schedules, and other essential features quickly, clearly, and securely.</p>
-    <p>“How does it work?”:</p>
-    <p>The student brings the RFID card close to the reader.</p>
+    <p>The system identifies students and teachers through their school card, automatically records entries and exits, and makes this information available in real time.</p>
+    <p>From one place, users can check attendance, grades, schedules and other essential information quickly, clearly and securely.</p>
+    <p>How does it work?</p>
+    <p>The student taps the RFID card on the reader.</p>
     <p>The Arduino sends the UID to the server.</p>
     <p>Attendance is recorded automatically.</p>
     
@@ -181,13 +182,17 @@ if ($res) {
     <section class="carousel-container" aria-label="News carousel">
       <div class="carousel" id="carousel">
         <?php foreach ($noticias as $i => $n): ?>
+          <?php
+            $titulo = $n['titulo_en'] !== null && $n['titulo_en'] !== '' ? $n['titulo_en'] : $n['titulo'];
+            $corpo  = $n['corpo_en']  !== null && $n['corpo_en']  !== '' ? $n['corpo_en']  : $n['corpo'];
+          ?>
           <article class="slide">
             <?php if (!empty($n['imagem'])): ?>
-              <img src="<?= htmlspecialchars($n['imagem']) ?>" alt="<?= htmlspecialchars($n['titulo']) ?>">
+              <img src="<?= htmlspecialchars($n['imagem']) ?>" alt="<?= htmlspecialchars($titulo) ?>">
             <?php endif; ?>
             <div class="slide-caption">
-              <h3><?= htmlspecialchars($n['titulo']) ?></h3>
-              <p><?= nl2br(htmlspecialchars($n['corpo'])) ?></p>
+              <h3><?= htmlspecialchars($titulo) ?></h3>
+              <p><?= nl2br(htmlspecialchars($corpo)) ?></p>
             </div>
           </article>
         <?php endforeach; ?>
@@ -217,7 +222,7 @@ if ($res) {
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=18"></script>
+  <script src="/PAP/project/assets/app.js?v=23"></script>
   <?php if (!isset($_SESSION['user_id'])): ?>
   <script>
   (function () {
@@ -236,4 +241,3 @@ if ($res) {
   <?php endif; ?>
 </body>
 </html>
-

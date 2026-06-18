@@ -28,7 +28,7 @@ if ($res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <title>PAP - Main</title>
-  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=332">
+  <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
@@ -103,10 +103,10 @@ if ($res) {
     <div id="loginModal" class="auth-modal hidden">
       <div class="auth-box">
         <button class="close-modal" type="button" data-close="loginModal">×</button>
-        <h2>Login</h2>
+        <h2>Log in</h2>
 
         <form id="loginForm">
-          <input type="text" name="login" placeholder="Login" required>
+          <input type="text" name="login" placeholder="Log in" required>
           <input type="password" name="password" placeholder="Palavra-passe" required>
           <button type="submit">Entrar</button>
           <div id="loginFormStatus">Sessão não iniciada</div>
@@ -138,24 +138,27 @@ if ($res) {
           <input type="password" name="password" id="regPassword" placeholder="Palavra-passe" required>
           <input type="password" name="password_confirm" id="regPasswordConfirm" placeholder="Confirmar palavra-passe" required>
           <input type="text" name="nome" placeholder="Nome completo" required>
-          <input type="date" name="data_nascimento" required>
+          <input type="date" id="dataNascimento" required>
         <div style="display: flex; gap: 10px;">
           
-          <select name="turma_num" required>
-            <option value="">Ano</option>
+         <select name="turma_num" required>
+            <option value="" selected disabled>Ano</option>
             <option value="10">10</option>
             <option value="11">11</option>
             <option value="12">12</option>
           </select>
 
           <select name="turma_letra" required>
-            <option value="">Turma</option>
+            <option value="" selected disabled>Turma</option>
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
           </select>
+          
 
         </div>
+
+        <p>Para funcionalidade completa, por favor contacte o administrador.</p>
           
           <button type="submit">Criar conta</button>
           <div id="registerStatus"></div>
@@ -171,7 +174,7 @@ if ($res) {
     <p class="main_text">Esta plataforma foi desenvolvida com o objetivo de simplificar o acesso à informação escolar e automatizar o registo de presenças através da tecnologia RFID.</p>
     <p>O sistema permite identificar alunos e professores por meio do cartão escolar, registando automaticamente entradas e saídas, e disponibilizando essa informação em tempo real.</p>
     <p>Num único ambiente, os utilizadores podem consultar presenças, avaliações, horários e outras funcionalidades essenciais de forma rápida, organizada e segura.</p>
-    <p>“Como funciona?”:</p>
+    <p>Como funciona?</p>
     <p>O aluno aproxima o cartão RFID.</p>
     <p>O Arduino envia o UID para o servidor.</p>
     <p>A presença é registada automaticamente.</p>
@@ -217,7 +220,7 @@ if ($res) {
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=18"></script>
+  <script src="/PAP/project/assets/app.js?v=23"></script>
   <?php if (!isset($_SESSION['user_id'])): ?>
   <script>
   (function () {

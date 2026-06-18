@@ -55,7 +55,7 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <title>Aluno</title>
-    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=335">
+    <link rel="stylesheet" href="/PAP/project/assets/style.css?v=336">
 </head>
 
 <body class="page-aluno">
@@ -94,10 +94,20 @@ $stmt->close();
     <section class="admin-panel">
 
         <div class="students-panel-header">
-            <div>
+            <div class="profile-avatar-wrap" id="avatarWrap" title="Clique para alterar foto">
+                <img class="profile-avatar" id="profileAvatar" src="" alt="" style="display:none">
+                <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">👤</div>
+                <div class="profile-avatar-overlay">📷</div>
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+            </div>
+            <div style="flex:1;">
                 <h2><?= htmlspecialchars($alunoNome) ?></h2>
                 <p>Turma <?= htmlspecialchars($alunoTurma) ?></p>
             </div>
+            <a href="/PAP/project/public/perfil_pdf.php" target="_blank"
+               style="align-self:center;padding:8px 16px;background:#0b1b3a;color:#fff;border-radius:8px;font-size:13px;text-decoration:none;white-space:nowrap;">
+               📄 Exportar PDF
+            </a>
         </div>
 
         <div class="admin-tabs">
@@ -237,7 +247,7 @@ $stmt->close();
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/PAP/project/assets/app.js?v=20"></script>
+<script src="/PAP/project/assets/app.js?v=23"></script>
 <script>
 (function () {
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';

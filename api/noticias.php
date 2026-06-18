@@ -38,7 +38,7 @@ if (!$isAdmin) {
 
 if ($action === 'list') {
     $res = $conn->query("
-        SELECT id, titulo, corpo, imagem, ativo, criado_em
+        SELECT id, titulo, corpo, titulo_en, corpo_en, imagem, ativo, criado_em
         FROM noticias
         ORDER BY criado_em DESC, id DESC
     ");
@@ -48,6 +48,8 @@ if ($action === 'list') {
             'id'        => (int)$row['id'],
             'titulo'    => $row['titulo'],
             'corpo'     => $row['corpo'],
+            'titulo_en' => $row['titulo_en'],
+            'corpo_en'  => $row['corpo_en'],
             'imagem'    => $row['imagem'],
             'ativo'     => (int)$row['ativo'],
             'criado_em' => $row['criado_em'],
@@ -64,7 +66,7 @@ if ($action === 'get') {
         echo json_encode(['ok' => false, 'error' => 'id required']);
         exit;
     }
-    $stmt = $conn->prepare("SELECT id, titulo, corpo, imagem, ativo FROM noticias WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, titulo, corpo, titulo_en, corpo_en, imagem, ativo FROM noticias WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
@@ -76,11 +78,13 @@ if ($action === 'get') {
         exit;
     }
     echo json_encode(['ok' => true, 'noticia' => [
-        'id'     => (int)$row['id'],
-        'titulo' => $row['titulo'],
-        'corpo'  => $row['corpo'],
-        'imagem' => $row['imagem'],
-        'ativo'  => (int)$row['ativo'],
+        'id'        => (int)$row['id'],
+        'titulo'    => $row['titulo'],
+        'corpo'     => $row['corpo'],
+        'titulo_en' => $row['titulo_en'],
+        'corpo_en'  => $row['corpo_en'],
+        'imagem'    => $row['imagem'],
+        'ativo'     => (int)$row['ativo'],
     ]]);
     exit;
 }
@@ -88,14 +92,21 @@ if ($action === 'get') {
 if ($action === 'create') {
     csrf_check();
 
-    $titulo = trim($_POST['titulo'] ?? '');
-    $corpo  = trim($_POST['corpo']  ?? '');
-    $imagem = trim($_POST['imagem'] ?? '');
-    $ativo  = isset($_POST['ativo']) ? (int)$_POST['ativo'] : 1;
+    $titulo   = trim($_POST['titulo'] ?? '');
+    $corpo    = trim($_POST['corpo']  ?? '');
+    $tituloEn = trim($_POST['titulo_en'] ?? '');
+    $corpoEn  = trim($_POST['corpo_en']  ?? '');
+    $imagem   = trim($_POST['imagem'] ?? '');
+    $ativo    = isset($_POST['ativo']) ? (int)$_POST['ativo'] : 1;
 
     if ($titulo === '' || $corpo === '' || mb_strlen($titulo) > 200) {
         http_response_code(400);
         echo json_encode(['ok' => false, 'error' => 'campos obrigatórios']);
+        exit;
+    }
+    if ($tituloEn !== '' && mb_strlen($tituloEn) > 200) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'título (EN) demasiado longo']);
         exit;
     }
     if ($imagem !== '' && mb_strlen($imagem) > 300) {
@@ -103,11 +114,13 @@ if ($action === 'create') {
         echo json_encode(['ok' => false, 'error' => 'imagem demasiado longa']);
         exit;
     }
-    $imagemSql = $imagem !== '' ? $imagem : null;
-    $ativo     = $ativo ? 1 : 0;
+    $imagemSql   = $imagem !== '' ? $imagem : null;
+    $tituloEnSql = $tituloEn !== '' ? $tituloEn : null;
+    $corpoEnSql  = $corpoEn !== '' ? $corpoEn : null;
+    $ativo       = $ativo ? 1 : 0;
 
-    $stmt = $conn->prepare("INSERT INTO noticias (titulo, corpo, imagem, ativo) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sssi", $titulo, $corpo, $imagemSql, $ativo);
+    $stmt = $conn->prepare("INSERT INTO noticias (titulo, corpo, titulo_en, corpo_en, imagem, ativo) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssi", $titulo, $corpo, $tituloEnSql, $corpoEnSql, $imagemSql, $ativo);
 
     if (!$stmt->execute()) {
         log_event("ERROR", "noticia insert failed", ["err" => $stmt->error]);
@@ -125,22 +138,31 @@ if ($action === 'create') {
 if ($action === 'update') {
     csrf_check();
 
-    $id     = (int)($_POST['id'] ?? 0);
-    $titulo = trim($_POST['titulo'] ?? '');
-    $corpo  = trim($_POST['corpo']  ?? '');
-    $imagem = trim($_POST['imagem'] ?? '');
-    $ativo  = isset($_POST['ativo']) ? (int)$_POST['ativo'] : 1;
+    $id       = (int)($_POST['id'] ?? 0);
+    $titulo   = trim($_POST['titulo'] ?? '');
+    $corpo    = trim($_POST['corpo']  ?? '');
+    $tituloEn = trim($_POST['titulo_en'] ?? '');
+    $corpoEn  = trim($_POST['corpo_en']  ?? '');
+    $imagem   = trim($_POST['imagem'] ?? '');
+    $ativo    = isset($_POST['ativo']) ? (int)$_POST['ativo'] : 1;
 
     if ($id <= 0 || $titulo === '' || $corpo === '') {
         http_response_code(400);
         echo json_encode(['ok' => false, 'error' => 'campos obrigatórios']);
         exit;
     }
-    $imagemSql = $imagem !== '' ? $imagem : null;
-    $ativo     = $ativo ? 1 : 0;
+    if ($tituloEn !== '' && mb_strlen($tituloEn) > 200) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'título (EN) demasiado longo']);
+        exit;
+    }
+    $imagemSql   = $imagem !== '' ? $imagem : null;
+    $tituloEnSql = $tituloEn !== '' ? $tituloEn : null;
+    $corpoEnSql  = $corpoEn !== '' ? $corpoEn : null;
+    $ativo       = $ativo ? 1 : 0;
 
-    $stmt = $conn->prepare("UPDATE noticias SET titulo = ?, corpo = ?, imagem = ?, ativo = ? WHERE id = ?");
-    $stmt->bind_param("sssii", $titulo, $corpo, $imagemSql, $ativo, $id);
+    $stmt = $conn->prepare("UPDATE noticias SET titulo = ?, corpo = ?, titulo_en = ?, corpo_en = ?, imagem = ?, ativo = ? WHERE id = ?");
+    $stmt->bind_param("sssssii", $titulo, $corpo, $tituloEnSql, $corpoEnSql, $imagemSql, $ativo, $id);
 
     if (!$stmt->execute()) {
         log_event("ERROR", "noticia update failed", ["err" => $stmt->error]);
