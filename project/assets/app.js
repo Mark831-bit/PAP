@@ -338,6 +338,16 @@ document.addEventListener("DOMContentLoaded", function () {
     addCardForm.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener("change", syncAddCardRole));
     syncAddCardRole();
 
+    // ── Turmas checkboxes counter (add form) ──
+    const addTurmasCount = document.getElementById("addTurmasCount");
+    const addTurmasDetails = document.getElementById("addTurmasDetails");
+    function updateAddTurmasCount() {
+      if (!addTurmasCount) return;
+      const n = addCardForm.querySelectorAll('input[name="turmas[]"]:checked').length;
+      addTurmasCount.textContent = n > 0 ? `(${n} selecionada${n > 1 ? "s" : ""})` : "(0 selecionadas)";
+    }
+    addCardForm.querySelectorAll('input[name="turmas[]"]').forEach(cb => cb.addEventListener("change", updateAddTurmasCount));
+
     addCardForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -362,6 +372,8 @@ document.addEventListener("DOMContentLoaded", function () {
             addCardStatus.style.color = "#10b981";
           }
           addCardForm.reset();
+          updateAddTurmasCount();
+          if (addTurmasDetails) addTurmasDetails.open = false;
         } else if (addCardStatus) {
           addCardStatus.textContent = data.error || "Erro ao criar.";
           addCardStatus.style.color = "#ef4444";
@@ -557,27 +569,36 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnDelete = document.getElementById("btnDeleteAluno");
 
   if (btnBlock) {
-    btnBlock.addEventListener("click", async () => {
+    btnBlock.addEventListener("click", () => {
       if (!currentAlunoLogin) return;
 
-      const fd = new FormData();
-      fd.append("login", currentAlunoLogin);
+      const isBlocked = btnBlock.textContent.includes("Desbloquear");
+      const action = isBlocked ? "desbloquear" : "bloquear";
 
-      try {
-        const res = await fetch("/PAP/api/admin_alunos.php?action=toggle_block", {
-          method: "POST",
-          headers: CSRF_HEADERS,
-          body: fd,
-        });
-        const data = await res.json();
+      showConfirm(
+        isBlocked ? "Desbloquear cartão" : "Bloquear cartão",
+        `Tens a certeza que queres ${action} o cartão do aluno "${currentAlunoLogin}"?`,
+        async () => {
+          const fd = new FormData();
+          fd.append("login", currentAlunoLogin);
 
-        if (!data.ok) throw new Error();
+          try {
+            const res = await fetch("/PAP/api/admin_alunos.php?action=toggle_block", {
+              method: "POST",
+              headers: CSRF_HEADERS,
+              body: fd,
+            });
+            const data = await res.json();
 
-        await loadAlunos();
-        openDossier(currentAlunoLogin);
-      } catch {
-        alert("Erro.");
-      }
+            if (!data.ok) throw new Error();
+
+            await loadAlunos();
+            openDossier(currentAlunoLogin);
+          } catch {
+            alert("Erro.");
+          }
+        }
+      );
     });
   }
 
@@ -682,7 +703,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.getElementById("professorNome").textContent = p.nome || "—";
       document.getElementById("professorLogin").textContent = p.login || "—";
-      document.getElementById("professorTurma").textContent = p.turma || "—";
+      document.getElementById("professorTurma").textContent =
+        (p.turmas && p.turmas.length > 0) ? p.turmas.join(", ") : (p.turma || "—");
       document.getElementById("professorGabinete").textContent = p.gabinete || "—";
       document.getElementById("professorCargo").textContent = p.cargo || "—";
       document.getElementById("professorMateria").textContent = p.materia || "—";
@@ -717,28 +739,37 @@ const btnBlockProfessor = document.getElementById("btnBlockProfessor");
 const btnDeleteProfessor = document.getElementById("btnDeleteProfessor");
 
 if (btnBlockProfessor) {
-  btnBlockProfessor.addEventListener("click", async () => {
+  btnBlockProfessor.addEventListener("click", () => {
     if (!currentProfessorLogin) return;
 
-    const fd = new FormData();
-    fd.append("login", currentProfessorLogin);
+    const isBlocked = btnBlockProfessor.textContent.includes("Desbloquear");
+    const action = isBlocked ? "desbloquear" : "bloquear";
 
-    try {
-      const res = await fetch("/PAP/api/admin_professores.php?action=toggle_block", {
-        method: "POST",
-        headers: CSRF_HEADERS,
-        body: fd
-      });
+    showConfirm(
+      isBlocked ? "Desbloquear conta" : "Bloquear conta",
+      `Tens a certeza que queres ${action} a conta do professor "${currentProfessorLogin}"?`,
+      async () => {
+        const fd = new FormData();
+        fd.append("login", currentProfessorLogin);
 
-      const data = await res.json();
-      if (!data.ok) throw new Error();
+        try {
+          const res = await fetch("/PAP/api/admin_professores.php?action=toggle_block", {
+            method: "POST",
+            headers: CSRF_HEADERS,
+            body: fd
+          });
 
-      await loadProfessores();
-      openProfessorDossier(currentProfessorLogin);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao bloquear professor.");
-    }
+          const data = await res.json();
+          if (!data.ok) throw new Error();
+
+          await loadProfessores();
+          openProfessorDossier(currentProfessorLogin);
+        } catch (err) {
+          console.error(err);
+          alert("Erro ao bloquear professor.");
+        }
+      }
+    );
   });
 }
 
@@ -1159,15 +1190,45 @@ if (btnDeleteProfessor) {
       if (updateUid) updateUid.value = user.uid ?? "";
       if (updatePassword) updatePassword.value = "";
 
-      const { num, letra } = splitTurma(user.turma);
-      if (updateTurmaNum) updateTurmaNum.value = num;
-      if (updateTurmaLetra) updateTurmaLetra.value = letra;
-
       updateForm.style.display = "block";
 
       const isProfessor = user.tipo === "professor";
       const idadeRow = updateIdade?.closest(".form-row");
       if (idadeRow) idadeRow.style.display = isProfessor ? "none" : "";
+
+      const alunoTurmaRow = document.getElementById("updateTurmaAlunoRow");
+      const profTurmaRow  = document.getElementById("updateTurmaProfRow");
+      if (alunoTurmaRow) alunoTurmaRow.style.display = isProfessor ? "none" : "";
+      if (profTurmaRow)  profTurmaRow.style.display  = isProfessor ? "" : "none";
+
+      if (isProfessor) {
+        document.querySelectorAll("#updateTurmasCheckboxes input[type='checkbox']").forEach(cb => { cb.checked = false; });
+        const turmasArr = user.turmas || [];
+        turmasArr.forEach(t => {
+          const cb = document.querySelector(`#updateTurmasCheckboxes input[value="${t}"]`);
+          if (cb) cb.checked = true;
+        });
+        // update counter + auto-open if already has turmas
+        const updCount = document.getElementById("updateTurmasCount");
+        const updDetails = document.getElementById("updateTurmasDetails");
+        if (updCount) {
+          const n = turmasArr.length;
+          updCount.textContent = n > 0 ? `(${n} selecionada${n > 1 ? "s" : ""})` : "(0 selecionadas)";
+        }
+        if (updDetails && turmasArr.length > 0) updDetails.open = true;
+        // live counter on manual change
+        document.querySelectorAll("#updateTurmasCheckboxes input[type='checkbox']").forEach(cb => {
+          cb.onchange = () => {
+            if (!updCount) return;
+            const n = document.querySelectorAll("#updateTurmasCheckboxes input:checked").length;
+            updCount.textContent = n > 0 ? `(${n} selecionada${n > 1 ? "s" : ""})` : "(0 selecionadas)";
+          };
+        });
+      } else {
+        const { num, letra } = splitTurma(user.turma);
+        if (updateTurmaNum) updateTurmaNum.value = num;
+        if (updateTurmaLetra) updateTurmaLetra.value = letra;
+      }
     }
 
     updateSearch.addEventListener("input", () => {
@@ -1182,9 +1243,19 @@ if (btnDeleteProfessor) {
     updateForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const tNum = updateTurmaNum?.value || "";
-      const tLetra = (updateTurmaLetra?.value || "").toUpperCase();
-      const turma = `${tNum}${tLetra}`;
+      const isProfUpdate = (updateType?.value || "").toLowerCase() === "professor";
+      let tNum = "", tLetra = "", turma = "";
+      let turmasPayload = undefined;
+
+      if (isProfUpdate) {
+        turmasPayload = Array.from(
+          document.querySelectorAll("#updateTurmasCheckboxes input[type='checkbox']:checked")
+        ).map(cb => cb.value);
+      } else {
+        tNum   = updateTurmaNum?.value || "";
+        tLetra = (updateTurmaLetra?.value || "").toUpperCase();
+        turma  = `${tNum}${tLetra}`;
+      }
 
       const payload = {
         id: updateId?.value ?? "",
@@ -1198,6 +1269,7 @@ if (btnDeleteProfessor) {
         uid: updateUid?.value ?? "",
         password: updatePassword?.value ?? "",
       };
+      if (turmasPayload !== undefined) payload.turmas = turmasPayload;
 
       try {
         const res = await fetch("/PAP/api/admin_update_card.php?action=update", {
@@ -1588,6 +1660,10 @@ if (btnDeleteProfessor) {
         const data = await res.json();
         if (data.ok) {
           if (horarioStatus) { horarioStatus.textContent = editing ? "Atualizada." : "Criada."; horarioStatus.style.color = "#10b981"; }
+          // Sync view dropdown to the turma that was just saved
+          if (horarioTurmaSelect && horarioFormTurma && horarioFormTurma.value) {
+            horarioTurmaSelect.value = horarioFormTurma.value;
+          }
           resetHorarioForm();
           loadHorarioAdmin();
         } else if (horarioStatus) {

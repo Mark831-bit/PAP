@@ -275,7 +275,7 @@ if ($res = $conn->query("
               <input type="text" id="addMateria" name="materia" placeholder="Ex.: Matemática, Português">
             </div>
 
-            <div class="form-row turma-row">
+            <div class="form-row turma-row" data-aluno-only>
               <div>
                 <label for="addTurmaNum">Class</label>
                 <select id="addTurmaNum" name="turma_num">
@@ -295,6 +295,20 @@ if ($res = $conn->query("
                   <option value="C">C</option>
                 </select>
               </div>
+            </div>
+
+            <div class="form-row" data-professor-only style="display:none;">
+              <label>Classes</label>
+              <details class="turmas-details" id="addTurmasDetails">
+                <summary class="turmas-summary">Select classes <span class="turmas-count" id="addTurmasCount">(0 selected)</span></summary>
+                <div class="turmas-checkboxes" id="addTurmasCheckboxes">
+                  <?php foreach ([10, 11, 12] as $tn): foreach (['A', 'B', 'C'] as $tl): ?>
+                    <label class="turma-check-label">
+                      <input type="checkbox" name="turmas[]" value="<?= $tn . $tl ?>"> <?= $tn . $tl ?>
+                    </label>
+                  <?php endforeach; endforeach; ?>
+                </div>
+              </details>
             </div>
 
 
@@ -354,7 +368,7 @@ if ($res = $conn->query("
             <input type="date" id="update-data-nascimento" name="data_nascimento">
           </div>
 
-          <div class="form-row turma-row">
+          <div class="form-row turma-row" id="updateTurmaAlunoRow">
             <div>
               <label for="updateTurmaNum">Class</label>
               <select id="updateTurmaNum" name="turma_num">
@@ -376,6 +390,19 @@ if ($res = $conn->query("
             </div>
           </div>
 
+          <div class="form-row" id="updateTurmaProfRow" style="display:none;">
+            <label>Classes</label>
+            <details class="turmas-details" id="updateTurmasDetails">
+              <summary class="turmas-summary">Select classes <span class="turmas-count" id="updateTurmasCount">(0 selected)</span></summary>
+              <div class="turmas-checkboxes" id="updateTurmasCheckboxes">
+                <?php foreach ([10, 11, 12] as $tn): foreach (['A', 'B', 'C'] as $tl): ?>
+                  <label class="turma-check-label">
+                    <input type="checkbox" value="<?= $tn . $tl ?>"> <?= $tn . $tl ?>
+                  </label>
+                <?php endforeach; endforeach; ?>
+              </div>
+            </details>
+          </div>
 
           <div class="form-row uid-row">
             <div class="uid-input-wrap">
@@ -559,7 +586,7 @@ if ($res = $conn->query("
             </div>
 
             <div class="aluno-info-box">
-              <span class="dossier-label">Class</span>
+              <span class="dossier-label">Classes</span>
               <span id="professorTurma">—</span>
             </div>
 
@@ -788,7 +815,7 @@ if ($res = $conn->query("
     </section>
   </main>
 
-<script src="/PAP/project/assets/app.js?v=23"></script>
+<script src="/PAP/project/assets/app.js?v=25"></script>
 </body>
 
 </html>

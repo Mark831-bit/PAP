@@ -175,11 +175,12 @@ try {
     log_event("INFO", "uid matched", ["uid" => $uid, "login" => $login, "role" => $role]);
 
     echo json_encode([
-        "ok"    => true,
-        "uid"   => $uid,
-        "login" => $login,
-        "role"  => $role,
-        "nome"  => $nome,
+        "ok"      => true,
+        "uid"     => $uid,
+        "login"   => $login,
+        "role"    => $role,
+        "nome"    => $nome,
+        "presenca" => $newPresenca ?? null,
     ], JSON_UNESCAPED_UNICODE);
     exit;
 

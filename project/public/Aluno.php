@@ -247,7 +247,7 @@ $stmt->close();
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/PAP/project/assets/app.js?v=23"></script>
+<script src="/PAP/project/assets/app.js?v=25"></script>
 <script>
 (function () {
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';

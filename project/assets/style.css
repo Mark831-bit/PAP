@@ -1186,6 +1186,69 @@ main {
   gap: 12px;
 }
 
+.turmas-details {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.turmas-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  background: #f9fafb;
+  user-select: none;
+  list-style: none;
+}
+
+.turmas-summary::-webkit-details-marker { display: none; }
+
+.turmas-summary::after {
+  content: "▸";
+  font-size: 12px;
+  color: #6b7280;
+  transition: transform 0.15s;
+}
+
+.turmas-details[open] .turmas-summary::after {
+  transform: rotate(90deg);
+}
+
+.turmas-details[open] .turmas-summary {
+  border-bottom: 1px solid #d1d5db;
+}
+
+.turmas-count {
+  font-size: 12px;
+  color: #6b7280;
+  margin-right: 6px;
+}
+
+.turmas-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 12px;
+  padding: 12px;
+}
+
+.turma-check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.turma-check-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .uid-row {
   display: grid;
   grid-template-columns: 1fr auto;

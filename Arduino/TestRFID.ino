@@ -84,28 +84,66 @@ String uidToHexString() {
   return s;
 }
 
+// Extract integer value from flat JSON: "key":N
+int jsonGetInt(const String& json, const String& key) {
+  String search = "\"" + key + "\":";
+  int pos = json.indexOf(search);
+  if (pos < 0) return -1;
+  pos += search.length();
+  String num = "";
+  while (pos < (int)json.length() && json[pos] >= '0' && json[pos] <= '9') {
+    num += json[pos++];
+  }
+  return num.length() > 0 ? num.toInt() : -1;
+}
+
+// Extract string value from flat JSON: "key":"value"
+String jsonGetStr(const String& json, const String& key) {
+  String search = "\"" + key + "\":\"";
+  int pos = json.indexOf(search);
+  if (pos < 0) return "";
+  pos += search.length();
+  int end = json.indexOf("\"", pos);
+  if (end < 0) return "";
+  return json.substring(pos, end);
+}
+
 void showResultOnLcd(int statusCode, String response) {
   lcd.clear();
 
   if (statusCode == 200) {
+    int presenca = jsonGetInt(response, "presenca");
+    String nome  = jsonGetStr(response, "nome");
+    if (nome.length() > 16) nome = nome.substring(0, 16);
+
     lcd.setCursor(0, 0);
-    lcd.print("Access OK");
+    if (presenca == 1) {
+      lcd.print("Entrada!");
+    } else if (presenca == 0) {
+      lcd.print("Saida!");
+    } else {
+      lcd.print("OK");
+    }
 
     lcd.setCursor(0, 1);
-    lcd.print("User found");
-  } 
+    if (nome.length() > 0) {
+      lcd.print(nome);
+    } else {
+      lcd.print("Utilizador OK");
+    }
+  }
   else if (statusCode == 403) {
     lcd.setCursor(0, 0);
     lcd.print("CARD BLOCKED");
-  } 
+  }
   else if (statusCode == 404) {
     lcd.setCursor(0, 0);
     lcd.print("CARD NOT FOUND");
-  } 
+  }
   else if (statusCode < 0) {
     lcd.setCursor(0, 0);
     lcd.print("SERVER ERROR");
-  } 
+  }
   else {
     lcd.setCursor(0, 0);
     lcd.print("HTTP ERROR:");
@@ -179,25 +217,25 @@ void setColor(int r, int g, int b) {
 
 void handleLedByStatus(int statusCode) {
   if (statusCode == 200) {
-    setColor(0, 255, 0); 
+    setColor(0, 255, 0);
     delay(1000);
     setColor(0, 0, 0);
   }
   else if (statusCode == 403) {
     for (int i = 0; i < 2; i++) {
-      setColor(0, 0, 255); 
+      setColor(255, 0, 0);
       delay(300);
       setColor(0, 0, 0);
       delay(300);
     }
   }
   else if (statusCode == 404) {
-    setColor(0, 0, 255); 
-    delay(1000);
+    setColor(255, 0, 0);
+    delay(300);
     setColor(0, 0, 0);
   }
   else if (statusCode == 500 || statusCode < 0) {
-    setColor(0, 0, 255); 
+    setColor(0, 0, 255);
     delay(1000);
     setColor(0, 0, 0);
   }

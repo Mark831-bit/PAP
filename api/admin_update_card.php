@@ -46,16 +46,18 @@ if ($action === 'list') {
     }
 
     $sqlProfessores = "
-        SELECT 
+        SELECT
             p.`ID` AS id,
             p.`Nome` AS nome,
             '' AS data_nascimento,
-            p.`turma` AS turma,
+            CONCAT(p.turma_num, p.turma_letra) AS turma,
             p.`turma_num` AS turma_num,
             p.`turma_letra` AS turma_letra,
             p.`login` AS login,
             l.`UID` AS uid,
-            'professor' AS tipo
+            'professor' AS tipo,
+            IFNULL((SELECT GROUP_CONCAT(CONCAT(pt.turma_num, pt.turma_letra) ORDER BY pt.turma_num, pt.turma_letra SEPARATOR ',')
+                    FROM professor_turmas pt WHERE pt.professor_login = p.login), '') AS turmas_str
         FROM professores p
         LEFT JOIN login l ON l.`Login` = p.`login`
     ";
@@ -63,6 +65,8 @@ if ($action === 'list') {
     $resultProfessores = $conn->query($sqlProfessores);
     if ($resultProfessores) {
         while ($row = $resultProfessores->fetch_assoc()) {
+            $row['turmas'] = $row['turmas_str'] ? explode(',', $row['turmas_str']) : [];
+            unset($row['turmas_str']);
             $users[] = $row;
         }
     }
@@ -189,6 +193,42 @@ if ($action === 'update') {
 
         $mainUpdated = ($stmt->affected_rows > 0);
         $stmt->close();
+
+        // Sync professor_turmas junction table
+        $turmasInput = $input['turmas'] ?? null;
+        if (is_array($turmasInput)) {
+            $validTurmas = [];
+            foreach ($turmasInput as $t) {
+                $t = trim($t);
+                if (preg_match('/^(10|11|12)[ABC]$/', $t)) {
+                    $validTurmas[] = $t;
+                }
+            }
+            $stmtDelPT = $conn->prepare("DELETE FROM professor_turmas WHERE professor_login = ?");
+            $stmtDelPT->bind_param("s", $login);
+            $stmtDelPT->execute();
+            $stmtDelPT->close();
+
+            if (count($validTurmas) > 0) {
+                $stmtInsPT = $conn->prepare("INSERT IGNORE INTO professor_turmas (professor_login, turma_num, turma_letra) VALUES (?, ?, ?)");
+                foreach ($validTurmas as $t) {
+                    $tNum   = (int)substr($t, 0, 2);
+                    $tLetra = substr($t, 2);
+                    $stmtInsPT->bind_param("sis", $login, $tNum, $tLetra);
+                    $stmtInsPT->execute();
+                }
+                $stmtInsPT->close();
+
+                // Update legacy single-turma fields with first turma
+                $first = $validTurmas[0];
+                $fNum   = (int)substr($first, 0, 2);
+                $fLetra = substr($first, 2);
+                $stmtLeg = $conn->prepare("UPDATE professores SET `turma` = ?, `turma_num` = ?, `turma_letra` = ? WHERE `login` = ?");
+                $stmtLeg->bind_param("siss", $first, $fNum, $fLetra, $login);
+                $stmtLeg->execute();
+                $stmtLeg->close();
+            }
+        }
 
     } else {
         echo json_encode([

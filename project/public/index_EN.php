@@ -222,7 +222,7 @@ if ($res) {
       
     </div>
   </footer>
-  <script src="/PAP/project/assets/app.js?v=23"></script>
+  <script src="/PAP/project/assets/app.js?v=25"></script>
   <?php if (!isset($_SESSION['user_id'])): ?>
   <script>
   (function () {

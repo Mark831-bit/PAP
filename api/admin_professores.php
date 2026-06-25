@@ -53,6 +53,12 @@ if ($action === 'get') {
     $stmt->execute([$login]);
     $professor = $stmt->fetch();
 
+    if ($professor) {
+        $stmtT = $pdo->prepare("SELECT CONCAT(turma_num, turma_letra) FROM professor_turmas WHERE professor_login = ? ORDER BY turma_num, turma_letra");
+        $stmtT->execute([$login]);
+        $professor['turmas'] = $stmtT->fetchAll(PDO::FETCH_COLUMN);
+    }
+
     echo json_encode([
         "ok" => !!$professor,
         "professor" => $professor
@@ -92,6 +98,7 @@ if ($action === 'delete') {
 
     $pdo->beginTransaction();
     try {
+        $pdo->prepare("DELETE FROM professor_turmas WHERE professor_login = ?")->execute([$login]);
         $pdo->prepare("DELETE FROM professores WHERE login = ?")->execute([$login]);
         $pdo->prepare("DELETE FROM login WHERE Login = ?")->execute([$login]);
         $pdo->commit();

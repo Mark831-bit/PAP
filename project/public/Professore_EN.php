@@ -39,31 +39,36 @@ if (!$professor) {
     die("Teacher not found.");
 }
 
-if (empty($professor['turma'])) {
-    die("The teacher class has not been defined yet.");
-}
-
-$turma = $professor['turma'];
 $professorNome = $professor['Nome'];
 
-/* 2. Получаем все уникальные turma из alunos */
+/* 2. Turmas from junction table (multi-turma support); fallback to legacy field */
 $turmas = [];
 
 $stmtTurmas = $conn->prepare("
-    SELECT DISTINCT CONCAT(`turma_num`, `turma_letra`) AS turma
-    FROM alunos
-    WHERE `turma_num` IS NOT NULL AND `turma_letra` IS NOT NULL
-    ORDER BY `turma_num` ASC, `turma_letra` ASC
+    SELECT CONCAT(turma_num, turma_letra) AS turma
+    FROM professor_turmas
+    WHERE professor_login = ?
+    ORDER BY turma_num ASC, turma_letra ASC
 ");
 
 if ($stmtTurmas) {
+    $stmtTurmas->bind_param("s", $login);
     $stmtTurmas->execute();
     $resultTurmas = $stmtTurmas->get_result();
-
     while ($row = $resultTurmas->fetch_assoc()) {
         $turmas[] = $row['turma'];
     }
 }
+
+if (empty($turmas) && !empty($professor['turma'])) {
+    $turmas[] = $professor['turma'];
+}
+
+if (empty($turmas)) {
+    die("The teacher class has not been defined yet.");
+}
+
+$turma = $turmas[0];
 
 /* 3. Фильтры */
 $filtroTurma = $_GET['turma'] ?? $turma;
@@ -632,6 +637,6 @@ document.getElementById("testeForm").addEventListener("submit", async (e) => {
 })();
 </script>
 
-<script src="/PAP/project/assets/app.js?v=23"></script>
+<script src="/PAP/project/assets/app.js?v=25"></script>
 </body>
 </html>

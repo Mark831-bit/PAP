@@ -31,9 +31,7 @@ try {
     $horario  = trim($_POST['horario']  ?? '');
     $materia  = trim($_POST['materia']  ?? '');
 
-    $turma = $turmaNum . $turmaLetra;
-
-    if ($role === '' || $nome === '' || $login === '' || $password === '' || $turmaNum === '' || $turmaLetra === '') {
+    if ($role === '' || $nome === '' || $login === '' || $password === '') {
         echo json_encode([
             'ok' => false,
             'error' => 'Preencha os campos obrigatórios'
@@ -49,12 +47,34 @@ try {
         exit;
     }
 
-    if (!is_valid_turma($turmaNum, $turmaLetra)) {
-        echo json_encode([
-            'ok' => false,
-            'error' => 'Turma inválida'
-        ]);
-        exit;
+    // For Aluno: require single turma; for Professor: require turmas[] checkboxes
+    $turmas = [];
+    if ($role === 'Aluno') {
+        if ($turmaNum === '' || $turmaLetra === '') {
+            echo json_encode(['ok' => false, 'error' => 'Preencha os campos obrigatórios']);
+            exit;
+        }
+        if (!is_valid_turma($turmaNum, $turmaLetra)) {
+            echo json_encode(['ok' => false, 'error' => 'Turma inválida']);
+            exit;
+        }
+        $turma = $turmaNum . $turmaLetra;
+    } else {
+        $rawTurmas = $_POST['turmas'] ?? [];
+        foreach ($rawTurmas as $t) {
+            $t = trim($t);
+            if (preg_match('/^(10|11|12)[ABC]$/', $t)) {
+                $turmas[] = $t;
+            }
+        }
+        if (count($turmas) === 0) {
+            echo json_encode(['ok' => false, 'error' => 'Selecione pelo menos uma turma']);
+            exit;
+        }
+        // Use first turma for legacy fields
+        $turmaNum   = substr($turmas[0], 0, 2);
+        $turmaLetra = substr($turmas[0], 2);
+        $turma      = $turmas[0];
     }
 
     if ($role === 'Aluno') {
@@ -126,6 +146,11 @@ try {
             strtoupper($turmaLetra),
             $login
         ]);
+
+        $stmtPT = $pdo->prepare("INSERT IGNORE INTO professor_turmas (professor_login, turma_num, turma_letra) VALUES (?, ?, ?)");
+        foreach ($turmas as $t) {
+            $stmtPT->execute([$login, (int)substr($t, 0, 2), substr($t, 2)]);
+        }
     }
 
     $pdo->commit();
