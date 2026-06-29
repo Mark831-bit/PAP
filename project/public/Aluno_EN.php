@@ -391,5 +391,12 @@ $stmt->close();
     if (document.getElementById('tab-aluno-documentos')?.classList.contains('active')) loadDocs();
 })();
 </script>
+<script>
+// Polling sumários and notas every 10 seconds
+setInterval(() => {
+    if (typeof loadSumariosAluno === 'function') loadSumariosAluno();
+    if (typeof loadNotasAluno === 'function') loadNotasAluno();
+}, 10000);
+</script>
 </body>
 </html>

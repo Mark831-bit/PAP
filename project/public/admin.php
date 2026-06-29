@@ -149,19 +149,19 @@ if ($res = $conn->query("
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-label">Alunos (total)</div>
-            <div class="stat-value"><?= $statAlunosTotal ?></div>
+            <div class="stat-value" id="statAlunosTotal"><?= $statAlunosTotal ?></div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Alunos presentes</div>
-            <div class="stat-value"><?= $statAlunosPresent ?></div>
+            <div class="stat-value" id="statAlunosPresent"><?= $statAlunosPresent ?></div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Professores (total)</div>
-            <div class="stat-value"><?= $statProfTotal ?></div>
+            <div class="stat-value" id="statProfTotal"><?= $statProfTotal ?></div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Professores presentes</div>
-            <div class="stat-value"><?= $statProfPresent ?></div>
+            <div class="stat-value" id="statProfPresent"><?= $statProfPresent ?></div>
           </div>
         </div>
 
@@ -181,6 +181,7 @@ if ($res = $conn->query("
 
         <div class="admin-card">
           <h2>Últimos scans</h2>
+          <div id="scansList">
           <?php if (count($lastScans) > 0): ?>
             <div class="scans-list">
               <?php foreach ($lastScans as $s): ?>
@@ -203,6 +204,7 @@ if ($res = $conn->query("
           <?php else: ?>
             <p class="empty-state">Ainda não há scans registados.</p>
           <?php endif; ?>
+          </div>
         </div>
 
       </div>
@@ -823,6 +825,46 @@ if ($res = $conn->query("
   </main>
 
 <script src="/PAP/project/assets/app.js?v=25"></script>
+<script>
+(function () {
+  function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function refreshStats() {
+    try {
+      const res  = await fetch("/PAP/api/admin_charts.php?action=stats");
+      const data = await res.json();
+      if (!data.ok) return;
+
+      document.getElementById("statAlunosTotal").textContent   = data.alunosTotal;
+      document.getElementById("statAlunosPresent").textContent = data.alunosPresent;
+      document.getElementById("statProfTotal").textContent     = data.profTotal;
+      document.getElementById("statProfPresent").textContent   = data.profPresent;
+
+      const list = document.getElementById("scansList");
+      if (!list || !data.scans) return;
+      if (data.scans.length === 0) {
+        list.innerHTML = '<p class="empty-state">Ainda não há scans registados.</p>';
+        return;
+      }
+      list.innerHTML = '<div class="scans-list">' + data.scans.map(s => {
+        const presente = parseInt(s.presenca) === 1;
+        const data_fmt = s.data ? s.data.split('-').reverse().join('/') : '';
+        const hora_fmt = s.hora ? s.hora.substring(0, 5) : '';
+        return `<div class="scan-row">
+          <span class="scan-dot ${presente ? 'present' : 'absent'}"></span>
+          <div class="scan-info">
+            <div class="scan-name">${escH(s.nome)}</div>
+            <div class="scan-meta">${escH(s.person_type)} • ${data_fmt} ${hora_fmt}</div>
+          </div>
+          <div class="scan-type ${presente ? 'present-text' : 'absent-text'}">${presente ? 'Entrada' : 'Saída'}</div>
+        </div>`;
+      }).join('') + '</div>';
+    } catch {}
+  }
+
+  setInterval(refreshStats, 5000);
+})();
+</script>
 </body>
 
 </html>
