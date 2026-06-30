@@ -138,7 +138,7 @@ if ($res) {
           <input type="password" name="password" id="regPassword" placeholder="Palavra-passe" required>
           <input type="password" name="password_confirm" id="regPasswordConfirm" placeholder="Confirmar palavra-passe" required>
           <input type="text" name="nome" placeholder="Nome completo" required>
-          <input type="date" id="dataNascimento" required>
+          <input type="date" id="dataNascimento" name="data_nascimento" required>
         <div style="display: flex; gap: 10px;">
           
          <select name="turma_num" required>
