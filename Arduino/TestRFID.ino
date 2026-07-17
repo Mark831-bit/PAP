@@ -32,6 +32,9 @@ String lastUid = "";
 unsigned long lastUidSentMs = 0;
 const unsigned long UID_COOLDOWN_MS = 10000;
 
+unsigned long lastWifiCheckMs = 0;
+const unsigned long WIFI_CHECK_INTERVAL_MS = 5000;
+
 bool connectWiFi(unsigned long timeoutMs = 15000) {
   lcd.clear();
   lcd.print("WiFi...");
@@ -242,6 +245,20 @@ void handleLedByStatus(int statusCode) {
 }
 
 void loop() {
+  unsigned long nowCheck = millis();
+  if (nowCheck - lastWifiCheckMs >= WIFI_CHECK_INTERVAL_MS) {
+    lastWifiCheckMs = nowCheck;
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println("WiFi caiu - a reconectar...");
+      connectWiFi();
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("RFID ready");
+      lcd.setCursor(0, 1);
+      lcd.print("Scan card");
+    }
+  }
+
   if (!mfrc522.PICC_IsNewCardPresent()) return;
   if (!mfrc522.PICC_ReadCardSerial()) return;
 

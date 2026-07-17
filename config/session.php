@@ -43,13 +43,7 @@ function csrf_field(): string
          . htmlspecialchars(csrf_token(), ENT_QUOTES) . '">';
 }
 
-/**
- * Verifica o token CSRF. Aceita de três fontes:
- *   1. $_POST['_csrf'] — forms HTML / FormData
- *   2. Header X-CSRF-Token — fetch() com headers
- *   3. Body JSON { "_csrf": "..." } — fetch() com JSON body
- * Em falha responde 403 JSON e interrompe.
- */
+
 function csrf_check(): void
 {
     $submitted = $_POST['_csrf']
